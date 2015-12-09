@@ -5,6 +5,15 @@
 	<property name="testray.main.component.name" value="Documents Management" />
 
 	<set-up>
+		<var method="TestPropsUtil#get('test.portal.instance')" name="testPortalInstance" />
+
+		<if>
+			<equals arg1="${testPortalInstance}" arg2="true" />
+			<then>
+				<execute macro="SignIn#signInPortalInstanceSetUp" />
+			</then>
+		</if>
+
 		<var method="TestPropsUtil#get('cmis.repository.vm.host.name')" name="sharepointVMHostName" />
 
 		<execute function="AntCommand" locator1="build-test-sharepoint.xml" value1="clean-sharepoint-repository -Dssh.host=${sharepointVMHostName}" />
@@ -39,47 +48,66 @@
 			<var name="userScreenName" value="administrator" />
 		</execute>
 
-		<execute macro="Page#gotoContentCP">
-			<var name="portletName" value="Documents and Media" />
+		<execute macro="Navigator#openURL" />
+
+		<execute macro="ProductMenu#gotoSitesContent">
+			<var name="portlet" value="Documents and Media" />
 		</execute>
 
-		<execute macro="DMRepository#addCP">
-			<var name="dmRepositoryLibraryName" value="Documents" />
+		<execute macro="DMRepository#gotoAdd" />
+
+		<execute macro="DMRepository#select">
 			<var name="dmRepositoryName" value="Sharepoint Repository Name" />
-			<var name="dmRepositorySiteURL" value="http://${sharepointVMHostName}" />
 			<var name="dmRepositoryType" value="Sharepoint" />
 		</execute>
+
+		<execute macro="DMRepository#addSharepoint">
+			<var name="dmRepositoryLibraryName" value="Documents" />
+			<var name="dmRepositorySiteURL" value="http://${sharepointVMHostName}" />
+		</execute>
+
+		<execute macro="DMRepository#save" />
 	</set-up>
 
 	<tear-down>
-		<execute macro="DMRepository#tearDownCP" />
+		<var method="TestPropsUtil#get('test.portal.instance')" name="testPortalInstance" />
 
-		<execute macro="DMDocument#tearDownCP" />
+		<if>
+			<equals arg1="${testPortalInstance}" arg2="true" />
+			<then>
+				<execute macro="PortalInstances#tearDownCP" />
+			</then>
+			<else>
+				<execute macro="DMRepository#tearDownCP" />
 
-		<execute macro="Page#gotoMyAccount">
-			<var name="portletName" value="Account Settings" />
-		</execute>
+				<execute macro="DMDocument#tearDownCP" />
 
-		<execute macro="User#editDetailsViaMyAccount">
-			<var name="userScreenNameEdit" value="test" />
-		</execute>
+				<execute macro="Page#gotoMyAccount">
+					<var name="portletName" value="Account Settings" />
+				</execute>
 
-		<execute macro="Page#gotoMyAccount">
-			<var name="portletName" value="Account Settings" />
-		</execute>
+				<execute macro="User#editDetailsViaMyAccount">
+					<var name="userScreenNameEdit" value="test" />
+				</execute>
 
-		<execute macro="User#editPasswordViaMyAccount">
-			<var name="currentPassword" value="password" />
-			<var name="newPassword" value="test" />
-		</execute>
+				<execute macro="Page#gotoMyAccount">
+					<var name="portletName" value="Account Settings" />
+				</execute>
 
-		<execute macro="User#logoutPG" />
+				<execute macro="User#editPasswordViaMyAccount">
+					<var name="currentPassword" value="password" />
+					<var name="newPassword" value="test" />
+				</execute>
 
-		<execute macro="User#loginPG">
-			<var name="authenticationMethod" value="By Screen Name" />
-			<var name="password" value="test" />
-			<var name="userScreenName" value="test" />
-		</execute>
+				<execute macro="User#logoutPG" />
+
+				<execute macro="User#loginPG">
+					<var name="authenticationMethod" value="By Screen Name" />
+					<var name="password" value="test" />
+					<var name="userScreenName" value="test" />
+				</execute>
+			</else>
+		</if>
 	</tear-down>
 
 	<command name="AddDocument" priority="4">
@@ -92,7 +120,7 @@
 			<var name="dmDocumentTitle" value="Document_1.txt" />
 		</execute>
 
-		<execute macro="DMDocument#gotoCP">
+		<execute macro="DMNavigator#gotoDocumentCP">
 			<var name="dmDocumentTitle" value="Document_1.txt" />
 		</execute>
 
@@ -102,8 +130,10 @@
 	</command>
 
 	<command name="AddDocumentInSubfolder" priority="4">
-		<execute macro="Page#gotoContentCP">
-			<var name="portletName" value="Documents and Media" />
+		<execute macro="Navigator#openURL" />
+
+		<execute macro="ProductMenu#gotoSitesContent">
+			<var name="portlet" value="Documents and Media" />
 		</execute>
 
 		<execute macro="DMRepository#gotoCP">
@@ -123,8 +153,10 @@
 			<var name="dmDocumentTitle" value="Document_2.txt" />
 		</execute>
 
-		<execute macro="Page#gotoContentCP">
-			<var name="portletName" value="Documents and Media" />
+		<execute macro="Navigator#openURL" />
+
+		<execute macro="ProductMenu#gotoSitesContent">
+			<var name="portlet" value="Documents and Media" />
 		</execute>
 
 		<execute macro="DMRepository#gotoCP">
@@ -135,7 +167,7 @@
 			<var name="dmFolderName" value="DM Folder2 Name" />
 		</execute>
 
-		<execute macro="DMDocument#gotoCP">
+		<execute macro="DMNavigator#gotoDocumentCP">
 			<var name="dmDocumentTitle" value="Document_2.txt" />
 		</execute>
 
@@ -168,32 +200,36 @@
 			<var name="dmDocumentTitle" value="Document_3.txt" />
 		</execute>
 
-		<execute macro="DMDocument#gotoCP">
+		<execute macro="DMNavigator#gotoDocumentCP">
 			<var name="dmDocumentTitle" value="Document_3.txt" />
 		</execute>
 
 		<execute macro="DMDocument#checkoutCP">
-			<var name="sharepointRepository" value="true" />
+			<var name="dmRepositoryName" value="true" />
 		</execute>
 
-		<execute macro="Page#gotoContentCP">
-			<var name="portletName" value="Documents and Media" />
+		<execute macro="Navigator#openURL" />
+
+		<execute macro="ProductMenu#gotoSitesContent">
+			<var name="portlet" value="Documents and Media" />
 		</execute>
 
 		<execute macro="DMRepository#gotoCP">
 			<var name="dmRepositoryName" value="Sharepoint Repository Name" />
 		</execute>
 
-		<execute macro="DMDocument#gotoCP">
+		<execute macro="DMNavigator#gotoDocumentCP">
 			<var name="dmDocumentTitle" value="Document_3.txt" />
 		</execute>
 
 		<execute macro="DMDocument#checkinCP">
-			<var name="sharepointRepository" value="true" />
+			<var name="dmRepositoryName" value="true" />
 		</execute>
 
-		<execute macro="Page#gotoContentCP">
-			<var name="portletName" value="Documents and Media" />
+		<execute macro="Navigator#openURL" />
+
+		<execute macro="ProductMenu#gotoSitesContent">
+			<var name="portlet" value="Documents and Media" />
 		</execute>
 
 		<execute macro="DMRepository#gotoCP">
@@ -204,12 +240,12 @@
 			<var name="dmDocumentTitle" value="Document_3.txt" />
 		</execute>
 
-		<execute macro="DMDocument#gotoCP">
+		<execute macro="DMNavigator#gotoDocumentCP">
 			<var name="dmDocumentTitle" value="Document_3.txt" />
 		</execute>
 
 		<execute macro="DMDocument#viewCheckedinCP" >
-			<var name="sharepointRepository" value="true" />
+			<var name="dmRepositoryName" value="true" />
 		</execute>
 	</command>
 
@@ -223,16 +259,18 @@
 			<var name="dmDocumentTitle" value="Document_4.txt" />
 		</execute>
 
-		<execute macro="DMDocument#gotoCP">
+		<execute macro="DMNavigator#gotoDocumentCP">
 			<var name="dmDocumentTitle" value="Document_4.txt" />
 		</execute>
 
 		<execute macro="DMDocument#checkoutCP">
-			<var name="sharepointRepository" value="true" />
+			<var name="dmRepositoryName" value="true" />
 		</execute>
 
-		<execute macro="Page#gotoContentCP">
-			<var name="portletName" value="Documents and Media" />
+		<execute macro="Navigator#openURL" />
+
+		<execute macro="ProductMenu#gotoSitesContent">
+			<var name="portlet" value="Documents and Media" />
 		</execute>
 
 		<execute macro="DMRepository#gotoCP">
@@ -243,12 +281,12 @@
 			<var name="dmDocumentTitle" value="Document_4.txt" />
 		</execute>
 
-		<execute macro="DMDocument#gotoCP">
+		<execute macro="DMNavigator#gotoDocumentCP">
 			<var name="dmDocumentTitle" value="Document_4.txt" />
 		</execute>
 
 		<execute macro="DMDocument#viewCheckedoutCP" >
-			<var name="sharepointRepository" value="true" />
+			<var name="dmRepositoryName" value="true" />
 		</execute>
 	</command>
 
@@ -296,8 +334,10 @@
 			<var name="dmDocumentTitle" value="Document_2.doc" />
 		</execute>
 
-		<execute macro="Page#gotoContentCP">
-			<var name="portletName" value="Documents and Media" />
+		<execute macro="Navigator#openURL" />
+
+		<execute macro="ProductMenu#gotoSitesContent">
+			<var name="portlet" value="Documents and Media" />
 		</execute>
 
 		<execute macro="DMRepository#gotoCP">
@@ -313,7 +353,7 @@
 			<var name="recycleBinDisabled" value="true" />
 		</execute>
 
-		<execute macro="DMDocument#gotoHomeCP" />
+		<execute macro="DMNavigator#gotoHomeCP" />
 
 		<execute macro="DMRepository#gotoCP">
 			<var name="dmRepositoryName" value="Sharepoint Repository Name" />
@@ -370,13 +410,13 @@
 			<var name="dmDocumentTitle" value="Document_3.doc" />
 		</execute>
 
-		<execute macro="DMDocument#gotoHomeCP" />
+		<execute macro="DMNavigator#gotoHomeCP" />
 
 		<execute macro="DMRepository#gotoCP">
 			<var name="dmRepositoryName" value="Sharepoint Repository Name" />
 		</execute>
 
-		<execute macro="DMDocument#gotoCP">
+		<execute macro="DMNavigator#gotoDocumentCP">
 			<var name="dmDocumentTitle" value="Document_3.doc" />
 		</execute>
 
@@ -410,15 +450,17 @@
 			<var name="dmDocumentTitleEdit" value="Document_1.jpg" />
 		</execute>
 
-		<execute macro="Page#gotoContentCP">
-			<var name="portletName" value="Documents and Media" />
+		<execute macro="Navigator#openURL" />
+
+		<execute macro="ProductMenu#gotoSitesContent">
+			<var name="portlet" value="Documents and Media" />
 		</execute>
 
 		<execute macro="DMRepository#gotoCP">
 			<var name="dmRepositoryName" value="Sharepoint Repository Name" />
 		</execute>
 
-		<execute macro="DMDocument#gotoCP">
+		<execute macro="DMNavigator#gotoDocumentCP">
 			<var name="dmDocumentTitle" value="Document_1.docx" />
 		</execute>
 
@@ -442,15 +484,17 @@
 			<var name="dmDocumentTitleEdit" value="Document_2_Edit.jpg" />
 		</execute>
 
-		<execute macro="Page#gotoContentCP">
-			<var name="portletName" value="Documents and Media" />
+		<execute macro="Navigator#openURL" />
+
+		<execute macro="ProductMenu#gotoSitesContent">
+			<var name="portlet" value="Documents and Media" />
 		</execute>
 
 		<execute macro="DMRepository#gotoCP">
 			<var name="dmRepositoryName" value="Sharepoint Repository Name" />
 		</execute>
 
-		<execute macro="DMDocument#gotoCP">
+		<execute macro="DMNavigator#gotoDocumentCP">
 			<var name="dmDocumentTitle" value="Document_2_Edit.docx" />
 		</execute>
 
@@ -474,15 +518,17 @@
 			<var name="dmDocumentTitleEdit" value="Document_3" />
 		</execute>
 
-		<execute macro="Page#gotoContentCP">
-			<var name="portletName" value="Documents and Media" />
+		<execute macro="Navigator#openURL" />
+
+		<execute macro="ProductMenu#gotoSitesContent">
+			<var name="portlet" value="Documents and Media" />
 		</execute>
 
 		<execute macro="DMRepository#gotoCP">
 			<var name="dmRepositoryName" value="Sharepoint Repository Name" />
 		</execute>
 
-		<execute macro="DMDocument#gotoCP">
+		<execute macro="DMNavigator#gotoDocumentCP">
 			<var name="dmDocumentTitle" value="Document_3.docx" />
 		</execute>
 
@@ -492,8 +538,10 @@
 	</command>
 
 	<command name="MoveCheckedoutDocumentToFolder" priority="4">
-		<execute macro="Page#gotoContentCP">
-			<var name="portletName" value="Documents and Media" />
+		<execute macro="Navigator#openURL" />
+
+		<execute macro="ProductMenu#gotoSitesContent">
+			<var name="portlet" value="Documents and Media" />
 		</execute>
 
 		<execute macro="DMRepository#gotoCP">
@@ -508,8 +556,10 @@
 			<var name="dmFolderName" value="Sharepoint Folder" />
 		</execute>
 
-		<execute macro="Page#gotoContentCP">
-			<var name="portletName" value="Documents and Media" />
+		<execute macro="Navigator#openURL" />
+
+		<execute macro="ProductMenu#gotoSitesContent">
+			<var name="portlet" value="Documents and Media" />
 		</execute>
 
 		<execute macro="DMRepository#gotoCP">
@@ -521,16 +571,18 @@
 			<var name="dmDocumentTitle" value="Document_1.txt" />
 		</execute>
 
-		<execute macro="DMDocument#gotoCP">
+		<execute macro="DMNavigator#gotoDocumentCP">
 			<var name="dmDocumentTitle" value="Document_1.txt" />
 		</execute>
 
 		<execute macro="DMDocument#checkoutCP">
-			<var name="sharepointRepository" value="true" />
+			<var name="dmRepositoryName" value="true" />
 		</execute>
 
-		<execute macro="Page#gotoContentCP">
-			<var name="portletName" value="Documents and Media" />
+		<execute macro="Navigator#openURL" />
+
+		<execute macro="ProductMenu#gotoSitesContent">
+			<var name="portlet" value="Documents and Media" />
 		</execute>
 
 		<execute macro="DMRepository#gotoCP">
@@ -541,16 +593,18 @@
 			<var name="dmDocumentTitle" value="Document_1.txt" />
 		</execute>
 
-		<execute macro="DMDocument#gotoCP">
+		<execute macro="DMNavigator#gotoDocumentCP">
 			<var name="dmDocumentTitle" value="Document_1.txt" />
 		</execute>
 
 		<execute macro="DMDocument#viewCheckedoutCP" >
-			<var name="sharepointRepository" value="true" />
+			<var name="dmRepositoryName" value="true" />
 		</execute>
 
-		<execute macro="Page#gotoContentCP">
-			<var name="portletName" value="Documents and Media" />
+		<execute macro="Navigator#openURL" />
+
+		<execute macro="ProductMenu#gotoSitesContent">
+			<var name="portlet" value="Documents and Media" />
 		</execute>
 
 		<execute macro="DMRepository#gotoCP">
@@ -572,12 +626,12 @@
 			<var name="dmDocumentTitle" value="Document_1.txt" />
 		</execute>
 
-		<execute macro="DMDocument#gotoCP">
+		<execute macro="DMNavigator#gotoDocumentCP">
 			<var name="dmDocumentTitle" value="Document_1.txt" />
 		</execute>
 
 		<execute macro="DMDocument#viewCheckedoutCP" >
-			<var name="sharepointRepository" value="true" />
+			<var name="dmRepositoryName" value="true" />
 		</execute>
 	</command>
 
@@ -596,11 +650,13 @@
 			<var name="dmFolderName" value="Home" />
 		</execute>
 
-		<execute macro="Page#gotoContentCP">
-			<var name="portletName" value="Documents and Media" />
+		<execute macro="Navigator#openURL" />
+
+		<execute macro="ProductMenu#gotoSitesContent">
+			<var name="portlet" value="Documents and Media" />
 		</execute>
 
-		<execute macro="DMDocument#gotoCP">
+		<execute macro="DMNavigator#gotoDocumentCP">
 			<var name="dmDocumentTitle" value="Document_1.odt" />
 		</execute>
 
@@ -608,8 +664,10 @@
 			<var name="dmDocumentTitle" value="Document_1.odt" />
 		</execute>
 
-		<execute macro="Page#gotoContentCP">
-			<var name="portletName" value="Documents and Media" />
+		<execute macro="Navigator#openURL" />
+
+		<execute macro="ProductMenu#gotoSitesContent">
+			<var name="portlet" value="Documents and Media" />
 		</execute>
 
 		<execute macro="DMRepository#gotoCP">
@@ -651,7 +709,7 @@
 			<var name="dmDocumentTitle" value="Document_3.odt" />
 		</execute>
 
-		<execute macro="DMDocument#gotoHomeCP" />
+		<execute macro="DMNavigator#gotoHomeCP" />
 
 		<execute macro="DMDocument#searchCP">
 			<var name="dmDocumentKeyword" value="Document_3.odt" />
@@ -674,16 +732,18 @@
 			<var name="dmDocumentTitle" value="Document_1.xls" />
 		</execute>
 
-		<execute macro="DMDocument#gotoCP">
+		<execute macro="DMNavigator#gotoDocumentCP">
 			<var name="dmDocumentTitle" value="Document_1.xls" />
 		</execute>
 
 		<execute macro="DMDocument#checkoutCP">
-			<var name="sharepointRepository" value="true" />
+			<var name="dmRepositoryName" value="true" />
 		</execute>
 
-		<execute macro="Page#gotoContentCP">
-			<var name="portletName" value="Documents and Media" />
+		<execute macro="Navigator#openURL" />
+
+		<execute macro="ProductMenu#gotoSitesContent">
+			<var name="portlet" value="Documents and Media" />
 		</execute>
 
 		<execute macro="DMRepository#gotoCP">
@@ -694,11 +754,13 @@
 			<var name="checkedOut" value="true" />
 			<var name="dmDocumentTitle" value="Document_1.xls" />
 			<var name="dmDocumentTitleEdit" value="Document_1_Edit.jpg" />
-			<var name="sharepointRepository" value="true" />
+			<var name="dmRepositoryName" value="true" />
 		</execute>
 
-		<execute macro="Page#gotoContentCP">
-			<var name="portletName" value="Documents and Media" />
+		<execute macro="Navigator#openURL" />
+
+		<execute macro="ProductMenu#gotoSitesContent">
+			<var name="portlet" value="Documents and Media" />
 		</execute>
 
 		<execute macro="DMRepository#gotoCP">
@@ -709,18 +771,20 @@
 			<var name="dmDocumentTitle" value="Document_1_Edit.xls" />
 		</execute>
 
-		<execute macro="DMDocument#gotoCP">
+		<execute macro="DMNavigator#gotoDocumentCP">
 			<var name="dmDocumentTitle" value="Document_1_Edit.xls" />
 		</execute>
 
 		<execute macro="DMDocument#viewCheckedoutCP" >
-			<var name="sharepointRepository" value="true" />
+			<var name="dmRepositoryName" value="true" />
 		</execute>
 	</command>
 
 	<command name="ViewRepository" priority="4">
-		<execute macro="Page#gotoContentCP">
-			<var name="portletName" value="Documents and Media" />
+		<execute macro="Navigator#openURL" />
+
+		<execute macro="ProductMenu#gotoSitesContent">
+			<var name="portlet" value="Documents and Media" />
 		</execute>
 
 		<execute macro="DMRepository#gotoCP">

@@ -14,7 +14,7 @@
 
 package com.liferay.portlet.asset.service.impl;
 
-import com.liferay.portal.kernel.cache.ThreadLocalCachable;
+import com.liferay.portal.kernel.cache.thread.local.ThreadLocalCachable;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.systemevent.SystemEvent;
@@ -23,11 +23,9 @@ import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.model.Group;
-import com.liferay.portal.model.ResourceConstants;
 import com.liferay.portal.model.SystemEventConstants;
 import com.liferay.portal.model.User;
 import com.liferay.portal.service.ServiceContext;
-import com.liferay.portal.service.permission.ModelPermissions;
 import com.liferay.portlet.asset.AssetTagException;
 import com.liferay.portlet.asset.DuplicateTagException;
 import com.liferay.portlet.asset.model.AssetEntry;
@@ -61,8 +59,6 @@ public class AssetTagLocalServiceImpl extends AssetTagLocalServiceBaseImpl {
 	 * @param  name the asset tag's name
 	 * @param  serviceContext the service context to be applied
 	 * @return the asset tag that was added
-	 * @throws PortalException if a user with the primary key could not be found
-	 *         or if a portal exception occurred
 	 */
 	@Override
 	public AssetTag addTag(
@@ -98,58 +94,7 @@ public class AssetTagLocalServiceImpl extends AssetTagLocalServiceBaseImpl {
 
 		assetTagPersistence.update(tag);
 
-		// Resources
-
-		if (serviceContext.isAddGroupPermissions() ||
-			serviceContext.isAddGuestPermissions()) {
-
-			addTagResources(
-				tag, serviceContext.isAddGroupPermissions(),
-				serviceContext.isAddGuestPermissions());
-		}
-		else {
-			addTagResources(tag, serviceContext.getModelPermissions());
-		}
-
 		return tag;
-	}
-
-	/**
-	 * Adds resources for the asset tag.
-	 *
-	 * @param  tag the asset tag for which to add resources
-	 * @param  addGroupPermissions whether to add group permissions
-	 * @param  addGuestPermissions whether to add guest permissions
-	 * @throws PortalException if resources could not be added for the asset tag
-	 *         or if a portal exception occurred
-	 */
-	@Override
-	public void addTagResources(
-			AssetTag tag, boolean addGroupPermissions,
-			boolean addGuestPermissions)
-		throws PortalException {
-
-		resourceLocalService.addResources(
-			tag.getCompanyId(), tag.getGroupId(), tag.getUserId(),
-			AssetTag.class.getName(), tag.getTagId(), false,
-			addGroupPermissions, addGuestPermissions);
-	}
-
-	/**
-	 * Adds resources for the asset tag using the group and guest permissions.
-	 *
-	 * @param  tag the asset tag for which to add resources
-	 * @param  modelPermissions the model permissions to be applied
-	 * @throws PortalException if resources could not be added for the asset tag
-	 *         or if a portal exception occurred
-	 */
-	@Override
-	public void addTagResources(AssetTag tag, ModelPermissions modelPermissions)
-		throws PortalException {
-
-		resourceLocalService.addModelResources(
-			tag.getCompanyId(), tag.getGroupId(), tag.getUserId(),
-			AssetTag.class.getName(), tag.getTagId(), modelPermissions);
 	}
 
 	/**
@@ -166,8 +111,6 @@ public class AssetTagLocalServiceImpl extends AssetTagLocalServiceBaseImpl {
 	 * @param  names the asset tag names
 	 * @return the asset tags matching the group and names and new asset tags
 	 *         matching the names that don't already exist in the group
-	 * @throws PortalException if a matching group could not be found or if a
-	 *         portal exception occurred
 	 */
 	@Override
 	public List<AssetTag> checkTags(long userId, Group group, String[] names)
@@ -206,8 +149,6 @@ public class AssetTagLocalServiceImpl extends AssetTagLocalServiceBaseImpl {
 	 * @param  names the asset tag names
 	 * @return the asset tags matching the group and names and new asset tags
 	 *         matching the names that don't already exist in the group
-	 * @throws PortalException if a matching group could not be found or if a
-	 *         portal exception occurred
 	 */
 	@Override
 	public List<AssetTag> checkTags(long userId, long groupId, String[] names)
@@ -225,8 +166,6 @@ public class AssetTagLocalServiceImpl extends AssetTagLocalServiceBaseImpl {
 	 * @param  classNameId the class name ID of the entity to which the asset
 	 *         tag had been applied
 	 * @return the asset tag
-	 * @throws PortalException if an asset tag with the primary key could not be
-	 *         found or if a portal exception occurred
 	 */
 	@Override
 	public AssetTag decrementAssetCount(long tagId, long classNameId)
@@ -246,9 +185,8 @@ public class AssetTagLocalServiceImpl extends AssetTagLocalServiceBaseImpl {
 	/**
 	 * Deletes all asset tags in the group.
 	 *
-	 * @param  groupId the primary key of the group in which to delete all asset
-	 *         tags
-	 * @throws PortalException if a portal exception occurred
+	 * @param groupId the primary key of the group in which to delete all asset
+	 *        tags
 	 */
 	@Override
 	public void deleteGroupTags(long groupId) throws PortalException {
@@ -262,8 +200,7 @@ public class AssetTagLocalServiceImpl extends AssetTagLocalServiceBaseImpl {
 	/**
 	 * Deletes the asset tag.
 	 *
-	 * @param  tag the asset tag to be deleted
-	 * @throws PortalException if a portal exception occurred
+	 * @param tag the asset tag to be deleted
 	 */
 	@Override
 	@SystemEvent(type = SystemEventConstants.TYPE_DELETE)
@@ -278,12 +215,6 @@ public class AssetTagLocalServiceImpl extends AssetTagLocalServiceBaseImpl {
 
 		assetTagPersistence.remove(tag);
 
-		// Resources
-
-		resourceLocalService.deleteResource(
-			tag.getCompanyId(), AssetTag.class.getName(),
-			ResourceConstants.SCOPE_INDIVIDUAL, tag.getTagId());
-
 		// Stats
 
 		assetTagStatsLocalService.deleteTagStatsByTagId(tag.getTagId());
@@ -296,9 +227,7 @@ public class AssetTagLocalServiceImpl extends AssetTagLocalServiceBaseImpl {
 	/**
 	 * Deletes the asset tag.
 	 *
-	 * @param  tagId the primary key of the asset tag
-	 * @throws PortalException if no asset tag could be found with the primary
-	 *         key or if a portal exception occurred
+	 * @param tagId the primary key of the asset tag
 	 */
 	@Override
 	public void deleteTag(long tagId) throws PortalException {
@@ -416,8 +345,6 @@ public class AssetTagLocalServiceImpl extends AssetTagLocalServiceBaseImpl {
 	 *
 	 * @param  tagId the primary key of the asset tag
 	 * @return the asset tag with the primary key
-	 * @throws PortalException if an asset tag with the primary key could not be
-	 *         found
 	 */
 	@Override
 	public AssetTag getTag(long tagId) throws PortalException {
@@ -430,7 +357,6 @@ public class AssetTagLocalServiceImpl extends AssetTagLocalServiceBaseImpl {
 	 * @param  groupId the primary key of the group
 	 * @param  name the name of the asset tag
 	 * @return the asset tag with the name in the group
-	 * @throws PortalException if a matching asset tag could not be found
 	 */
 	@Override
 	public AssetTag getTag(long groupId, String name) throws PortalException {
@@ -628,8 +554,6 @@ public class AssetTagLocalServiceImpl extends AssetTagLocalServiceBaseImpl {
 	 * @param  classNameId the class name ID of the entity to which the asset
 	 *         tag is being applied
 	 * @return the asset tag
-	 * @throws PortalException if a asset tag with the primary key could not be
-	 *         found or if a portal exception occurred
 	 */
 	@Override
 	public AssetTag incrementAssetCount(long tagId, long classNameId)
@@ -650,10 +574,9 @@ public class AssetTagLocalServiceImpl extends AssetTagLocalServiceBaseImpl {
 	 * Replaces all occurrences of the first asset tag with the second asset tag
 	 * and deletes the first asset tag.
 	 *
-	 * @param  fromTagId the primary key of the asset tag to be replaced
-	 * @param  toTagId the primary key of the asset tag to apply to the asset
-	 *         entries of the other asset tag
-	 * @throws PortalException if a portal exception occurred
+	 * @param fromTagId the primary key of the asset tag to be replaced
+	 * @param toTagId the primary key of the asset tag to apply to the asset
+	 *        entries of the other asset tag
 	 */
 	@Override
 	public void mergeTags(long fromTagId, long toTagId) throws PortalException {
@@ -663,6 +586,10 @@ public class AssetTagLocalServiceImpl extends AssetTagLocalServiceBaseImpl {
 		assetTagPersistence.addAssetEntries(toTagId, entries);
 
 		deleteTag(fromTagId);
+
+		for (AssetEntry entry : entries) {
+			incrementAssetCount(toTagId, entry.getClassNameId());
+		}
 	}
 
 	/**

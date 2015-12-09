@@ -101,16 +101,14 @@ public class VerifyAuditedModel extends VerifyProcess {
 	}
 
 	protected Object[] getAuditedModelArray(
-			String tableName, String pkColumnName, long primKey)
+			Connection con, String tableName, String pkColumnName, long primKey,
+			boolean allowAnonymousUser, long previousUserId)
 		throws Exception {
 
-		Connection con = null;
 		PreparedStatement ps = null;
 		ResultSet rs = null;
 
 		try {
-			con = DataAccess.getUpgradeOptimizedConnection();
-
 			ps = con.prepareStatement(
 				"select companyId, userId, createDate, modifiedDate from " +
 					tableName + " where " + pkColumnName + " = ?");
@@ -121,13 +119,24 @@ public class VerifyAuditedModel extends VerifyProcess {
 
 			if (rs.next()) {
 				long companyId = rs.getLong("companyId");
-				long userId = rs.getLong("userId");
+
+				long userId = 0;
+				String userName = null;
+
+				if (allowAnonymousUser) {
+					userId = previousUserId;
+					userName = "Anonymous";
+				}
+				else {
+					userId = rs.getLong("userId");
+					userName = getUserName(con, userId);
+				}
+
 				Timestamp createDate = rs.getTimestamp("createDate");
 				Timestamp modifiedDate = rs.getTimestamp("modifiedDate");
 
 				return new Object[] {
-					companyId, userId, getUserName(userId), createDate,
-					modifiedDate
+					companyId, userId, userName, createDate, modifiedDate
 				};
 			}
 
@@ -138,7 +147,7 @@ public class VerifyAuditedModel extends VerifyProcess {
 			return null;
 		}
 		finally {
-			DataAccess.cleanUp(con, ps, rs);
+			DataAccess.cleanUp(ps, rs);
 		}
 	}
 
@@ -181,18 +190,15 @@ public class VerifyAuditedModel extends VerifyProcess {
 			return null;
 		}
 		finally {
-			DataAccess.cleanUp(null, ps, rs);
+			DataAccess.cleanUp(ps, rs);
 		}
 	}
 
-	protected String getUserName(long userId) throws Exception {
-		Connection con = null;
+	protected String getUserName(Connection con, long userId) throws Exception {
 		PreparedStatement ps = null;
 		ResultSet rs = null;
 
 		try {
-			con = DataAccess.getUpgradeOptimizedConnection();
-
 			ps = con.prepareStatement(
 				"select firstName, middleName, lastName from User_ where " +
 					"userId = ?");
@@ -216,21 +222,18 @@ public class VerifyAuditedModel extends VerifyProcess {
 			return StringPool.BLANK;
 		}
 		finally {
-			DataAccess.cleanUp(con, ps, rs);
+			DataAccess.cleanUp(ps, rs);
 		}
 	}
 
 	protected void verifyAuditedModel(
-			String tableName, String primaryKeyColumnName, long primKey,
-			Object[] auditedModelArray, boolean updateDates)
+			Connection con, String tableName, String primaryKeyColumnName,
+			long primKey, Object[] auditedModelArray, boolean updateDates)
 		throws Exception {
 
-		Connection con = null;
 		PreparedStatement ps = null;
 
 		try {
-			con = DataAccess.getUpgradeOptimizedConnection();
-
 			long companyId = (Long)auditedModelArray[0];
 
 			if (auditedModelArray[2] == null) {
@@ -283,7 +286,7 @@ public class VerifyAuditedModel extends VerifyProcess {
 			}
 		}
 		finally {
-			DataAccess.cleanUp(con, ps);
+			DataAccess.cleanUp(ps);
 		}
 	}
 
@@ -291,18 +294,15 @@ public class VerifyAuditedModel extends VerifyProcess {
 			VerifiableAuditedModel verifiableAuditedModel)
 		throws Exception {
 
-		Connection con = null;
 		PreparedStatement ps = null;
 		ResultSet rs = null;
 
-		try {
-			con = DataAccess.getUpgradeOptimizedConnection();
-
+		try (Connection con = DataAccess.getUpgradeOptimizedConnection()) {
 			StringBundler sb = new StringBundler(8);
 
 			sb.append("select ");
 			sb.append(verifiableAuditedModel.getPrimaryKeyColumnName());
-			sb.append(", companyId");
+			sb.append(", companyId, userId");
 
 			if (verifiableAuditedModel.getJoinByTableName() != null) {
 				sb.append(StringPool.COMMA_AND_SPACE);
@@ -325,15 +325,18 @@ public class VerifyAuditedModel extends VerifyProcess {
 				long companyId = rs.getLong("companyId");
 				long primKey = rs.getLong(
 					verifiableAuditedModel.getPrimaryKeyColumnName());
+				long previousUserId = rs.getLong("userId");
 
 				if (verifiableAuditedModel.getJoinByTableName() != null) {
 					long relatedPrimKey = rs.getLong(
 						verifiableAuditedModel.getJoinByTableName());
 
 					auditedModelArray = getAuditedModelArray(
-						verifiableAuditedModel.getRelatedModelName(),
+						con, verifiableAuditedModel.getRelatedModelName(),
 						verifiableAuditedModel.getRelatedPKColumnName(),
-						relatedPrimKey);
+						relatedPrimKey,
+						verifiableAuditedModel.isAnonymousUserAllowed(),
+						previousUserId);
 				}
 				else if (previousCompanyId != companyId) {
 					auditedModelArray = getDefaultUserArray(con, companyId);
@@ -346,13 +349,13 @@ public class VerifyAuditedModel extends VerifyProcess {
 				}
 
 				verifyAuditedModel(
-					verifiableAuditedModel.getTableName(),
+					con, verifiableAuditedModel.getTableName(),
 					verifiableAuditedModel.getPrimaryKeyColumnName(), primKey,
 					auditedModelArray, verifiableAuditedModel.isUpdateDates());
 			}
 		}
 		finally {
-			DataAccess.cleanUp(con, ps, rs);
+			DataAccess.cleanUp(ps, rs);
 		}
 	}
 

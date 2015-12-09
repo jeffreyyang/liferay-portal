@@ -26,6 +26,7 @@ import com.liferay.portal.kernel.util.ContentTypes;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.LocaleUtil;
+import com.liferay.portal.kernel.util.ResourceBundleUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
@@ -79,10 +80,8 @@ import org.apache.struts.util.RequestUtils;
 public class ResourceActionsImpl implements ResourceActions {
 
 	public ResourceActionsImpl() {
-		_resourceBundles = ServiceTrackerCollections.multiValueMap(
+		_resourceBundles = ServiceTrackerCollections.openMultiValueMap(
 			ResourceBundle.class, "language.id");
-
-		_resourceBundles.open();
 	}
 
 	public void afterPropertiesSet() {
@@ -905,7 +904,7 @@ public class ResourceActionsImpl implements ResourceActions {
 
 		for (ResourceBundle resourceBundle : resourceBundles) {
 			if (resourceBundle.containsKey(key)) {
-				return resourceBundle.getString(key);
+				return ResourceBundleUtil.getString(resourceBundle, key);
 			}
 		}
 

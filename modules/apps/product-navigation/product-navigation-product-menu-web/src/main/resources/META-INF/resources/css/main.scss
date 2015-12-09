@@ -1,0 +1,172 @@
+@import "mixins";
+
+body {
+	&.open #wrapper {
+		@include sm() {
+			padding-left: 320px;
+		}
+	}
+
+	&.open, &.sidenav-transition {
+		#wrapper {
+			@include sm() {
+				overflow-x: hidden;
+			}
+		}
+	}
+}
+
+.lfr-product-menu-panel.sidenav-menu-slider {
+	z-index: 501;
+
+	&, .sidenav-menu {
+		width: 320px;
+	}
+}
+
+.product-menu {
+	.sidebar-header {
+		padding-bottom: 5px;
+		padding-top: 5px;
+
+		@include sm() {
+			padding: 19px 24px;
+		}
+
+		.sidenav-close {
+			float: right;
+		}
+	}
+
+	.sidebar-header-logo {
+		margin-right: 10px;
+	}
+}
+
+.product-menu {
+	.sidebar-body {
+		bottom: 0;
+		left: 0;
+		padding: 0;
+		position: absolute;
+		right: 0;
+		top: 35px;
+
+		@include sm() {
+			top: 63px;
+		}
+
+		@include media-query(null, 320px) {
+			overflow: visible;
+			position: static;
+		}
+	}
+}
+
+.product-menu {
+	small {
+		display: block;
+	}
+
+	.collapse-icon:before {
+		right: 5px;
+		top: auto;
+	}
+
+	.list-group {
+		> .collapse,
+		> .collapsing {
+			> .list-group-item > .tabular-list-group {
+				margin-bottom: -10px;
+				margin-top: -10px;
+			}
+		}
+	}
+
+	.list-group-heading {
+		h1, h2, h3, h4, h5, h6 {
+			margin-bottom: 0;
+			margin-top: 0;
+		}
+	}
+
+	.list-group-item {
+		border-top-width: 0;
+		padding: 10px 20px;
+	}
+
+	.lfr-icon-menu {
+		.btn-default {
+			border-width: 0;
+			height: 32px;
+			line-height: 32px;
+			padding: 0;
+			width: 32px;
+		}
+	}
+}
+
+.product-menu {
+	.nav-equal-height-heading {
+		.collapse-icon {
+			&:after,
+			&.collapsed:after {
+				content: '';
+				display: block;
+				height: 12px;
+				left: -6px;
+				position: absolute;
+				right: auto;
+				top: 14px;
+				width: 9px;
+			}
+
+			&:before {
+				left: -8px;
+				right: auto;
+				z-index: 1;
+			}
+		}
+	}
+
+	.nav-nested-margins > li .nav > li {
+		.nav > li {
+			margin-bottom: 1px;
+		}
+	}
+}
+
+.product-menu.popover {
+	background-color: #FFF;
+}
+
+.product-menu {
+	.manage-sites-link {
+		padding: 1em;
+	}
+
+	.site-selector {
+		box-shadow: none;
+
+		.selectable-site {
+			color: #333;
+			height: auto;
+		}
+
+		.list-group-item-content, .list-group-item-field {
+			vertical-align: middle;
+		}
+
+		.site-link {
+			color: #333;
+
+			&.selected-site {
+				color: #999;
+			}
+		}
+
+		.site-logo-container {
+			padding: 2em;
+		}
+	}
+}

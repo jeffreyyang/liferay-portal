@@ -1,8 +1,13 @@
 <?xml version="1.0"?>
 
-<project name="portal-impl" basedir="." default="compile"
+<project
+	basedir="."
+	default="compile"
+	name="portal-impl"
 	xmlns:antelope="antlib:ise.antelope.tasks"
 	xmlns:artifact="antlib:org.apache.maven.artifact.ant"
+	xmlns:if="ant:if"
+	xmlns:unless="ant:unless"
 >
 	<property name="test.properties" value="portal-test.properties" />
 
@@ -262,9 +267,13 @@ svn://svn.liferay.com/repos/public/alloy/trunk/sandbox/taglibs.
 	</target>
 
 	<target name="build-lang-cmd">
+		<path id="lang.builder.classpath">
+			<fileset dir="${portal.tools.dir}/lang-builder" includes="*.jar" />
+		</path>
+
 		<java
 			classname="com.liferay.lang.builder.LangBuilder"
-			classpathref="portal.tools.classpath"
+			classpathref="lang.builder.classpath"
 			fork="true"
 			newenvironment="true"
 		>
@@ -613,13 +622,18 @@ svn://svn.liferay.com/repos/public/alloy/trunk/sandbox/taglibs.
 	</target>
 
 	<target name="build-service">
+		<path id="service.builder.classpath">
+			<fileset dir="${portal.tools.dir}/portal-tools-service-builder" includes="*.jar" />
+		</path>
+
 		<java
 			classname="com.liferay.portal.tools.service.builder.ServiceBuilder"
-			classpathref="portal.tools.classpath"
+			classpathref="service.builder.classpath"
 			fork="true"
 			newenvironment="true"
 			outputproperty="build-service.output"
 		>
+			<jvmarg if:true="${jvm.debug}" value="${jpda.settings}" />
 			<jvmarg value="-Xms512m" />
 			<jvmarg value="-Xmx1024m" />
 			<jvmarg value="-Xss2048k" />
@@ -639,7 +653,6 @@ svn://svn.liferay.com/repos/public/alloy/trunk/sandbox/taglibs.
 			<arg value="service.osgi.module=false" />
 			<arg value="service.plugin.name=" />
 			<arg value="service.props.util=com.liferay.portal.util.PropsUtil" />
-			<arg value="service.remoting.file=${basedir}/../portal-web/docroot/WEB-INF/remoting-servlet.xml" />
 			<arg value="service.resources.dir=${basedir}/src" />
 			<arg value="service.spring.file=${basedir}/src/META-INF/portal-spring.xml" />
 			<arg value="service.spring.namespaces=beans" />
@@ -719,12 +732,6 @@ svn://svn.liferay.com/repos/public/alloy/trunk/sandbox/taglibs.
 		</antcall>
 	</target>
 
-	<target name="build-service-portlet-flags">
-		<antcall target="build-service">
-			<param name="service.file" value="${basedir}/src/com/liferay/portlet/flags/service.xml" />
-		</antcall>
-	</target>
-
 	<target name="build-service-portlet-messageboards">
 		<antcall target="build-service">
 			<param name="service.file" value="${basedir}/src/com/liferay/portlet/messageboards/service.xml" />
@@ -743,12 +750,6 @@ svn://svn.liferay.com/repos/public/alloy/trunk/sandbox/taglibs.
 		</antcall>
 	</target>
 
-	<target name="build-service-portlet-softwarecatalog">
-		<antcall target="build-service">
-			<param name="service.file" value="${basedir}/src/com/liferay/portlet/softwarecatalog/service.xml" />
-		</antcall>
-	</target>
-
 	<target name="build-service-portlet-trash">
 		<antcall target="build-service">
 			<param name="service.file" value="${basedir}/src/com/liferay/portlet/trash/service.xml" />
@@ -763,11 +764,9 @@ svn://svn.liferay.com/repos/public/alloy/trunk/sandbox/taglibs.
 		<antcall target="build-service-portlet-documentlibrary" />
 		<antcall target="build-service-portlet-expando" />
 		<antcall target="build-service-portlet-exportimport" />
-		<antcall target="build-service-portlet-flags" />
 		<antcall target="build-service-portlet-messageboards" />
 		<antcall target="build-service-portlet-ratings" />
 		<antcall target="build-service-portlet-social" />
-		<antcall target="build-service-portlet-softwarecatalog" />
 		<antcall target="build-service-portlet-trash" />
 	</target>
 
@@ -793,9 +792,13 @@ svn://svn.liferay.com/repos/public/alloy/trunk/sandbox/taglibs.
 			<then>
 				<antcall target="prepare-upgrade-table" />
 
+				<path id="upgrade.table.builder.classpath">
+					<fileset dir="${portal.tools.dir}/portal-tools-upgrade-table-builder" includes="*.jar" />
+				</path>
+
 				<java
 					classname="com.liferay.portal.tools.upgrade.table.builder.UpgradeTableBuilder"
-					classpathref="portal.tools.classpath"
+					classpathref="upgrade.table.builder.classpath"
 					fork="true"
 					newenvironment="true"
 				>
@@ -809,7 +812,7 @@ svn://svn.liferay.com/repos/public/alloy/trunk/sandbox/taglibs.
 
 	<target name="build-wsdd" depends="compile">
 		<path id="wsdd.builder.classpath">
-			<path refid="portal.tools.classpath" />
+			<fileset dir="${portal.tools.dir}/portal-tools-wsdd-builder" includes="*.jar" />
 			<path refid="project.classpath" />
 		</path>
 
@@ -886,12 +889,6 @@ svn://svn.liferay.com/repos/public/alloy/trunk/sandbox/taglibs.
 		</antcall>
 	</target>
 
-	<target name="build-wsdd-portlet-flags">
-		<antcall target="build-wsdd">
-			<param name="service.file" value="${basedir}/src/com/liferay/portlet/flags/service.xml" />
-		</antcall>
-	</target>
-
 	<target name="build-wsdd-portlet-messageboards">
 		<antcall target="build-wsdd">
 			<param name="service.file" value="${basedir}/src/com/liferay/portlet/messageboards/service.xml" />
@@ -910,12 +907,6 @@ svn://svn.liferay.com/repos/public/alloy/trunk/sandbox/taglibs.
 		</antcall>
 	</target>
 
-	<target name="build-wsdd-portlet-softwarecatalog">
-		<antcall target="build-wsdd">
-			<param name="service.file" value="${basedir}/src/com/liferay/portlet/softwarecatalog/service.xml" />
-		</antcall>
-	</target>
-
 	<target name="build-wsdd-portlet-trash">
 		<antcall target="build-wsdd">
 			<param name="service.file" value="${basedir}/src/com/liferay/portlet/trash/service.xml" />
@@ -929,17 +920,19 @@ svn://svn.liferay.com/repos/public/alloy/trunk/sandbox/taglibs.
 		<antcall target="build-wsdd-portlet-documentlibrary" />
 		<antcall target="build-wsdd-portlet-expando" />
 		<antcall target="build-wsdd-portlet-exportimport" />
-		<antcall target="build-wsdd-portlet-flags" />
 		<antcall target="build-wsdd-portlet-messageboards" />
 		<antcall target="build-wsdd-portlet-ratings" />
 		<antcall target="build-wsdd-portlet-social" />
-		<antcall target="build-wsdd-portlet-softwarecatalog" />
 		<antcall target="build-wsdd-portlet-trash" />
 	</target>
 
 	<target name="build-wsdds">
 		<antcall target="build-wsdd-portal" />
 		<antcall target="build-wsdd-portlets" />
+
+		<gradle-execute dir="../modules" task="buildWSDD">
+			<arg value="-Dportal.build=true" />
+		</gradle-execute>
 	</target>
 
 	<target name="build-yui-compressor-jar">
@@ -973,7 +966,7 @@ svn://svn.liferay.com/repos/public/alloy/trunk/sandbox/taglibs.
 
 	<target name="format-source">
 		<path id="source.formatter.classpath">
-			<path refid="portal.tools.classpath" />
+			<fileset dir="${portal.tools.dir}/source-formatter" includes="*.jar" />
 			<path refid="project.classpath" />
 		</path>
 
@@ -993,8 +986,10 @@ svn://svn.liferay.com/repos/public/alloy/trunk/sandbox/taglibs.
 			fork="true"
 			newenvironment="true"
 		>
+			<jvmarg if:true="${jvm.debug}" value="${jpda.settings}" />
 			<jvmarg value="-Xmx512m" />
 			<jvmarg value="-Xss2048k" />
+			<jvmarg value="-Dsource.formatter.check.modules.service.util=${source.formatter.check.modules.service.util}" />
 			<jvmarg value="-Dsource.formatter.check.unprocessed.exceptions=${source.formatter.check.unprocessed.exceptions}" />
 			<jvmarg value="-Dsource.formatter.excludes=${source.formatter.excludes}" />
 			<arg value="format.current.branch=${format.current.branch}" />
@@ -1024,9 +1019,13 @@ svn://svn.liferay.com/repos/public/alloy/trunk/sandbox/taglibs.
 	</target>
 
 	<target name="format-tld">
+		<path id="tld.formatter.classpath">
+			<fileset dir="${portal.tools.dir}/tld-formatter" includes="*.jar" />
+		</path>
+
 		<java
 			classname="com.liferay.tld.formatter.TLDFormatter"
-			classpathref="portal.tools.classpath"
+			classpathref="tld.formatter.classpath"
 			dir="${project.dir}"
 			fork="true"
 			newenvironment="true"

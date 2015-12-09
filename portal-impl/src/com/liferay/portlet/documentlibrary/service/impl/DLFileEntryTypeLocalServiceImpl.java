@@ -208,7 +208,9 @@ public class DLFileEntryTypeLocalServiceImpl
 		if (dlFileEntryPersistence.countByFileEntryTypeId(
 				dlFileEntryType.getFileEntryTypeId()) > 0) {
 
-			throw new RequiredFileEntryTypeException();
+			throw new RequiredFileEntryTypeException(
+				"There are file entries of file entry type " +
+					dlFileEntryType.getFileEntryTypeId());
 		}
 
 		DDMStructure ddmStructure = DDMStructureManagerUtil.fetchStructure(
@@ -224,6 +226,13 @@ public class DLFileEntryTypeLocalServiceImpl
 		}
 
 		if (ddmStructure != null) {
+			long classNameId = classNameLocalService.getClassNameId(
+				DLFileEntryType.class);
+
+			DDMStructureLinkManagerUtil.deleteStructureLink(
+				classNameId, dlFileEntryType.getFileEntryTypeId(),
+				ddmStructure.getStructureId());
+
 			DDMStructureManagerUtil.deleteStructure(
 				ddmStructure.getStructureId());
 		}
@@ -790,7 +799,7 @@ public class DLFileEntryTypeLocalServiceImpl
 		}
 
 		if (ddmStructureIds.length == 0) {
-			throw new NoSuchMetadataSetException();
+			throw new NoSuchMetadataSetException("DDM structure IDs is empty");
 		}
 
 		for (long ddmStructureId : ddmStructureIds) {

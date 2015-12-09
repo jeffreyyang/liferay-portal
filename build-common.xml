@@ -1,10 +1,13 @@
 <?xml version="1.0"?>
 
-<project name="build-common"
+<project
+	name="build-common"
 	xmlns:antelope="antlib:ise.antelope.tasks"
 	xmlns:artifact="antlib:org.apache.maven.artifact.ant"
+	xmlns:if="ant:if"
 	xmlns:ivy="antlib:org.apache.ivy.ant"
 	xmlns:sonar="antlib:org.sonar.ant"
+	xmlns:unless="ant:unless"
 >
 	<dirname file="${ant.file.build-common}" property="project.dir.native" />
 
@@ -17,6 +20,8 @@
 	</pathconvert>
 
 	<property name="sdk.dir" value="${project.dir}/tools/sdk" />
+
+	<property name="portal.tools.dir" value="${sdk.dir}/tmp/portal-tools" />
 
 	<property name="test.properties" value="com/liferay/portal/tools/dependencies/portal-tools.properties" />
 
@@ -58,10 +63,6 @@
 		<fileset dir="${project.dir}/lib/portal" includes="*.jar" />
 	</path>
 
-	<path id="portal.tools.classpath">
-		<fileset dir="${project.dir}/tools/sdk/tmp/portal-tools" includes="*.jar" />
-	</path>
-
 	<path id="project.classpath">
 		<pathelement path="${classpath.full}" />
 		<path refid="lib.classpath" />
@@ -83,6 +84,8 @@
 	<typedef classpathref="lib.classpath" resource="org/apache/maven/artifact/ant/antlib.xml" uri="antlib:org.apache.maven.artifact.ant" />
 	<taskdef classpathref="lib.classpath" resource="tasks.properties" />
 
+	<taskdef classname="com.liferay.ant.beanshell.BeanShellTask" classpathref="lib.classpath" name="beanshell" />
+
 	<taskdef classname="com.liferay.ant.bnd.BaselineJarTask" classpathref="lib.classpath" name="baseline-jar" />
 	<taskdef classname="com.liferay.ant.bnd.ReleaseToRepoTask" classpathref="lib.classpath" name="release-to-repo" />
 
@@ -90,8 +93,9 @@
 
 	<liferay-build-logger-installer />
 
-	<taskdef classname="com.tonicsystems.jarjar.JarJarTask" classpath="${project.dir}/lib/development/jarjar.jar" name="jarjar" />
 	<taskdef classname="com.oopsconsultancy.xmltask.ant.XmlTask" classpath="${project.dir}/lib/development/xmltask.jar" name="xmltask" />
+
+	<taskdef classname="com.tonicsystems.jarjar.JarJarTask" classpath="${project.dir}/lib/development/jarjar.jar" name="jarjar" />
 
 	<import file="build-common-ivy.xml" />
 
@@ -456,15 +460,6 @@ Please set the environment variable ANT_OPTS to the recommended value of
 		</and>
 		<then>
 			<property name="jdk.7.home" value="${env.JAVA_HOME}" />
-		</then>
-	</if>
-
-	<if>
-		<not>
-			<equals arg1="${junit.debug}" arg2="true" />
-		</not>
-		<then>
-			<var name="junit.debug.jpda" value="" />
 		</then>
 	</if>
 
@@ -877,18 +872,44 @@ Please set the environment variable ANT_OPTS to the recommended value of
 				</else>
 			</if>
 
-			<exec dir="@{dir}" executable="${project.dir}/gradlew${gradlew.suffix}" failonerror="@{failonerror}">
-				<args />
-				<arg value="--init-script=${project.dir}/modules/init.gradle" />
-				<arg value="--no-daemon" />
-				<arg value="--project-cache-dir=${project.dir}/.gradle" />
-				<arg value="--stacktrace" />
-				<arg value="-Dapp.server.parent.dir=${app.server.parent.dir}" />
-				<arg value="-Dforced.cache.enabled=@{forcedcacheenabled}" />
-				<arg value="-Dliferay.home=${liferay.home}" />
-				<arg value="@{task}" />
-				<env key="GRADLE_OPTS" value="${env.ANT_OPTS}" />
-			</exec>
+			<if>
+				<isset property="env.JENKINS_HOME" />
+				<then>
+					<parallel>
+						<daemons>
+							<sequential>
+								<sleep hours="1" />
+
+								<print-thread-dump jps.name="GradleWrapperMain" />
+							</sequential>
+						</daemons>
+						<exec dir="@{dir}" executable="${project.dir}/gradlew${gradlew.suffix}" failonerror="@{failonerror}">
+							<args />
+							<arg value="--no-daemon" />
+							<arg value="--project-cache-dir=${project.dir}/.gradle" />
+							<arg value="--stacktrace" />
+							<arg value="-Dapp.server.parent.dir=${app.server.parent.dir}" />
+							<arg value="-Dforced.cache.enabled=@{forcedcacheenabled}" />
+							<arg value="-Dliferay.home=${liferay.home}" />
+							<arg value="@{task}" />
+							<env key="GRADLE_OPTS" value="${env.ANT_OPTS}" />
+						</exec>
+					</parallel>
+				</then>
+				<else>
+					<exec dir="@{dir}" executable="${project.dir}/gradlew${gradlew.suffix}" failonerror="@{failonerror}">
+						<args />
+						<arg value="--no-daemon" />
+						<arg value="--project-cache-dir=${project.dir}/.gradle" />
+						<arg value="--stacktrace" />
+						<arg value="-Dapp.server.parent.dir=${app.server.parent.dir}" />
+						<arg value="-Dforced.cache.enabled=@{forcedcacheenabled}" />
+						<arg value="-Dliferay.home=${liferay.home}" />
+						<arg value="@{task}" />
+						<env key="GRADLE_OPTS" value="${env.ANT_OPTS}" />
+					</exec>
+				</else>
+			</if>
 		</sequential>
 	</macrodef>
 
@@ -957,11 +978,11 @@ Please set the environment variable ANT_OPTS to the recommended value of
 			<junit dir="${project.dir}" fork="on" forkmode="@{forkmode}" haltonfailure="${junit.halt.on.failure}" jvm="${junit.jvm}" outputtoformatters="false" printsummary="on" showoutput="true">
 				<sysproperty key="junit.aspectj.dump" file="woven-classes" />
 				<sysproperty key="junit.code.coverage" value="${junit.code.coverage}" />
-				<sysproperty key="junit.debug" value="${junit.debug}" />
+				<sysproperty if:true="${jvm.debug}" key="jvm.debug" value="true" />
 				<sysproperty key="whip.agent" value="${whip.agent}" />
 				<sysproperty key="whip.datafile" file="test-coverage/@{test.type}/whip.dat" />
 				<sysproperty key="whip.instrument.dump" value="${whip.instrument.dump}" />
-				<jvmarg line="${junit.debug.jpda}" />
+				<jvmarg if:true="${jvm.debug}" line="${jpda.settings}" />
 				<jvmarg line="${junit.java.gc}" />
 				<jvmarg line="${whip.agent}" />
 				<jvmarg value="-Xss2m" />
@@ -971,6 +992,7 @@ Please set the environment variable ANT_OPTS to the recommended value of
 				<jvmarg value="-Djava.net.preferIPv4Stack=true" />
 				<jvmarg value="-Dliferay.log.dir=${liferay.home}/logs" />
 				<jvmarg value="-Dliferay.mode=test" />
+				<jvmarg value="-Dosgi.state.dir=${liferay.home}/osgi/state" />
 				<misc />
 				<jvmarg value="-Duser.timezone=GMT" />
 				<classpath location="test-coverage" />
@@ -1051,6 +1073,44 @@ Please set the environment variable ANT_OPTS to the recommended value of
 			</tstamp>
 
 			<echo message="${current.time}" />
+		</sequential>
+	</macrodef>
+
+	<macrodef name="print-thread-dump">
+		<attribute name="jps.name" />
+
+		<sequential>
+			<local name="jps.pid" />
+
+			<exec executable="jps" />
+
+			<exec executable="jps">
+				<redirector outputproperty="jps.pid">
+					<outputfilterchain>
+						<linecontains>
+							<contains value="@{jps.name}" />
+						</linecontains>
+						<replacestring from=" @{jps.name}" />
+					</outputfilterchain>
+				</redirector>
+			</exec>
+
+			<if>
+				<not>
+					<equals arg1="${jps.pid}" arg2="" />
+				</not>
+				<then>
+					<echo>Thread dump for process : ${jps.pid}</echo>
+
+					<exec executable="jstack">
+						<arg value="-l" />
+						<arg value="${jps.pid}" />
+					</exec>
+				</then>
+				<else>
+					<echo>Unable to print the thread dump of @{jps.name}.</echo>
+				</else>
+			</if>
 		</sequential>
 	</macrodef>
 
@@ -1482,12 +1542,15 @@ rerun your task.
 				junit.java.integration.gc=${junit.java.integration.gc}
 				junit.java.unit.gc=${junit.java.unit.gc}
 				liferay.home=${liferay.home}
+				liferay.portal.version=${lp.version}-SNAPSHOT
 				microsoft.translator.client.id=${microsoft.translator.client.id}
 				microsoft.translator.client.secret=${microsoft.translator.client.secret}
 				nodejs.npm.email=${nodejs.npm.email}
 				nodejs.npm.password=${nodejs.npm.password}
 				nodejs.npm.user=${nodejs.npm.user}
 				sass.compiler.class.name=${sass.compiler.class.name}
+				sass.generate.source.map=${sass.generate.source.map}
+				sass.precision=${sass.precision}
 				upgrade.table.dir=${upgrade.table.dir}
 			</echo>
 		</sequential>
@@ -1676,9 +1739,14 @@ rerun your task.
 	<target name="format-javadoc">
 		<echo>Run "ant compile compile-test" before using format-javadoc to generate @Override tags.</echo>
 
+		<path id="javadoc.formatter.classpath">
+			<fileset dir="${portal.tools.dir}/javadoc-formatter" includes="*.jar" />
+			<path refid="project.classpath" />
+		</path>
+
 		<java
 			classname="com.liferay.javadoc.formatter.JavadocFormatter"
-			classpathref="portal.tools.classpath"
+			classpathref="javadoc.formatter.classpath"
 			fork="true"
 			newenvironment="true"
 		>
@@ -1782,7 +1850,7 @@ rerun your task.
 			</sequential>
 		</for>
 
-		<taskdef classpathref="portal.tools.classpath" resource="org/sonar/ant/antlib.xml" uri="antlib:org.sonar.ant" />
+		<taskdef classpath="${portal.tools.dir}/sonar/sonar-ant-task.jar" resource="org/sonar/ant/antlib.xml" uri="antlib:org.sonar.ant" />
 
 		<sonar:sonar />
 

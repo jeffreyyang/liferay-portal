@@ -26,7 +26,9 @@ import com.liferay.portal.kernel.repository.model.Folder;
 import com.liferay.portal.kernel.util.ContentTypes;
 import com.liferay.portal.kernel.util.FileUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
+import com.liferay.portal.kernel.util.LocaleThreadLocal;
 import com.liferay.portal.kernel.util.LocaleUtil;
+import com.liferay.portal.kernel.util.MapUtil;
 import com.liferay.portal.kernel.util.PropertiesParamUtil;
 import com.liferay.portal.kernel.util.PropsKeys;
 import com.liferay.portal.kernel.util.StreamUtil;
@@ -39,6 +41,7 @@ import com.liferay.portal.model.Layout;
 import com.liferay.portal.model.LayoutRevision;
 import com.liferay.portal.model.LayoutSetBranch;
 import com.liferay.portal.model.LayoutSetBranchConstants;
+import com.liferay.portal.model.PortletPreferences;
 import com.liferay.portal.model.Repository;
 import com.liferay.portal.model.User;
 import com.liferay.portal.portletfilerepository.PortletFileRepositoryUtil;
@@ -74,6 +77,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -190,8 +194,14 @@ public class StagingLocalServiceImpl extends StagingLocalServiceBaseImpl {
 		UnicodeProperties typeSettingsProperties =
 			liveGroup.getTypeSettingsProperties();
 
+		boolean stagedLocally = GetterUtil.getBoolean(
+			typeSettingsProperties.getProperty("staged"));
 		boolean stagedRemotely = GetterUtil.getBoolean(
 			typeSettingsProperties.getProperty("stagedRemotely"));
+
+		if (!stagedLocally && !stagedRemotely) {
+			return;
+		}
 
 		if (stagedRemotely) {
 			String remoteURL = StagingUtil.buildRemoteURL(
@@ -275,12 +285,15 @@ public class StagingLocalServiceImpl extends StagingLocalServiceBaseImpl {
 			"branchingPrivate", String.valueOf(branchingPrivate));
 		typeSettingsProperties.setProperty(
 			"branchingPublic", String.valueOf(branchingPublic));
-		typeSettingsProperties.setProperty("staged", Boolean.TRUE.toString());
-		typeSettingsProperties.setProperty(
-			"stagedRemotely", String.valueOf(false));
 
-		setCommonStagingOptions(
-			liveGroup, typeSettingsProperties, serviceContext);
+		if (!hasStagingGroup) {
+			typeSettingsProperties.setProperty(
+				"staged", Boolean.TRUE.toString());
+			typeSettingsProperties.setProperty(
+				"stagedRemotely", String.valueOf(false));
+
+			setCommonStagingOptions(typeSettingsProperties, serviceContext);
+		}
 
 		groupLocalService.updateGroup(
 			liveGroup.getGroupId(), typeSettingsProperties.toString());
@@ -324,15 +337,16 @@ public class StagingLocalServiceImpl extends StagingLocalServiceBaseImpl {
 			disableStaging(stagingGroup, serviceContext);
 		}
 
-		String remoteURL = StagingUtil.buildRemoteURL(
-			remoteAddress, remotePort, remotePathContext, secureConnection,
-			GroupConstants.DEFAULT_LIVE_GROUP_ID, false);
+		boolean stagedRemotely = stagingGroup.isStagedRemotely();
+
+		boolean oldStagedRemotely = stagedRemotely;
 
 		UnicodeProperties typeSettingsProperties =
 			stagingGroup.getTypeSettingsProperties();
 
-		boolean stagedRemotely = GetterUtil.getBoolean(
-			typeSettingsProperties.getProperty("stagedRemotely"));
+		String remoteURL = StagingUtil.buildRemoteURL(
+			remoteAddress, remotePort, remotePathContext, secureConnection,
+			GroupConstants.DEFAULT_LIVE_GROUP_ID, false);
 
 		if (stagedRemotely) {
 			long oldRemoteGroupId = GetterUtil.getLong(
@@ -371,12 +385,15 @@ public class StagingLocalServiceImpl extends StagingLocalServiceBaseImpl {
 			"remotePort", String.valueOf(remotePort));
 		typeSettingsProperties.setProperty(
 			"secureConnection", String.valueOf(secureConnection));
-		typeSettingsProperties.setProperty("staged", Boolean.TRUE.toString());
-		typeSettingsProperties.setProperty(
-			"stagedRemotely", Boolean.TRUE.toString());
 
-		setCommonStagingOptions(
-			stagingGroup, typeSettingsProperties, serviceContext);
+		if (!oldStagedRemotely) {
+			typeSettingsProperties.setProperty(
+				"staged", Boolean.TRUE.toString());
+			typeSettingsProperties.setProperty(
+				"stagedRemotely", Boolean.TRUE.toString());
+
+			setCommonStagingOptions(typeSettingsProperties, serviceContext);
+		}
 
 		groupLocalService.updateGroup(
 			stagingGroup.getGroupId(), typeSettingsProperties.toString());
@@ -406,6 +423,8 @@ public class StagingLocalServiceImpl extends StagingLocalServiceBaseImpl {
 
 		File file = null;
 
+		Locale siteDefaultLocale = LocaleThreadLocal.getSiteDefaultLocale();
+
 		try {
 			ExportImportThreadLocal.setLayoutImportInProcess(true);
 			ExportImportThreadLocal.setLayoutStagingInProcess(true);
@@ -425,6 +444,11 @@ public class StagingLocalServiceImpl extends StagingLocalServiceBaseImpl {
 
 			settingsMap.put("userId", userId);
 
+			long targetGroupId = MapUtil.getLong(settingsMap, "targetGroupId");
+
+			LocaleThreadLocal.setSiteDefaultLocale(
+				PortalUtil.getSiteDefaultLocale(targetGroupId));
+
 			exportImportLocalService.importLayoutsDataDeletions(
 				exportImportConfiguration, file);
 
@@ -443,6 +467,8 @@ public class StagingLocalServiceImpl extends StagingLocalServiceBaseImpl {
 		finally {
 			ExportImportThreadLocal.setLayoutImportInProcess(false);
 			ExportImportThreadLocal.setLayoutStagingInProcess(false);
+
+			LocaleThreadLocal.setSiteDefaultLocale(siteDefaultLocale);
 		}
 	}
 
@@ -577,7 +603,7 @@ public class StagingLocalServiceImpl extends StagingLocalServiceBaseImpl {
 	protected void deleteLayoutSetBranches(long groupId, boolean privateLayout)
 		throws PortalException {
 
-		// Find the latest layout revision for all the published layouts
+		// Find the latest layout revision for all the layouts
 
 		Map<Long, LayoutRevision> layoutRevisions = new HashMap<>();
 
@@ -585,16 +611,33 @@ public class StagingLocalServiceImpl extends StagingLocalServiceBaseImpl {
 			layoutSetBranchLocalService.getLayoutSetBranches(
 				groupId, privateLayout);
 
+		boolean publishedToLive = false;
+
 		for (LayoutSetBranch layoutSetBranch : layoutSetBranches) {
 			String lastPublishDateString = layoutSetBranch.getSettingsProperty(
 				"last-publish-date");
 
-			if (Validator.isNull(lastPublishDateString)) {
+			if (Validator.isNotNull(lastPublishDateString)) {
+				publishedToLive = true;
+
+				break;
+			}
+		}
+
+		for (LayoutSetBranch layoutSetBranch : layoutSetBranches) {
+			String lastPublishDateString = layoutSetBranch.getSettingsProperty(
+				"last-publish-date");
+
+			if (Validator.isNull(lastPublishDateString) && publishedToLive) {
 				continue;
 			}
 
-			Date lastPublishDate = new Date(
-				GetterUtil.getLong(lastPublishDateString));
+			Date lastPublishDate = null;
+
+			if (Validator.isNotNull(lastPublishDateString)) {
+				lastPublishDate = new Date(
+					GetterUtil.getLong(lastPublishDateString));
+			}
 
 			List<LayoutRevision> headLayoutRevisions =
 				layoutRevisionLocalService.getLayoutRevisions(
@@ -614,7 +657,8 @@ public class StagingLocalServiceImpl extends StagingLocalServiceBaseImpl {
 				Date statusDate = headLayoutRevision.getStatusDate();
 
 				if (statusDate.after(layoutRevision.getStatusDate()) &&
-					lastPublishDate.after(statusDate)) {
+					((lastPublishDate == null) ||
+					 lastPublishDate.after(statusDate))) {
 
 					layoutRevisions.put(
 						headLayoutRevision.getPlid(), headLayoutRevision);
@@ -622,7 +666,7 @@ public class StagingLocalServiceImpl extends StagingLocalServiceBaseImpl {
 			}
 		}
 
-		// Update all layouts based on their latest published revision
+		// Update all layouts based on their latest revision
 
 		for (LayoutRevision layoutRevision : layoutRevisions.values()) {
 			updateLayoutWithLayoutRevision(layoutRevision);
@@ -817,12 +861,8 @@ public class StagingLocalServiceImpl extends StagingLocalServiceBaseImpl {
 	}
 
 	protected void setCommonStagingOptions(
-		Group liveGroup, UnicodeProperties typeSettingsProperties,
+		UnicodeProperties typeSettingsProperties,
 		ServiceContext serviceContext) {
-
-		if (liveGroup.hasRemoteStagingGroup()) {
-			return;
-		}
 
 		typeSettingsProperties.putAll(
 			PropertiesParamUtil.getProperties(
@@ -850,6 +890,8 @@ public class StagingLocalServiceImpl extends StagingLocalServiceBaseImpl {
 				stagingAdvicesThreadLocalEnabled);
 		}
 
+		updatePortletPreferences(layoutRevision, layout);
+
 		layout.setUserId(layoutRevision.getUserId());
 		layout.setUserName(layoutRevision.getUserName());
 		layout.setCreateDate(layoutRevision.getCreateDate());
@@ -869,6 +911,25 @@ public class StagingLocalServiceImpl extends StagingLocalServiceBaseImpl {
 		layout.setCss(layoutRevision.getCss());
 
 		return layoutLocalService.updateLayout(layout);
+	}
+
+	protected void updatePortletPreferences(
+		LayoutRevision layoutRevision, Layout layout) {
+
+		portletPreferencesLocalService.deletePortletPreferencesByPlid(
+			layout.getPlid());
+
+		List<PortletPreferences> portletPreferencesList =
+			portletPreferencesLocalService.getPortletPreferencesByPlid(
+				layoutRevision.getLayoutRevisionId());
+
+		for (PortletPreferences portletPreferences : portletPreferencesList) {
+			portletPreferencesLocalService.addPortletPreferences(
+				layoutRevision.getCompanyId(), portletPreferences.getOwnerId(),
+				portletPreferences.getOwnerType(), layout.getPlid(),
+				portletPreferences.getPortletId(), null,
+				portletPreferences.getPreferences());
+		}
 	}
 
 	protected void updateStagedPortlets(

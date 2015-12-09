@@ -38,6 +38,7 @@ import com.liferay.portal.test.rule.PersistenceTestRule;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -54,8 +55,9 @@ import java.util.Set;
  * @generated
  */
 public class OrgLaborPersistenceTest {
+	@ClassRule
 	@Rule
-	public final AggregateTestRule aggregateTestRule = new AggregateTestRule(new LiferayIntegrationTestRule(),
+	public static final AggregateTestRule aggregateTestRule = new AggregateTestRule(new LiferayIntegrationTestRule(),
 			PersistenceTestRule.INSTANCE,
 			new TransactionalTestRule(Propagation.REQUIRED));
 
@@ -114,6 +116,8 @@ public class OrgLaborPersistenceTest {
 
 		newOrgLabor.setMvccVersion(RandomTestUtil.nextLong());
 
+		newOrgLabor.setCompanyId(RandomTestUtil.nextLong());
+
 		newOrgLabor.setOrganizationId(RandomTestUtil.nextLong());
 
 		newOrgLabor.setTypeId(RandomTestUtil.nextLong());
@@ -154,6 +158,8 @@ public class OrgLaborPersistenceTest {
 			newOrgLabor.getMvccVersion());
 		Assert.assertEquals(existingOrgLabor.getOrgLaborId(),
 			newOrgLabor.getOrgLaborId());
+		Assert.assertEquals(existingOrgLabor.getCompanyId(),
+			newOrgLabor.getCompanyId());
 		Assert.assertEquals(existingOrgLabor.getOrganizationId(),
 			newOrgLabor.getOrganizationId());
 		Assert.assertEquals(existingOrgLabor.getTypeId(),
@@ -219,11 +225,12 @@ public class OrgLaborPersistenceTest {
 
 	protected OrderByComparator<OrgLabor> getOrderByComparator() {
 		return OrderByComparatorFactoryUtil.create("OrgLabor", "mvccVersion",
-			true, "orgLaborId", true, "organizationId", true, "typeId", true,
-			"sunOpen", true, "sunClose", true, "monOpen", true, "monClose",
-			true, "tueOpen", true, "tueClose", true, "wedOpen", true,
-			"wedClose", true, "thuOpen", true, "thuClose", true, "friOpen",
-			true, "friClose", true, "satOpen", true, "satClose", true);
+			true, "orgLaborId", true, "companyId", true, "organizationId",
+			true, "typeId", true, "sunOpen", true, "sunClose", true, "monOpen",
+			true, "monClose", true, "tueOpen", true, "tueClose", true,
+			"wedOpen", true, "wedClose", true, "thuOpen", true, "thuClose",
+			true, "friOpen", true, "friClose", true, "satOpen", true,
+			"satClose", true);
 	}
 
 	@Test
@@ -332,11 +339,9 @@ public class OrgLaborPersistenceTest {
 
 		ActionableDynamicQuery actionableDynamicQuery = OrgLaborLocalServiceUtil.getActionableDynamicQuery();
 
-		actionableDynamicQuery.setPerformActionMethod(new ActionableDynamicQuery.PerformActionMethod() {
+		actionableDynamicQuery.setPerformActionMethod(new ActionableDynamicQuery.PerformActionMethod<OrgLabor>() {
 				@Override
-				public void performAction(Object object) {
-					OrgLabor orgLabor = (OrgLabor)object;
-
+				public void performAction(OrgLabor orgLabor) {
 					Assert.assertNotNull(orgLabor);
 
 					count.increment();
@@ -426,6 +431,8 @@ public class OrgLaborPersistenceTest {
 		OrgLabor orgLabor = _persistence.create(pk);
 
 		orgLabor.setMvccVersion(RandomTestUtil.nextLong());
+
+		orgLabor.setCompanyId(RandomTestUtil.nextLong());
 
 		orgLabor.setOrganizationId(RandomTestUtil.nextLong());
 

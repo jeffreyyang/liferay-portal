@@ -40,7 +40,6 @@ import com.liferay.portal.kernel.util.OSDetector;
 import com.liferay.portal.kernel.util.PropertiesUtil;
 import com.liferay.portal.kernel.util.PropsKeys;
 import com.liferay.portal.kernel.util.ServerDetector;
-import com.liferay.portal.kernel.util.StreamUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
@@ -73,6 +72,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -321,37 +324,6 @@ public class BaseDeployer implements AutoDeployer, Deployer {
 
 		DeployUtil.copyDependencyXml(
 			fileName, targetDir, fileName, filterMap, overwrite);
-	}
-
-	public void copyDtds(File srcFile, PluginPackage pluginPackage)
-		throws Exception {
-
-		File portalLog4jXml = new File(
-			srcFile.getAbsolutePath() +
-				"/WEB-INF/classes/META-INF/portal-log4j.xml");
-
-		if (!portalLog4jXml.exists()) {
-			return;
-		}
-
-		InputStream is = null;
-
-		try {
-			Class<?> clazz = getClass();
-
-			ClassLoader classLoader = clazz.getClassLoader();
-
-			is = classLoader.getResourceAsStream("META-INF/log4j.dtd");
-
-			File file = new File(
-				srcFile.getAbsolutePath() +
-					"/WEB-INF/classes/META-INF/log4j.dtd");
-
-			FileUtil.write(file, is);
-		}
-		finally {
-			StreamUtil.cleanUp(is);
-		}
 	}
 
 	@Override
@@ -666,7 +638,6 @@ public class BaseDeployer implements AutoDeployer, Deployer {
 
 		processPluginPackageProperties(srcFile, displayName, pluginPackage);
 
-		copyDtds(srcFile, pluginPackage);
 		copyJars(srcFile, pluginPackage);
 		copyProperties(srcFile, pluginPackage);
 		copyTlds(srcFile, pluginPackage);
@@ -775,9 +746,11 @@ public class BaseDeployer implements AutoDeployer, Deployer {
 		}
 
 		if (!unpackWar) {
-			File tempDir = new File(
-				SystemProperties.get(SystemProperties.TMP_DIR) +
-					File.separator + Time.getTimestamp());
+			Path tempDirPath = Files.createTempDirectory(
+				Paths.get(SystemProperties.get(SystemProperties.TMP_DIR)),
+				null);
+
+			File tempDir = tempDirPath.toFile();
 
 			excludes += "/WEB-INF/web.xml";
 
@@ -1072,9 +1045,10 @@ public class BaseDeployer implements AutoDeployer, Deployer {
 			return false;
 		}
 
-		File tempDir = new File(
-			SystemProperties.get(SystemProperties.TMP_DIR) + File.separator +
-				Time.getTimestamp());
+		Path tempDirPath = Files.createTempDirectory(
+			Paths.get(SystemProperties.get(SystemProperties.TMP_DIR)), null);
+
+		File tempDir = tempDirPath.toFile();
 
 		ExpandTask.expand(srcFile, tempDir);
 
@@ -1803,17 +1777,22 @@ public class BaseDeployer implements AutoDeployer, Deployer {
 				_log.info("Process output: " + line);
 			}
 
-			int exitValue = process.exitValue();
+			try {
+				int exitValue = process.exitValue();
 
-			if (exitValue == 0) {
-				_log.info(
-					"Successfully executed command with an exit value of " +
-						exitValue);
+				if (exitValue == 0) {
+					_log.info(
+						"Successfully executed command with an exit value of " +
+							exitValue);
+				}
+				else {
+					_log.info(
+						"Unsuccessfully executed command with an exit value " +
+							"of " + exitValue);
+				}
 			}
-			else {
-				_log.info(
-					"Unsuccessfully executed command with an exit value of " +
-						exitValue);
+			catch (IllegalThreadStateException itse) {
+				_log.info("Process did not terminate");
 			}
 		}
 

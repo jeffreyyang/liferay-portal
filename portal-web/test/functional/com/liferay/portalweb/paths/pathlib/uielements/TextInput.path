@@ -9,11 +9,6 @@
 </thead>
 <tbody>
 <tr>
-	<td>AIM</td>
-	<td>//div[label[contains(.,'AIM')]]//input[@type='text']</td>
-	<td></td>
-</tr>
-<tr>
 	<td>ANSWER</td>
 	<td>//div[label[contains(.,'Answer')]]/input[@type='text']</td>
 	<td></td>
@@ -45,12 +40,12 @@
 </tr>
 <tr>
 	<td>CUSTOM_FIELD</td>
-	<td>//input[contains(@name,'ExpandoAttribute')] | //textarea[contains(@name,'ExpandoAttribute')]</td>
+	<td>//input[@type='text' and contains(@name,'ExpandoAttribute')] | //textarea[contains(@name,'ExpandoAttribute')]</td>
 	<td></td>
 </tr>
 <tr>
 	<td>DATA_DEFINITION</td>
-	<td>//div[label[contains(.,'Data Definition')]]//input[@type='text']</td>
+	<td>//div[label[contains(.,'Data Definition')]]/input[@type='text']</td>
 	<td></td>
 </tr>
 <tr>
@@ -64,23 +59,38 @@
 	<td></td>
 </tr>
 <tr>
+	<td>DISPLAY_DATE_DAY</td>
+	<td>//input[contains(@id,'displayDateDay')]</td>
+	<td></td>
+</tr>
+<tr>
 	<td>DISPLAY_DATE_HOUR</td>
-	<td>//input[@id='_33_displayDateHour']</td>
+	<td>//input[contains(@id,'displayDateHour')]</td>
 	<td></td>
 </tr>
 <tr>
 	<td>DISPLAY_DATE_MINUTE</td>
-	<td>//input[@id='_33_displayDateMinute']</td>
+	<td>//input[contains(@id,'displayDateMinute')]</td>
 	<td></td>
 </tr>
 <tr>
 	<td>DISPLAY_DATE_MERIDIAN</td>
-	<td>//input[@id='_33_displayDateAmPm']</td>
+	<td>//input[contains(@id,'displayDateAmPm')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>DISPLAY_DATE_MONTH</td>
+	<td>//input[contains(@id,'displayDateMonth')]</td>
 	<td></td>
 </tr>
 <tr>
 	<td>DISPLAY_DATE_TIME</td>
 	<td>//input[contains(@id,'displayDateTime')]</td>
+	<td></td>
+</tr>
+<tr>
+ 	<td>DISPLAY_DATE_YEAR</td>
+	<td>//input[contains(@id,'displayDateYear')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -90,7 +100,7 @@
 </tr>
 <tr>
 	<td>EMAIL_ADDRESS</td>
-	<td>//div[label[contains(.,'Email Address')]]/input[@type='text']</td>
+	<td>//div[label[contains(.,'Email Address')]]/input[@type='text'] | //div[label[contains(.,'Dirección de correo')]]/input[@type='text'] | //div[label[contains(.,'メールアドレス')]]/input[@type='text'] | //div[label[contains(.,'邮箱地址')]]/input[@type='text'] | //div[contains(.,'E-Mail-Adresse')]/input[@type='text']</td>
 	<td></td>
 </tr>
 <tr>
@@ -139,18 +149,23 @@
 	<td></td>
 </tr>
 <tr>
+	<td>FRIENDLY_URL</td>
+	<td>//input[contains(@id,'friendlyURL')]</td>
+	<td></td>
+</tr>
+<tr>
 	<td>FROM</td>
 	<td>//div[label[contains(.,'From')]]//input[@type='number']</td>
 	<td></td>
 </tr>
 <tr>
 	<td>GOOGLE_ANALYTICS_ID</td>
-	<td>//input[contains(@id,'_165_googleAnalyticsId')]</td>
+	<td>//input[contains(@id,'googleAnalyticsId')]</td>
 	<td></td>
 </tr>
 <tr>
-	<td>ICQ</td>
-	<td>//div[label[contains(.,'ICQ')]]//input[@type='text']</td>
+	<td>IMAGE_URL</td>
+	<td>//div[label[contains(.,'Image URL')]]//input[@type='text']</td>
 	<td></td>
 </tr>
 <tr>
@@ -184,8 +199,13 @@
 	<td></td>
 </tr>
 <tr>
+	<td>GOOGLE_APPS_API_KEY</td>
+	<td>//div[label[contains(.,'Google Apps API Key')]]/input[@type='text']</td>
+	<td></td>
+</tr>
+<tr>
 	<td>GOOGLE_CLIENT_ID</td>
-	<td>//input[contains(@id,'google-client-id')]</td>
+	<td>//div[label[contains(.,'Google Client ID')]]/input[@type='text'] | //input[contains(@id,'google-client-id')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -259,11 +279,6 @@
 	<td></td>
 </tr>
 <tr>
-	<td>MYSPACE</td>
-	<td>//div[label[contains(.,'MySpace')]]//input[@type='text']</td>
-	<td></td>
-</tr>
-<tr>
 	<td>NAME</td>
 	<td>//div[label[contains(.,'Name')]]//input[@type='text'] | //input[contains(@id,'name')]</td>
 	<td></td>
@@ -300,7 +315,7 @@
 </tr>
 <tr>
 	<td>PASSWORD</td>
-	<td>//div[label[contains(.,'Password')]]/input</td>
+	<td>//div[label[contains(.,'Password')]]/input | //div[label[contains(.,'Contraseña')]]/input | //div[label[contains(.,'パスワード')]]/input | //div[label[contains(.,'密码')]]/input | //div[contains(.,'Kennwort')]//input[@type='password']</td>
 	<td></td>
 </tr>
 <tr>
@@ -310,12 +325,12 @@
 </tr>
 <tr>
 	<td>POLL_CHOICE_A</td>
-	<td>//input[contains(.,'choiceDescriptiona')]</td>
+	<td>//input[contains(@id,'choiceDescriptiona')]</td>
 	<td></td>
 </tr>
 <tr>
 	<td>POLL_CHOICE_B</td>
-	<td>//input[contains(.,'choiceDescriptionb')]</td>
+	<td>//input[contains(@id,'choiceDescriptionb')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -326,6 +341,16 @@
 <tr>
 	<td>POSTAL_CODE</td>
 	<td>//div[label[contains(.,'Postal Code')]]//input[@type='text']</td>
+	<td></td>
+</tr>
+<tr>
+	<td>PRIVATE_VIRTUAL_HOST_URL</td>
+	<td>//input[contains(@id,'privateVirtualHost')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>PUBLIC_VIRTUAL_HOST_URL</td>
+	<td>//input[contains(@id,'publicVirtualHost')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -386,6 +411,11 @@
 <tr>
 	<td>STREET_1</td>
 	<td>//div[label[contains(.,'Street 1')]]//input[@type='text']</td>
+	<td></td>
+</tr>
+<tr>
+	<td>STRUCTURE</td>
+	<td>//div[label[contains(.,'Structure')]]/input[@type='text']</td>
 	<td></td>
 </tr>
 <tr>
@@ -454,22 +484,12 @@
 	<td></td>
 </tr>
 <tr>
-	<td>WINDOWS_LIVE_MESSENGER</td>
-	<td>//div[label[contains(.,'Windows Live Messenger')]]//input[@type='text']</td>
-	<td></td>
-</tr>
-<tr>
 	<td>YEARS</td>
 	<td>//div[label[contains(.,'Years')]]//input[@type='text']</td>
 	<td></td>
 </tr>
 <tr>
 	<td>YIM</td>
-	<td>//div[label[contains(.,'YIM')]]//input[@type='text']</td>
-	<td></td>
-</tr>
-<tr>
-	<td>YM</td>
 	<td>//div[label[contains(.,'YIM')]]//input[@type='text']</td>
 	<td></td>
 </tr>

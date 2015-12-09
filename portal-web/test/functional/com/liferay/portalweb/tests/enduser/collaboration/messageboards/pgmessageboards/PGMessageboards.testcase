@@ -5,6 +5,15 @@
 	<var name="portletName" value="Message Boards" />
 
 	<set-up>
+		<var method="TestPropsUtil#get('test.portal.instance')" name="testPortalInstance" />
+
+		<if>
+			<equals arg1="${testPortalInstance}" arg2="true" />
+			<then>
+				<execute macro="SignIn#signInPortalInstanceSetUp" />
+			</then>
+		</if>
+
 		<execute macro="User#firstLoginPG" />
 
 		<execute macro="Page#addPG">
@@ -18,19 +27,33 @@
 		<execute macro="Portlet#addPG">
 			<var name="portletName" value="${portletName}" />
 		</execute>
+
+		<execute macro="Page#gotoPG">
+			<var name="pageName" value="Message Boards Page" />
+		</execute>
 	</set-up>
 
 	<tear-down>
-		<execute macro="MessageboardsCategory#tearDownCP" />
+		<var method="TestPropsUtil#get('test.portal.instance')" name="testPortalInstance" />
 
-		<execute macro="MessageboardsThread#tearDownCP" />
+		<if>
+			<equals arg1="${testPortalInstance}" arg2="true" />
+			<then>
+				<execute macro="PortalInstances#tearDownCP" />
+			</then>
+			<else>
+				<execute macro="MessageboardsCategory#tearDownCP" />
 
-		<execute macro="Page#tearDownPG" />
+				<execute macro="MessageboardsThread#tearDownCP" />
 
-		<execute macro="ServerAdministration#tearDownDMFileUploadSettings" />
+				<execute macro="Page#tearDownPG" />
+
+				<execute macro="ServerAdministration#tearDownDMFileUploadSettings" />
+			</else>
+		</if>
 	</tear-down>
 
-	<command name="AddMBCategories" priority="4">
+	<command name="AddMBCategories" priority="5">
 		<var name="categoryNameList" value="MB Category1 Name,MB Category2 Name,MB Category3 Name" />
 
 		<for list="${categoryNameList}" param="categoryName" >
@@ -48,7 +71,7 @@
 		</for>
 	</command>
 
-	<command name="AddMBCategory" priority="4">
+	<command name="AddMBCategory" priority="5">
 		<var name="categoryName" value="MB Category Name" />
 
 		<execute macro="Page#gotoPG">
@@ -330,7 +353,7 @@
 		</execute>
 	</command>
 
-	<command name="AddMBThread" priority="4">
+	<command name="AddMBThread" priority="5">
 		<var name="threadBody" value="MB Thread Message Body" />
 		<var name="threadSubject" value="MB Thread Message Subject" />
 
@@ -457,7 +480,7 @@
 		</execute>
 	</command>
 
-	<command name="AddMBThreadReply" priority="4">
+	<command name="AddMBThreadReply" priority="5">
 		<var name="threadBody" value="MB Thread Message Body" />
 		<var name="threadReplyBody" value="MB Thread Reply Body" />
 		<var name="threadSubject" value="MB Thread Message Subject" />
@@ -498,6 +521,10 @@
 			<var name="pageName" value="Message Boards Page" />
 		</execute>
 
+		<execute macro="ProductMenu#gotoControlPanelSystem">
+			<var name="portlet" value="Server Administration" />
+		</execute>
+
 		<execute macro="ServerAdministration#configureFileUploadOverallMaximumFileSize">
 			<var name="maxFileSize" value="10000" />
 		</execute>
@@ -528,7 +555,9 @@
 			</execute>
 		</for>
 
-		<execute macro="MessageboardsCategory#tearDownCP" />
+		<execute macro="MessageboardsCategory#tearDownCP">
+			<var name="assetType" value="3 items" />
+		</execute>
 
 		<execute macro="Page#gotoPG">
 			<var name="pageName" value="${pageName}" />
@@ -600,7 +629,7 @@
 		</execute>
 	</command>
 
-	<command name="EditMBThreadBody" priority="4">
+	<command name="EditMBThreadBody" priority="5">
 		<execute macro="Page#gotoPG">
 			<var name="pageName" value="${pageName}" />
 		</execute>
@@ -632,7 +661,7 @@
 		</execute>
 	</command>
 
-	<command name="EditMBThreadSubject" priority="4">
+	<command name="EditMBThreadSubject" priority="5">
 		<execute macro="Page#gotoPG">
 			<var name="pageName" value="${pageName}" />
 		</execute>
@@ -767,7 +796,7 @@
 		</execute>
 	</command>
 
-	<command name="MoveMBCategory1ThreadWithExplanationPostToCategory2" priority="4">
+	<command name="MoveMBCategory1ThreadWithExplanationPostToCategory2" priority="3">
 		<var name="categoryName1" value="MB Category1 Name" />
 		<var name="categoryName2" value="MB Category2 Name" />
 		<var name="explanationBody" value="MB Explanation Post Body" />
@@ -844,17 +873,17 @@
 	</command>
 
 	<command name="ViewDefaultEmailFromConfigurationAndSubscriptionEmail" priority="4">
-		<execute macro="Page#gotoCP">
-			<var name="portletName" value="Server Administration" />
+		<execute macro="ProductMenu#gotoControlPanelSystem">
+			<var name="portlet" value="Server Administration" />
 		</execute>
 
 		<execute macro="ServerAdministration#configureMailServerSettings">
-			<var name="userName" property-value="email.address.1" />
-			<var name="userPassword" property-value="email.password.1" />
+			<var method="TestPropsUtil#get('email.address.1')" name="userName" />
+			<var method="TestPropsUtil#get('email.password.1')" name="userPassword" />
 		</execute>
 
-		<execute macro="Page#gotoCP">
-			<var name="portletName" value="Portal Instances" />
+		<execute macro="ProductMenu#gotoControlPanelSystem">
+			<var name="portlet" value="Portal Instances" />
 		</execute>
 
 		<execute macro="PortalInstances#editCP">
@@ -867,7 +896,7 @@
 		</execute>
 
 		<execute macro="User#addCP">
-			<var name="userEmailAddress" property-value="email.address.2" />
+			<var method="TestPropsUtil#get('email.address.2')" name="userEmailAddress" />
 			<var name="userFirstName" value="userfn" />
 			<var name="userLastName" value="userln" />
 			<var name="userScreenName" value="usersn" />
@@ -878,7 +907,7 @@
 		</execute>
 
 		<execute macro="User#editPasswordCP">
-			<var name="userEmailAddress" property-value="email.address.2" />
+			<var method="TestPropsUtil#get('email.address.2')" name="userEmailAddress" />
 			<var name="userScreenName" value="usersn" />
 		</execute>
 
@@ -893,10 +922,6 @@
 
 		<execute macro="MessageboardsPortlet#viewDefaultEmailFromCP" />
 
-		<execute macro="MessageboardsPortlet#configureMessageEmailFromCP">
-			<var name="emailFromAddress" property-value="email.address.1" />
-		</execute>
-
 		<execute macro="Page#gotoPG">
 			<var name="pageName" value="${pageName}" />
 		</execute>
@@ -909,7 +934,7 @@
 
 		<execute macro="User#loginPG">
 			<var name="password" value="test" />
-			<var name="userEmailAddress" property-value="email.address.2" />
+			<var method="TestPropsUtil#get('email.address.2')" name="userEmailAddress" />
 		</execute>
 
 		<execute macro="Page#gotoPG">
@@ -945,8 +970,8 @@
 		<execute function="Pause" locator1="30000" />
 
 		<execute macro="Gmail#login">
-			<var name="userEmailAddress" property-value="email.address.2" />
-			<var name="userPassword" property-value="email.password.2" />
+			<var method="TestPropsUtil#get('email.address.2')" name="userEmailAddress" />
+			<var method="TestPropsUtil#get('email.password.2')" name="userPassword" />
 		</execute>
 
 		<execute macro="Gmail#gotoHtmlMode" />
@@ -962,8 +987,8 @@
 		</execute>
 
 		<execute macro="Gmail#tearDown">
-			<var name="userEmailAddress" property-value="email.address.2" />
-			<var name="userPassword" property-value="email.password.2" />
+			<var method="TestPropsUtil#get('email.address.2')" name="userEmailAddress" />
+			<var method="TestPropsUtil#get('email.password.2')" name="userPassword" />
 		</execute>
 
 		<execute function="Open" locator1="http://localhost:8080" />
@@ -972,17 +997,17 @@
 	<command name="ViewMBThreadAndReplyThreadInGmail" priority="4">
 		<property name="custom.properties" value="pop.server.notifications.enabled=true{line.separator}pop.server.subdomain=" />
 
-		<execute macro="Page#gotoCP">
-			<var name="portletName" value="Server Administration" />
+		<execute macro="ProductMenu#gotoControlPanelSystem">
+			<var name="portlet" value="Server Administration" />
 		</execute>
 
 		<execute macro="ServerAdministration#configureMailServerSettings">
-			<var name="userName" property-value="email.address.1" />
-			<var name="userPassword" property-value="email.password.1" />
+			<var method="TestPropsUtil#get('email.address.1')" name="userName" />
+			<var method="TestPropsUtil#get('email.password.1')" name="userPassword" />
 		</execute>
 
-		<execute macro="Page#gotoCP">
-			<var name="portletName" value="Portal Instances" />
+		<execute macro="ProductMenu#gotoControlPanelSystem">
+			<var name="portlet" value="Portal Instances" />
 		</execute>
 
 		<execute macro="PortalInstances#editCP">
@@ -995,7 +1020,7 @@
 		</execute>
 
 		<execute macro="User#addCP">
-			<var name="userEmailAddress" property-value="email.address.2" />
+			<var method="TestPropsUtil#get('email.address.2')" name="userEmailAddress" />
 			<var name="userFirstName" value="userfn" />
 			<var name="userLastName" value="userln" />
 			<var name="userScreenName" value="usersn" />
@@ -1006,7 +1031,7 @@
 		</execute>
 
 		<execute macro="User#editPasswordCP">
-			<var name="userEmailAddress" property-value="email.address.2" />
+			<var method="TestPropsUtil#get('email.address.2')" name="userEmailAddress" />
 			<var name="userScreenName" value="usersn" />
 		</execute>
 
@@ -1020,7 +1045,7 @@
 		</execute>
 
 		<execute macro="MessageboardsPortlet#configureMessageEmailFromCP">
-			<var name="emailFromAddress" property-value="email.address.1" />
+			<var method="TestPropsUtil#get('email.address.1')" name="emailFromAddress" />
 		</execute>
 
 		<execute macro="Page#gotoPG">
@@ -1035,7 +1060,7 @@
 
 		<execute macro="User#loginPG">
 			<var name="password" value="test" />
-			<var name="userEmailAddress" property-value="email.address.2" />
+			<var method="TestPropsUtil#get('email.address.2')" name="userEmailAddress" />
 		</execute>
 
 		<execute macro="Page#gotoPG">
@@ -1071,14 +1096,14 @@
 		<execute function="Pause" locator1="30000" />
 
 		<execute macro="Gmail#login">
-			<var name="userEmailAddress" property-value="email.address.2" />
-			<var name="userPassword" property-value="email.password.2" />
+			<var method="TestPropsUtil#get('email.address.2')" name="userEmailAddress" />
+			<var method="TestPropsUtil#get('email.password.2')" name="userPassword" />
 		</execute>
 
 		<execute macro="Gmail#gotoHtmlMode" />
 
 		<execute macro="Gmail#viewMail">
-			<var name="emailFromUserName" value="Joe Bloggs" />
+			<var name="emailFromUserName" value="Test Test" />
 			<var name="gmailAssetType" value="MB Category Name New Message" />
 			<var name="gmailMailTableMessageTitle" value="MB Thread Message Subject" />
 			<var name="gmailMessageBody" value="MB Thread Message Body Liferay Message Boards" />
@@ -1123,8 +1148,8 @@
 		<execute function="AssertTextEquals" locator1="MessageBoardsThread#MESSAGE_RATING_2" value1="0 (0 Votes)" />
 
 		<execute macro="Gmail#tearDown">
-			<var name="userEmailAddress" property-value="email.address.2" />
-			<var name="userPassword" property-value="email.password.2" />
+			<var method="TestPropsUtil#get('email.address.2')" name="userEmailAddress" />
+			<var method="TestPropsUtil#get('email.password.2')" name="userPassword" />
 		</execute>
 
 		<execute function="Open" locator1="http://localhost:8080" />

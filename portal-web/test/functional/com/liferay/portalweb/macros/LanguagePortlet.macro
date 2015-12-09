@@ -2,8 +2,8 @@
 	<command name="configureViewAvailableLanguages">
 		<execute function="SelectFrame" locator1="IFrame#CONFIGURATION" />
 
-		<for list="${currentLanguages}" param="currentLanguage">
-			<execute function="AssertTextEquals#assertPartialText" locator1="LanguageConfiguration#LANGUAGES_CURRENT" value1="${currentLanguage}" />
+		<for list="${availableLanguages}" param="availableLanguage">
+			<execute function="AssertTextEquals#assertPartialText" locator1="LanguageConfiguration#LANGUAGES_AVAILABLE" value1="${availableLanguage}" />
 		</for>
 
 		<execute function="SelectFrame" value1="relative=top" />
@@ -12,8 +12,8 @@
 	<command name="configureViewCurrentLanguages">
 		<execute function="SelectFrame" locator1="IFrame#CONFIGURATION" />
 
-		<for list="${availableLanguages}" param="availableLanguage">
-			<execute function="AssertTextEquals#assertPartialText" locator1="LanguageConfiguration#LANGUAGES_AVAILABLE" value1="${availableLanguage}" />
+		<for list="${currentLanguages}" param="currentLanguage">
+			<execute function="AssertTextEquals#assertPartialText" locator1="LanguageConfiguration#LANGUAGES_CURRENT" value1="${currentLanguage}" />
 		</for>
 
 		<execute function="SelectFrame" value1="relative=top" />
@@ -75,6 +75,12 @@
 				</then>
 			</elseif>
 			<elseif>
+				<equals arg1="${language}" arg2="Finnish (Finland)" />
+				<then>
+					<execute function="Click" locator1="Language#LANGUAGE_MENU_FINNISH" />
+				</then>
+			</elseif>
+			<elseif>
 				<equals arg1="${language}" arg2="German (Germany)" />
 				<then>
 					<execute function="Click" locator1="Language#LANGUAGE_MENU_GERMAN" />
@@ -112,6 +118,40 @@
 
 	<command name="tearDownLanguagePG">
 		<execute function="Click" locator1="Language#LANGUAGE_MENU_ENGLISH" />
+	</command>
+
+	<command name="toggleDisplayTemplate">
+		<execute function="SelectFrame" locator1="IFrame#CONFIGURATION" />
+
+		<execute function="Select" locator1="LanguageConfiguration#DISPLAY_TEMPLATE_SELECT" value1="${displayStyle}" />
+
+		<execute function="AssertClick" locator1="Button#SAVE" value1="Save" />
+
+		<execute function="SelectFrame" value1="relative=top" />
+	</command>
+
+	<command name="viewDisplayTemplateIconMenu">
+		<var name="key_language" value="${language}" />
+
+		<execute function="Click" locator1="Language#ICON_MENU_DROPDOWN" />
+
+		<execute function="AssertTextEquals" locator1="Language#ICON_MENU_LANGUAGE" value1="${language}" />
+	</command>
+
+	<command name="viewDisplayTemplateLongText">
+		<var name="key_language" value="${language}" />
+
+		<execute function="AssertTextEquals#assertPartialText" locator1="Language#LONG_TEXT_LINK" value1="${language}" />
+	</command>
+
+	<command name="viewDisplayTemplateSelectBox">
+		<execute function="AssertTextEquals#assertPartialText" locator1="Language#LANGUAGE_MENU_SELECT" value1="${language}" />
+	</command>
+
+	<command name="viewDisplayTemplateShortText">
+		<var name="key_languageKey" value="${languageKey}" />
+
+		<execute function="AssertTextEquals#assertPartialText" locator1="Language#SHORT_TEXT_LINK" value1="${languageKey}" />
 	</command>
 
 	<command name="viewLanguagesAbsent">

@@ -144,12 +144,12 @@ private String _getMessage(String className, Map<String, PortletURL> addPortletU
 }
 
 private String _getURL(long groupId, long plid, PortletURL addPortletURL, String portletId, String message, boolean addDisplayPageParameter, Layout layout, PageContext pageContext, PortletResponse portletResponse) {
+	addPortletURL.setParameter("hideDefaultSuccessMessage", Boolean.TRUE.toString());
 	addPortletURL.setParameter("groupId", String.valueOf(groupId));
 	addPortletURL.setParameter("showHeader", Boolean.FALSE.toString());
 
 	String addPortletURLString = addPortletURL.toString();
 
-	addPortletURLString = HttpUtil.addParameter(addPortletURLString, "doAsGroupId", groupId);
 	addPortletURLString = HttpUtil.addParameter(addPortletURLString, "refererPlid", plid);
 
 	String namespace = PortalUtil.getPortletNamespace(portletId);

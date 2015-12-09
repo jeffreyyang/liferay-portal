@@ -9,6 +9,11 @@
 </thead>
 <tbody>
 <tr>
+	<td>ACTIONS</td>
+	<td>//div[contains(@class,'navbar-default')]//a/span[contains(.,'Actions')]</td>
+	<td></td>
+</tr>
+<tr>
 	<td>ADD</td>
 	<td>//div[contains(@class,'navbar-default')]//a/span[contains(.,'Add')]</td>
 	<td></td>
@@ -54,8 +59,23 @@
 	<td></td>
 </tr>
 <tr>
+	<td>ORGANIZATIONS</td>
+	<td>//ul[contains(@class,'nav') and contains(@class,'navbar-nav')]/li/a[contains(.,'Organizations')]</td>
+	<td></td>
+</tr>
+<tr>
 	<td>SEARCH_TOGGLE_ADVANCED</td>
 	<td>//a[contains(@id,'searchtoggleAdvanced')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>USERS</td>
+	<td>//ul[contains(@class,'nav') and contains(@class,'navbar-nav')]/li/a[contains(.,'Users')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>USER_GROUPS</td>
+	<td>//ul[contains(@class,'nav') and contains(@class,'navbar-nav')]/li/a[contains(.,'User Groups')]</td>
 	<td></td>
 </tr>
 </tbody>

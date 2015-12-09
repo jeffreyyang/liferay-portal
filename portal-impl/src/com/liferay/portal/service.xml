@@ -58,7 +58,6 @@
 		<column name="typeId" type="long" />
 		<column name="mailing" type="boolean" />
 		<column name="primary" type="boolean" />
-		<column name="lastPublishDate" type="Date" />
 
 		<!-- Order -->
 
@@ -111,6 +110,7 @@
 
 		<!-- Audit fields -->
 
+		<column name="companyId" type="long" />
 		<column name="userId" type="long" />
 
 		<!-- Other fields -->
@@ -232,15 +232,10 @@
 		<column name="male" type="boolean" />
 		<column name="birthday" type="Date" />
 		<column name="smsSn" type="String" />
-		<column name="aimSn" type="String" />
 		<column name="facebookSn" type="String" />
-		<column name="icqSn" type="String" />
 		<column name="jabberSn" type="String" />
-		<column name="msnSn" type="String" />
-		<column name="mySpaceSn" type="String" />
 		<column name="skypeSn" type="String" />
 		<column name="twitterSn" type="String" />
-		<column name="ymSn" type="String" />
 		<column name="employeeStatusId" type="String" />
 		<column name="employeeNumber" type="String" />
 		<column name="jobTitle" type="String" />
@@ -327,7 +322,6 @@
 		<column name="address" type="String" />
 		<column name="typeId" type="long" />
 		<column name="primary" type="boolean" />
-		<column name="lastPublishDate" type="Date" />
 
 		<!-- Order -->
 
@@ -437,6 +431,10 @@
 			<finder-column name="companyId" />
 			<finder-column name="site" />
 		</finder>
+		<finder name="C_A" return-type="Collection">
+			<finder-column name="companyId" />
+			<finder-column name="active" />
+		</finder>
 		<finder name="T_A" return-type="Collection">
 			<finder-column name="type" />
 			<finder-column name="active" />
@@ -518,8 +516,6 @@
 		<reference package-path="com.liferay.portlet.social" entity="SocialActivity" />
 		<reference package-path="com.liferay.portlet.social" entity="SocialActivitySetting" />
 		<reference package-path="com.liferay.portlet.social" entity="SocialRequest" />
-		<reference package-path="com.liferay.portlet.softwarecatalog" entity="SCFrameworkVersion" />
-		<reference package-path="com.liferay.portlet.softwarecatalog" entity="SCProductEntry" />
 		<reference package-path="com.liferay.portlet.trash" entity="TrashEntry" />
 	</entity>
 	<entity name="Image" local-service="true" remote-service="true">
@@ -530,6 +526,7 @@
 
 		<!-- Audit fields -->
 
+		<column name="companyId" type="long" />
 		<column name="modifiedDate" type="Date" />
 
 		<!-- Other fields -->
@@ -806,7 +803,6 @@
 		<column name="description" type="String" localized="true" />
 		<column name="settings" type="String" />
 		<column name="active" type="boolean" />
-		<column name="lastPublishDate" type="Date" />
 
 		<!-- Finder methods -->
 
@@ -1079,7 +1075,6 @@
 		<column name="description" type="String" localized="true" />
 		<column name="settings" type="String" />
 		<column name="active" type="boolean" />
-		<column name="lastPublishDate" type="Date" />
 
 		<!-- Finder methods -->
 
@@ -1220,7 +1215,6 @@
 		<column name="statusId" type="long" />
 		<column name="comments" type="String" />
 		<column name="logoId" type="long" />
-		<column name="lastPublishDate" type="Date" />
 
 		<!-- Relationships -->
 
@@ -1289,6 +1283,10 @@
 		<column name="groupId" type="long" primary="true" />
 		<column name="roleId" type="long" primary="true" />
 
+		<!-- Audit fields -->
+
+		<column name="companyId" type="long" />
+
 		<!-- Finder methods -->
 
 		<finder name="GroupId" return-type="Collection">
@@ -1303,6 +1301,10 @@
 		<!-- PK fields -->
 
 		<column name="orgLaborId" type="long" primary="true" />
+
+		<!-- Audit fields -->
+
+		<column name="companyId" type="long" />
 
 		<!-- Other fields -->
 
@@ -1383,7 +1385,6 @@
 		<column name="requireUnlock" type="boolean" />
 		<column name="resetFailureCount" type="long" />
 		<column name="resetTicketMaxAge" type="long" />
-		<column name="lastPublishDate" type="Date" />
 
 		<!-- Finder methods -->
 
@@ -1411,6 +1412,10 @@
 		<!-- PK fields -->
 
 		<column name="passwordPolicyRelId" type="long" primary="true" />
+
+		<!-- Audit fields -->
+
+		<column name="companyId" type="long" />
 
 		<!-- Other fields -->
 
@@ -1440,6 +1445,7 @@
 
 		<!-- Audit fields -->
 
+		<column name="companyId" type="long" />
 		<column name="userId" type="long" />
 		<column name="createDate" type="Date" />
 
@@ -1497,7 +1503,6 @@
 		<column name="extension" type="String" />
 		<column name="typeId" type="long" />
 		<column name="primary" type="boolean" />
-		<column name="lastPublishDate" type="Date" />
 
 		<!-- Order -->
 
@@ -1682,6 +1687,10 @@
 		<!-- PK fields -->
 
 		<column name="portletPreferencesId" type="long" primary="true" />
+
+		<!-- Audit fields -->
+
+		<column name="companyId" type="long" />
 
 		<!-- Other fields -->
 
@@ -1988,6 +1997,10 @@
 
 		<column name="resourceBlockPermissionId" type="long" primary="true" />
 
+		<!-- Audit fields -->
+
+		<column name="companyId" type="long" />
+
 		<!-- Other fields -->
 
 		<column name="resourceBlockId" type="long" />
@@ -2135,7 +2148,6 @@
 		<column name="description" type="String" localized="true" />
 		<column name="type" type="int" />
 		<column name="subtype" type="String" />
-		<column name="lastPublishDate" type="Date" />
 
 		<!-- Relationships -->
 
@@ -2490,7 +2502,6 @@
 		<column name="lockoutDate" type="Date" />
 		<column name="agreedToTermsOfUse" type="boolean" />
 		<column name="emailAddressVerified" type="boolean" />
-		<column name="lastPublishDate" type="Date" />
 		<column name="status" type="int" />
 
 		<!-- Relationships -->
@@ -2668,6 +2679,10 @@
 		<column name="groupId" type="long" primary="true" />
 		<column name="roleId" type="long" primary="true" />
 
+		<!-- Audit fields -->
+
+		<column name="companyId" type="long" />
+
 		<!-- Finder methods -->
 
 		<finder name="UserGroupId" return-type="Collection">
@@ -2700,6 +2715,10 @@
 		<column name="userId" type="long" primary="true" />
 		<column name="groupId" type="long" primary="true" accessor="true" />
 		<column name="roleId" type="long" primary="true" accessor="true" />
+
+		<!-- Audit fields -->
+
+		<column name="companyId" type="long" />
 
 		<!-- Finder methods -->
 
@@ -2735,6 +2754,7 @@
 
 		<!-- Audit fields -->
 
+		<column name="companyId" type="long" />
 		<column name="userId" type="long" />
 
 		<!-- Other fields -->
@@ -2826,6 +2846,9 @@
 		<finder name="UserId" return-type="Collection">
 			<finder-column name="userId" />
 		</finder>
+		<finder name="Type" return-type="Collection">
+			<finder-column name="type" />
+		</finder>
 		<finder name="U_DT" return-type="Collection">
 			<finder-column name="userId" />
 			<finder-column name="deliveryType" />
@@ -2857,6 +2880,12 @@
 			<finder-column name="userId" />
 			<finder-column name="actionRequired" />
 			<finder-column name="archived" />
+		</finder>
+		<finder name="U_T_DT_D" return-type="Collection">
+			<finder-column name="userId" />
+			<finder-column name="type" />
+			<finder-column name="deliveryType" />
+			<finder-column name="delivered" />
 		</finder>
 		<finder name="U_DT_D_A" return-type="Collection">
 			<finder-column name="userId" />
@@ -2915,6 +2944,10 @@
 		<!-- PK fields -->
 
 		<column name="userTrackerPathId" type="long" primary="true" />
+
+		<!-- Audit fields -->
+
+		<column name="companyId" type="long" />
 
 		<!-- Other fields -->
 
@@ -3206,6 +3239,7 @@
 		<exception>PasswordPolicyName</exception>
 		<exception>PendingBackgroundTask</exception>
 		<exception>PhoneNumber</exception>
+		<exception>PhoneNumberExtension</exception>
 		<exception>PortletActive</exception>
 		<exception>PortletDefaultPreferences</exception>
 		<exception>PortletId</exception>

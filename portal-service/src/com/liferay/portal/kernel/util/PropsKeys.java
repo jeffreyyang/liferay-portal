@@ -63,10 +63,6 @@ public interface PropsKeys {
 
 	public static final String ADMIN_SYNC_DEFAULT_ASSOCIATIONS = "admin.sync.default.associations";
 
-	public static final String AIM_LOGIN = "aim.login";
-
-	public static final String AIM_PASSWORD = "aim.password";
-
 	public static final String ANNOUNCEMENTS_EMAIL_BODY = "announcements.email.body";
 
 	public static final String ANNOUNCEMENTS_EMAIL_FROM_ADDRESS = "announcements.email.from.address";
@@ -859,12 +855,6 @@ public interface PropsKeys {
 
 	public static final String HTTP_HEADER_VERSION_VERBOSITY = "http.header.version.verbosity";
 
-	public static final String ICQ_JAR = "icq.jar";
-
-	public static final String ICQ_LOGIN = "icq.login";
-
-	public static final String ICQ_PASSWORD = "icq.password";
-
 	public static final String IFRAME_PASSWORD_PASSWORD_TOKEN_ROLE = "iframe.password.token.role";
 
 	public static final String IMAGE_AUTO_SCALE = "image.auto.scale";
@@ -890,6 +880,8 @@ public interface PropsKeys {
 	public static final String IMAGEMAGICK_GLOBAL_SEARCH_PATH = "imagemagick.global.search.path";
 
 	public static final String IMAGEMAGICK_RESOURCE_LIMIT = "imagemagick.resource.limit.";
+
+	public static final String INDEX_COMMIT_IMMEDIATELY = "index.commit.immediately";
 
 	public static final String INDEX_DATE_FORMAT_PATTERN = "index.date.format.pattern";
 
@@ -947,6 +939,8 @@ public interface PropsKeys {
 
 	public static final String INDEX_WITH_THREAD = "index.with.thread";
 
+	public static final String INDEXER_ENABLED = "indexer.enabled";
+
 	public static final String INTRABAND_IMPL = "intraband.impl";
 
 	public static final String INTRABAND_MAILBOX_REAPER_THREAD_ENABLED = "intraband.mailbox.reaper.thread.enabled";
@@ -998,6 +992,8 @@ public interface PropsKeys {
 	public static final String JAVASCRIPT_LOG_ENABLED = "javascript.log.enabled";
 
 	public static final String JAVASCRIPT_SINGLE_PAGE_APPLICATION_ENABLED = "javascript.single.page.application.enabled";
+
+	public static final String JAVASCRIPT_SINGLE_PAGE_APPLICATION_TIMEOUT = "javascript.single.page.application.timeout";
 
 	public static final String JDBC_DEFAULT_DRIVER_CLASS_NAME = "jdbc.default.driverClassName";
 
@@ -1147,106 +1143,6 @@ public interface PropsKeys {
 
 	public static final String LDAP_ATTRS_TRANSFORMER_IMPL = "ldap.attrs.transformer.impl";
 
-	public static final String LDAP_AUTH_ENABLED = "ldap.auth.enabled";
-
-	public static final String LDAP_AUTH_METHOD = "ldap.auth.method";
-
-	public static final String LDAP_AUTH_PASSWORD_ENCRYPTION_ALGORITHM = "ldap.auth.password.encryption.algorithm";
-
-	public static final String LDAP_AUTH_REQUIRED = "ldap.auth.required";
-
-	public static final String LDAP_AUTH_SEARCH_FILTER = "ldap.auth.search.filter";
-
-	public static final String LDAP_BASE_DN = "ldap.base.dn";
-
-	public static final String LDAP_BASE_PROVIDER_URL = "ldap.base.provider.url";
-
-	public static final String LDAP_CONNECTION_PROPERTY_PREFIX = "ldap.connection.";
-
-	public static final String LDAP_CONTACT_CUSTOM_MAPPINGS = "ldap.contact.custom.mappings";
-
-	public static final String LDAP_CONTACT_MAPPINGS = "ldap.contact.mappings";
-
-	public static final String LDAP_ERROR_PASSWORD_AGE = "ldap.error.password.age";
-
-	public static final String LDAP_ERROR_PASSWORD_EXPIRED = "ldap.error.password.expired";
-
-	public static final String LDAP_ERROR_PASSWORD_HISTORY = "ldap.error.password.history";
-
-	public static final String LDAP_ERROR_PASSWORD_NOT_CHANGEABLE = "ldap.error.password.not.changeable";
-
-	public static final String LDAP_ERROR_PASSWORD_SYNTAX = "ldap.error.password.syntax";
-
-	public static final String LDAP_ERROR_PASSWORD_TRIVIAL = "ldap.error.password.trivial";
-
-	public static final String LDAP_ERROR_USER_LOCKOUT = "ldap.error.user.lockout";
-
-	public static final String LDAP_EXPORT_ENABLED = "ldap.export.enabled";
-
-	public static final String LDAP_EXPORT_GROUP_ENABLED = "ldap.export.group.enabled";
-
-	public static final String LDAP_FACTORY_INITIAL = "ldap.factory.initial";
-
-	public static final String LDAP_GROUP_DEFAULT_OBJECT_CLASSES = "ldap.group.default.object.classes";
-
-	public static final String LDAP_GROUP_MAPPINGS = "ldap.group.mappings";
-
-	public static final String LDAP_GROUPS_DN = "ldap.groups.dn";
-
-	public static final String LDAP_IMPORT_CREATE_ROLE_PER_GROUP = "ldap.import.create.role.per.group";
-
-	public static final String LDAP_IMPORT_ENABLED = "ldap.import.enabled";
-
-	public static final String LDAP_IMPORT_GROUP_CACHE_ENABLED = "ldap.import.group.cache.enabled";
-
-	public static final String LDAP_IMPORT_GROUP_SEARCH_FILTER = "ldap.import.group.search.filter";
-
-	public static final String LDAP_IMPORT_GROUP_SEARCH_FILTER_ENABLED = "ldap.import.group.search.filter.enabled";
-
-	public static final String LDAP_IMPORT_INTERVAL = "ldap.import.interval";
-
-	public static final String LDAP_IMPORT_LOCK_EXPIRATION_TIME = "ldap.import.lock.expiration.time";
-
-	public static final String LDAP_IMPORT_METHOD = "ldap.import.method";
-
-	public static final String LDAP_IMPORT_ON_STARTUP = "ldap.import.on.startup";
-
-	public static final String LDAP_IMPORT_USER_PASSWORD_AUTOGENERATED = "ldap.import.user.password.autogenerated";
-
-	public static final String LDAP_IMPORT_USER_PASSWORD_DEFAULT = "ldap.import.user.password.default";
-
-	public static final String LDAP_IMPORT_USER_PASSWORD_ENABLED = "ldap.import.user.password.enabled";
-
-	public static final String LDAP_IMPORT_USER_SEARCH_FILTER = "ldap.import.user.search.filter";
-
-	public static final String LDAP_IMPORT_USER_SYNC_STRATEGY = "ldap.import.user.sync.strategy";
-
-	public static final String LDAP_PAGE_SIZE = "ldap.page.size";
-
-	public static final String LDAP_PASSWORD_POLICY_ENABLED = "ldap.password.policy.enabled";
-
-	public static final String LDAP_RANGE_SIZE = "ldap.range.size";
-
-	public static final String LDAP_REFERRAL = "ldap.referral";
-
-	public static final String LDAP_SECURITY_CREDENTIALS = "ldap.security.credentials";
-
-	public static final String LDAP_SECURITY_PRINCIPAL = "ldap.security.principal";
-
-	public static final String LDAP_SERVER_NAME = "ldap.server.name";
-
-	public static final String LDAP_USER_CUSTOM_MAPPINGS = "ldap.user.custom.mappings";
-
-	public static final String LDAP_USER_DEFAULT_OBJECT_CLASSES = "ldap.user.default.object.classes";
-
-	public static final String LDAP_USER_IGNORE_ATTRIBUTES = "ldap.user.ignore.attributes";
-
-	public static final String LDAP_USER_IMPL = "ldap.user.impl";
-
-	public static final String LDAP_USER_MAPPINGS = "ldap.user.mappings";
-
-	public static final String LDAP_USERS_DN = "ldap.users.dn";
-
 	public static final String LIBRARY_DOWNLOAD_URL = "library.download.url.";
 
 	public static final String LIFERAY_HOME = "liferay.home";
@@ -1310,10 +1206,6 @@ public interface PropsKeys {
 	public static final String MAIL_AUDIT_TRAIL = "mail.audit.trail";
 
 	public static final String MAIL_BATCH_SIZE = "mail.batch.size";
-
-	public static final String MAIL_HOOK_CYRUS_ADD_USER = "mail.hook.cyrus.add.user";
-
-	public static final String MAIL_HOOK_CYRUS_DELETE_USER = "mail.hook.cyrus.delete.user";
 
 	public static final String MAIL_HOOK_CYRUS_HOME = "mail.hook.cyrus.home";
 
@@ -1515,10 +1407,6 @@ public interface PropsKeys {
 
 	public static final String MODULE_FRAMEWORK_WEB_GENERATOR_JSP_COMPILER_DEPENDENCIES = "module.framework.web.generator.jsp.compiler.dependencies";
 
-	public static final String MSN_LOGIN = "msn.login";
-
-	public static final String MSN_PASSWORD = "msn.password";
-
 	public static final String MULTI_VALUE_MAP = "multi.value.map.";
 
 	public static final String MY_SITES_DIRECTORY_SITE_EXCLUDES = "my.sites.directory.site.excludes";
@@ -1622,8 +1510,6 @@ public interface PropsKeys {
 	public static final String ORGANIZATIONS_FORM_UPDATE_MAIN = "organizations.form.update.main";
 
 	public static final String ORGANIZATIONS_FORM_UPDATE_MISCELLANEOUS = "organizations.form.update.miscellaneous";
-
-	public static final String ORGANIZATIONS_INDEXER_ENABLED = "organizations.indexer.enabled";
 
 	public static final String ORGANIZATIONS_MEMBERSHIP_STRICT = "organizations.membership.strict";
 
@@ -1966,14 +1852,6 @@ public interface PropsKeys {
 	public static final String SANDBOX_DEPLOY_LISTENERS = "sandbox.deploy.listeners";
 
 	public static final String SANITIZER_IMPL = "sanitizer.impl";
-
-	public static final String SC_IMAGE_MAX_SIZE = "sc.image.max.size";
-
-	public static final String SC_IMAGE_THUMBNAIL_MAX_HEIGHT = "sc.image.thumbnail.max.height";
-
-	public static final String SC_IMAGE_THUMBNAIL_MAX_WIDTH = "sc.image.thumbnail.max.width";
-
-	public static final String SC_PRODUCT_COMMENTS_ENABLED = "sc.product.comments.enabled";
 
 	public static final String SCHEDULER_DESCRIPTION_MAX_LENGTH = "scheduler.description.max.length";
 
@@ -2353,8 +2231,6 @@ public interface PropsKeys {
 
 	public static final String USER_GROUPS_COPY_LAYOUTS_TO_USER_PERSONAL_SITE = "user.groups.copy.layouts.to.user.personal.site";
 
-	public static final String USER_GROUPS_INDEXER_ENABLED = "user.groups.indexer.enabled";
-
 	public static final String USER_GROUPS_NAME_ALLOW_NUMERIC = "user.groups.name.allow.numeric";
 
 	public static final String USER_GROUPS_SEARCH_WITH_INDEX = "user.groups.search.with.index";
@@ -2408,8 +2284,6 @@ public interface PropsKeys {
 	public static final String USERS_IMAGE_MAX_SIZE = "users.image.max.size";
 
 	public static final String USERS_IMAGE_MAX_WIDTH = "users.image.max.width";
-
-	public static final String USERS_INDEXER_ENABLED = "users.indexer.enabled";
 
 	public static final String USERS_LIST_VIEWS = "users.list.views";
 
@@ -2522,10 +2396,6 @@ public interface PropsKeys {
 	public static final String XUGGLER_JAR_OPTIONS = "xuggler.jar.options";
 
 	public static final String XUGGLER_JAR_URL = "xuggler.jar.url";
-
-	public static final String YM_LOGIN = "ym.login";
-
-	public static final String YM_PASSWORD = "ym.password";
 
 	public static final String YUI_COMPRESSOR_CSS_LINE_BREAK = "yui.compressor.css.line.break";
 

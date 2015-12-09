@@ -14,6 +14,7 @@
 
 package com.liferay.portlet.documentlibrary.service.impl;
 
+import com.liferay.portal.kernel.bean.BeanReference;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.dao.orm.WildcardMode;
 import com.liferay.portal.kernel.exception.PortalException;
@@ -69,6 +70,7 @@ import com.liferay.portlet.documentlibrary.model.DLFileVersion;
 import com.liferay.portlet.documentlibrary.model.DLFolder;
 import com.liferay.portlet.documentlibrary.model.DLFolderConstants;
 import com.liferay.portlet.documentlibrary.model.DLSyncConstants;
+import com.liferay.portlet.documentlibrary.service.DLAppService;
 import com.liferay.portlet.documentlibrary.service.base.DLAppHelperLocalServiceBaseImpl;
 import com.liferay.portlet.documentlibrary.service.permission.DLPermission;
 import com.liferay.portlet.documentlibrary.social.DLActivityKeys;
@@ -407,7 +409,6 @@ public class DLAppHelperLocalServiceImpl
 	 * @param  userId the primary key of the user moving the file entry
 	 * @param  fileEntry the file entry to be moved
 	 * @return the moved file entry
-	 * @throws PortalException if a user with the primary key could not be found
 	 */
 	@Override
 	public FileEntry moveFileEntryToTrash(long userId, FileEntry fileEntry)
@@ -495,7 +496,6 @@ public class DLAppHelperLocalServiceImpl
 	 * @param  userId the primary key of the user moving the file shortcut
 	 * @param  fileShortcut the file shortcut to be moved
 	 * @return the moved file shortcut
-	 * @throws PortalException if a user with the primary key could not be found
 	 */
 	@Override
 	public FileShortcut moveFileShortcutToTrash(
@@ -568,7 +568,6 @@ public class DLAppHelperLocalServiceImpl
 	 * @param  userId the primary key of the user moving the folder
 	 * @param  folder the folder to be moved
 	 * @return the moved folder
-	 * @throws PortalException if a user with the primary key could not be found
 	 */
 	@Override
 	public Folder moveFolderToTrash(long userId, Folder folder)
@@ -1706,6 +1705,30 @@ public class DLAppHelperLocalServiceImpl
 				DLFolderConstants.getClassName(), dlFolder.getFolderId());
 		}
 
+		long dlFileEntryClassNameId = classNameLocalService.getClassNameId(
+			DLFileEntry.class);
+
+		List<AssetEntry> dlFileEntryAssetEntries =
+			assetEntryFinder.findByDLFileEntryC_T(
+				dlFileEntryClassNameId, dlFolder.getTreePath());
+
+		for (AssetEntry dlFileEntryAssetEntry : dlFileEntryAssetEntries) {
+			assetEntryLocalService.updateVisible(
+				dlFileEntryAssetEntry, !moveToTrash);
+		}
+
+		long dlFolderClassNameId = classNameLocalService.getClassNameId(
+			DLFolder.class);
+
+		List<AssetEntry> dlFolderAssetEntries =
+			assetEntryFinder.findByDLFolderC_T(
+				dlFolderClassNameId, dlFolder.getTreePath());
+
+		for (AssetEntry dlFolderAssetEntry : dlFolderAssetEntries) {
+			assetEntryLocalService.updateVisible(
+				dlFolderAssetEntry, !moveToTrash);
+		}
+
 		List<DLFolder> dlFolders = dlFolderPersistence.findByG_M_T_H(
 			dlFolder.getGroupId(), false,
 			CustomSQLUtil.keywords(
@@ -1818,24 +1841,6 @@ public class DLAppHelperLocalServiceImpl
 				}
 			}
 
-			// Asset
-
-			if (moveToTrash) {
-				assetEntryLocalService.updateVisible(
-					DLFileEntryConstants.getClassName(),
-					dlFileEntry.getFileEntryId(), false);
-			}
-			else {
-				DLFileVersion latestDlFileVersion =
-					dlFileEntry.getLatestFileVersion(false);
-
-				if (latestDlFileVersion.isApproved()) {
-					assetEntryLocalService.updateVisible(
-						DLFileEntryConstants.getClassName(),
-						dlFileEntry.getFileEntryId(), true);
-				}
-			}
-
 			// Index
 
 			Indexer<DLFileEntry> indexer =
@@ -1943,12 +1948,6 @@ public class DLAppHelperLocalServiceImpl
 			}
 		}
 
-		// Asset
-
-		assetEntryLocalService.updateVisible(
-			DLFolderConstants.getClassName(), childDLFolder.getFolderId(),
-			!moveToTrash);
-
 		// Index
 
 		Indexer<DLFolder> indexer = IndexerRegistryUtil.nullSafeGetIndexer(
@@ -1977,5 +1976,8 @@ public class DLAppHelperLocalServiceImpl
 				repositoryEventType, modelClass, target);
 		}
 	}
+
+	@BeanReference(type = DLAppService.class)
+	protected DLAppService dlAppService;
 
 }

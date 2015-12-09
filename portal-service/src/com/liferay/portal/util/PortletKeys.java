@@ -19,11 +19,7 @@ package com.liferay.portal.util;
  */
 public class PortletKeys {
 
-	public static final String ADMIN = "9";
-
 	public static final String ADMIN_PLUGINS = "136";
-
-	public static final String ADMIN_SERVER = "137";
 
 	public static final String BACKGROUND_TASK = "189";
 
@@ -37,7 +33,8 @@ public class PortletKeys {
 
 	public static final String CHAT = "1_WAR_chatportlet";
 
-	public static final String DIRECTORY = "11";
+	public static final String DIRECTORY =
+		"com_liferay_directory_web_portlet_DirectoryPortlet";
 
 	public static final String DOCUMENT_LIBRARY =
 		"com_liferay_document_library_web_portlet_DLPortlet";
@@ -48,11 +45,14 @@ public class PortletKeys {
 	public static final String EXPORT_IMPORT =
 		"com_liferay_exportimport_web_portlet_ExportImportPortlet";
 
-	public static final String FAST_LOGIN = "164";
+	public static final String FAST_LOGIN =
+		"com_liferay_login_web_portlet_FastLoginPortlet";
 
-	public static final String FLAGS = "142";
+	public static final String FLAGS =
+		"com_liferay_flags_page_flags_web_portlet_FlagsPortlet";
 
-	public static final String FRIENDS_DIRECTORY = "186";
+	public static final String FRIENDS_DIRECTORY =
+		"com_liferay_directory_web_portlet_FriendsDirectoryPortlet";
 
 	public static final String IMAGE_UPLOADER = "195";
 
@@ -66,7 +66,8 @@ public class PortletKeys {
 
 	public static final String LIFERAY_PORTAL = "LIFERAY_PORTAL";
 
-	public static final String LOGIN = "58";
+	public static final String LOGIN =
+		"com_liferay_login_web_portlet_LoginPortlet";
 
 	public static final String MAIL = "1_WAR_mailportlet";
 
@@ -88,7 +89,8 @@ public class PortletKeys {
 	public static final String MY_PAGES =
 		"com_liferay_layout_admin_web_portlet_MyPagesPortlet";
 
-	public static final String MY_SITES_DIRECTORY = "188";
+	public static final String MY_SITES_DIRECTORY =
+		"com_liferay_directory_web_portlet_MySitesDirectoryPortlet";
 
 	public static final String MY_WORKFLOW_INSTANCE =
 		"com_liferay_workflow_instance_web_portlet_MyWorkflowInstancePortlet";
@@ -103,6 +105,9 @@ public class PortletKeys {
 		"com_liferay_plugins_admin_web_portlet_PluginsAdminPortlet";
 
 	public static final String PORTAL = "90";
+
+	public static final String PORTAL_SETTINGS =
+		"com_liferay_portal_settings_web_portlet_PortalSettingsPortlet";
 
 	public static final String PORTLET_DISPLAY_TEMPLATE =
 		"com_liferay_dynamic_data_mapping_web_portlet_" +
@@ -130,14 +135,16 @@ public class PortletKeys {
 
 	public static final String REQUESTS = "121";
 
+	public static final String SERVER_ADMIN =
+		"com_liferay_server_admin_web_portlet_ServerAdminPortlet";
+
 	public static final String SHOPPING = "34";
 
 	public static final String SITE_ADMIN =
 		"com_liferay_site_admin_web_portlet_SiteAdminPortlet";
 
-	public static final String SITE_MEMBERS_DIRECTORY = "187";
-
-	public static final String SOFTWARE_CATALOG = "98";
+	public static final String SITE_MEMBERS_DIRECTORY =
+		"com_liferay_directory_web_portlet_SiteMembersDirectoryPortlet";
 
 	public static final String STAGING_BAR =
 		"com_liferay_staging_bar_web_portlet_StagingBarPortlet";

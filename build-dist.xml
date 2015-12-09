@@ -50,6 +50,19 @@
 		</sequential>
 	</macrodef>
 
+	<macrodef name="update-jboss-java-opts">
+		<attribute name="app.server.jboss.dir" />
+
+		<sequential>
+			<replace
+				dir="@{app.server.jboss.dir}/bin"
+				includes="*.bat,*.conf"
+				token="-Xmx512m"
+				value="-Xmx1024m"
+			/>
+		</sequential>
+	</macrodef>
+
 	<macrodef name="update-plugins-includes-plugin">
 		<attribute name="plugins.includes.plugin.bundle" />
 		<attribute name="plugins.includes.plugin.dependent-apps" />
@@ -120,6 +133,8 @@
 
 		<antcall target="unzip-jboss" inheritAll="false" />
 
+		<update-jboss-java-opts app.server.jboss.dir="${app.server.parent.dir}/jboss-eap-6.0.1" />
+
 		<delete dir="${project.dir}/portal-web/classes" />
 
 		<ant target="deploy" inheritAll="false" />
@@ -148,6 +163,8 @@
 
 		<antcall target="unzip-jboss" inheritAll="false" />
 
+		<update-jboss-java-opts app.server.jboss.dir="${app.server.parent.dir}/jboss-eap-6.1.0" />
+
 		<delete dir="${project.dir}/portal-web/classes" />
 
 		<ant target="deploy" inheritAll="false" />
@@ -175,6 +192,8 @@
 		<antcall target="update-sdk-properties" inheritAll="false" />
 
 		<antcall target="unzip-jboss" inheritAll="false" />
+
+		<update-jboss-java-opts app.server.jboss.dir="${app.server.parent.dir}/jboss-eap-6.4.0" />
 
 		<delete dir="${project.dir}/portal-web/classes" />
 
@@ -281,7 +300,7 @@
 
 		<delete file="output.txt" />
 
-		<script classpathref="project.classpath" language="beanshell">
+		<beanshell>
 			String outputTxtContent = project.getProperty("output.txt.content");
 
 			if (outputTxtContent.contains("File Not Found")) {
@@ -299,7 +318,7 @@
 			}
 
 			project.setProperty("locale.list", locales);
-		</script>
+		</beanshell>
 
 		<for list="${locale.list}" param="locale.current">
 			<sequential>
@@ -362,13 +381,13 @@
 			<param name="tomcat.keep.app.server.properties" value="true" />
 		</antcall>
 
-		<script classpathref="project.classpath" language="beanshell">
+		<beanshell>
 			String lpVersion = project.getProperty("lp.version");
 
 			String lpVersionTcat = lpVersion.replace(".", "_");
 
 			project.setProperty("lp.version.tcat", lpVersionTcat);
-		</script>
+		</beanshell>
 
 		<echo append="true" file="release.${user.name}.properties">
 			lp.version.tcat=${lp.version.tcat}
@@ -1015,9 +1034,9 @@ release was successful.</echo>
 			</sequential>
 		</parallel>
 
-		<script classpathref="project.classpath" language="beanshell">
+		<beanshell>
 			project.setProperty("prepare-generated-files.tstamp", String.valueOf(System.currentTimeMillis()));
-		</script>
+		</beanshell>
 
 		<record name="prepare-generated-files.txt" action="stop" />
 
@@ -1290,7 +1309,7 @@ this task.
 
 		<echo file="${app.server.jboss.bin.dir}/standalone.conf" append="true">
 			<![CDATA[
-				JAVA_OPTS="$JAVA_OPTS -Dfile.encoding=UTF-8 -Djava.net.preferIPv4Stack=true ${java.security.config} -Duser.timezone=GMT -Xmx1024m -XX:MaxPermSize=256m"
+				JAVA_OPTS="$JAVA_OPTS -Dfile.encoding=UTF-8 -Djava.net.preferIPv4Stack=true ${java.security.config} -Duser.timezone=GMT -Xmx1024m -XX:MaxPermSize=384m"
 			]]>
 		</echo>
 
@@ -1304,7 +1323,7 @@ this task.
 			<replacetoken><![CDATA[:JAVA_OPTS_SET]]></replacetoken>
 			<replacevalue>
 				<![CDATA[
-					set "JAVA_OPTS=%JAVA_OPTS% -Dfile.encoding=UTF-8 -Djava.net.preferIPv4Stack=true @java.security.config@ -Duser.timezone=GMT -Xmx1024m -XX:MaxPermSize=256m"
+					set "JAVA_OPTS=%JAVA_OPTS% -Dfile.encoding=UTF-8 -Djava.net.preferIPv4Stack=true @java.security.config@ -Duser.timezone=GMT -Xmx1024m -XX:MaxPermSize=384m"
 
 					:JAVA_OPTS_SET
 				]]>
@@ -1585,7 +1604,7 @@ this task.
 			<replacetoken><![CDATA[export JAVA_OPTS]]></replacetoken>
 			<replacevalue>
 				<![CDATA[
-					JAVA_OPTS="-Dfile.encoding=UTF8 -Djava.net.preferIPv4Stack=true @java.security.config@ -Djonas.felix.configuration.file=\"$JONAS_ROOT/conf/felix-config.properties\" -Duser.timezone=GMT -Xmx1024m -XX:MaxPermSize=256m"
+					JAVA_OPTS="-Dfile.encoding=UTF8 -Djava.net.preferIPv4Stack=true @java.security.config@ -Djonas.felix.configuration.file=\"$JONAS_ROOT/conf/felix-config.properties\" -Duser.timezone=GMT -Xmx1024m -XX:MaxPermSize=384m"
 
 					export JAVA_OPTS
 				]]>
@@ -1599,7 +1618,7 @@ this task.
 				<![CDATA[
 					set JONAS_CLASSPATH=%JONAS_BASE%\conf;%JONAS_CLASSPATH%
 
-					set "JAVA_OPTS=-Dfile.encoding=UTF8 -Djava.net.preferIPv4Stack=true @java.security.config@ -Djonas.felix.configuration.file=%JONAS_ROOT%/conf/felix-config.properties -Duser.timezone=GMT -Xmx1024m -XX:MaxPermSize=256m"
+					set "JAVA_OPTS=-Dfile.encoding=UTF8 -Djava.net.preferIPv4Stack=true @java.security.config@ -Djonas.felix.configuration.file=%JONAS_ROOT%/conf/felix-config.properties -Duser.timezone=GMT -Xmx1024m -XX:MaxPermSize=384m"
 				]]>
 			</replacevalue>
 		</replace>
@@ -1659,7 +1678,7 @@ this task.
 		<replace file="${app.server.resin.dir}/conf/resin.properties">
 			<replacefilter token="@java.security.config@" value="${java.security.config}" />
 			<replacetoken><![CDATA[# jvm_args  : -Xmx2048m -XX:MaxPermSize=256m]]></replacetoken>
-			<replacevalue><![CDATA[jvm_args  : -Dfile.encoding=UTF-8 -Dcaucho.environment.class.loader=com.liferay.support.resin.EnvironmentClassLoader -Djava.net.preferIPv4Stack=true @java.security.config@ -Duser.timezone=GMT -Xmx1024m -XX:MaxPermSize=256m]]></replacevalue>
+			<replacevalue><![CDATA[jvm_args  : -Dfile.encoding=UTF-8 -Dcaucho.environment.class.loader=com.liferay.support.resin.EnvironmentClassLoader -Djava.net.preferIPv4Stack=true @java.security.config@ -Duser.timezone=GMT -Xmx1024m -XX:MaxPermSize=384m]]></replacevalue>
 		</replace>
 
 		<replace file="${app.server.resin.dir}/conf/resin.xml">
@@ -1717,7 +1736,7 @@ this task.
 			src="${app.server.parent.dir}/${app.server.tcserver.zip.name}"
 		>
 			<mapper
-				from="vfabric-tc-server-standard-${app.server.tcserver.version}.RELEASE/*"
+				from="vfabric-tc-server-developer-${app.server.tcserver.version}.RELEASE/*"
 				to="tc-server-${app.server.tcserver.version}/*"
 				type="glob"
 			/>
@@ -1747,13 +1766,13 @@ this task.
 			<os family="windows" />
 			<then>
 				<replace file="${app.server.tcserver.bin.dir}/setenv.bat">
-					<replacetoken><![CDATA[set JVM_OPTS=-Xmx512M -Xss192K]]></replacetoken>
+					<replacetoken><![CDATA[set JVM_OPTS=-Xmx512M -Xss256K]]></replacetoken>
 					<replacevalue><![CDATA[set JVM_OPTS=-Xmx1024M -Xss512K -XX:MaxPermSize=512m]]></replacevalue>
 				</replace>
 			</then>
 			<else>
 				<replace file="${app.server.tcserver.bin.dir}/setenv.sh">
-					<replacetoken><![CDATA[JVM_OPTS="-Xmx512M -Xss192K"]]></replacetoken>
+					<replacetoken><![CDATA[JVM_OPTS="-Xmx512M -Xss256K"]]></replacetoken>
 					<replacevalue><![CDATA[JVM_OPTS="-Xmx1024M -Xss512K -XX:MaxPermSize=512m"]]></replacevalue>
 				</replace>
 			</else>
@@ -1778,7 +1797,7 @@ this task.
 				</replace>
 
 				<replace file="${app.server.tcserver.dir}/liferay/conf/wrapper.conf">
-					<replacetoken><![CDATA[wrapper.java.additional.9="-Xss192K"]]></replacetoken>
+					<replacetoken><![CDATA[wrapper.java.additional.9="-Xss256K"]]></replacetoken>
 					<replacevalue><![CDATA[wrapper.java.additional.9="-Xss512K"
 						wrapper.java.additional.10="-XX:MaxPermSize=256m"]]></replacevalue>
 				</replace>
@@ -2622,6 +2641,11 @@ and put it in ${app.server.parent.dir}. Then rerun this task.
 		</replace>
 
 		<replace file="${app.server.wildfly.dir}/standalone/configuration/standalone.xml">
+			<replacetoken><![CDATA[<subsystem xmlns="urn:jboss:domain:weld:3.0"/>]]></replacetoken>
+			<replacevalue></replacevalue>
+		</replace>
+
+		<replace file="${app.server.wildfly.dir}/standalone/configuration/standalone.xml">
 			<replacetoken><![CDATA[</extensions>]]></replacetoken>
 			<replacevalue>
 				<![CDATA[
@@ -2676,7 +2700,7 @@ and put it in ${app.server.parent.dir}. Then rerun this task.
 
 		<echo file="${app.server.wildfly.bin.dir}/standalone.conf" append="true">
 			<![CDATA[
-				JAVA_OPTS="$JAVA_OPTS -Dfile.encoding=UTF-8 -Djava.net.preferIPv4Stack=true ${java.security.config} -Duser.timezone=GMT -Xmx1024m -XX:MaxPermSize=256m"
+				JAVA_OPTS="$JAVA_OPTS -Dfile.encoding=UTF-8 -Djava.net.preferIPv4Stack=true ${java.security.config} -Duser.timezone=GMT -Xmx1024m -XX:MaxPermSize=384m"
 			]]>
 		</echo>
 
@@ -2690,7 +2714,7 @@ and put it in ${app.server.parent.dir}. Then rerun this task.
 			<replacetoken><![CDATA[:JAVA_OPTS_SET]]></replacetoken>
 			<replacevalue>
 				<![CDATA[
-					set "JAVA_OPTS=%JAVA_OPTS% -Dfile.encoding=UTF-8 -Djava.net.preferIPv4Stack=true @java.security.config@ -Duser.timezone=GMT -Xmx1024m -XX:MaxPermSize=256m"
+					set "JAVA_OPTS=%JAVA_OPTS% -Dfile.encoding=UTF-8 -Djava.net.preferIPv4Stack=true @java.security.config@ -Duser.timezone=GMT -Xmx1024m -XX:MaxPermSize=384m"
 
 					:JAVA_OPTS_SET
 				]]>
@@ -3274,7 +3298,7 @@ plugins.includes=</echo>
 		<zip destfile="dist/liferay-portal-src-${lp.version}.zip">
 			<zipfileset
 				dir="${lp.source.dir}"
-				excludes="portal-web/test/com/**,portal-web/test-ant-templates/**"
+				excludes=".gradle/**,portal-web/test/com/**,portal-web/test-ant-templates/**"
 				prefix="liferay-portal-src-${lp.version}"
 			/>
 		</zip>

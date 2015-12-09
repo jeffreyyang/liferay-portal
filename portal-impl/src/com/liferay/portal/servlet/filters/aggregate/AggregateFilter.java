@@ -43,6 +43,7 @@ import com.liferay.portal.servlet.filters.IgnoreModuleRequestFilter;
 import com.liferay.portal.servlet.filters.dynamiccss.DynamicCSSUtil;
 import com.liferay.portal.util.AggregateUtil;
 import com.liferay.portal.util.JavaScriptBundleUtil;
+import com.liferay.portal.util.PortalUtil;
 import com.liferay.portal.util.PropsUtil;
 import com.liferay.portal.util.PropsValues;
 
@@ -357,6 +358,16 @@ public class AggregateFilter extends IgnoreModuleRequestFilter {
 			resourcePath = resourcePath.substring(contextPath.length());
 		}
 
+		if (resourcePath.endsWith(_CSS_EXTENSION) &&
+			PortalUtil.isRightToLeft(request)) {
+
+			int pos = resourcePath.lastIndexOf(StringPool.PERIOD);
+
+			resourcePath =
+				resourcePath.substring(0, pos) + "_rtl" +
+					resourcePath.substring(pos);
+		}
+
 		URL resourceURL = _servletContext.getResource(resourcePath);
 
 		if (resourceURL == null) {
@@ -421,8 +432,8 @@ public class AggregateFilter extends IgnoreModuleRequestFilter {
 				new BufferCacheServletResponse(response);
 
 			processFilter(
-				AggregateFilter.class, request, bufferCacheServletResponse,
-				filterChain);
+				AggregateFilter.class.getName(), request,
+				bufferCacheServletResponse, filterChain);
 
 			bufferCacheServletResponse.finishResponse(false);
 
@@ -543,7 +554,8 @@ public class AggregateFilter extends IgnoreModuleRequestFilter {
 
 		if (minifiedContent == null) {
 			processFilter(
-				AggregateFilter.class, request, response, filterChain);
+				AggregateFilter.class.getName(), request, response,
+				filterChain);
 		}
 		else {
 			if (minifiedContent instanceof File) {

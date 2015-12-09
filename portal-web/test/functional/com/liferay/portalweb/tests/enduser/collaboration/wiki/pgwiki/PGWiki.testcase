@@ -5,6 +5,15 @@
 	<var name="portletName" value="Wiki" />
 
 	<set-up>
+		<var method="TestPropsUtil#get('test.portal.instance')" name="testPortalInstance" />
+
+		<if>
+			<equals arg1="${testPortalInstance}" arg2="true" />
+			<then>
+				<execute macro="SignIn#signInPortalInstanceSetUp" />
+			</then>
+		</if>
+
 		<execute macro="User#firstLoginPG" />
 
 		<execute macro="Page#addPG">
@@ -21,14 +30,24 @@
 	</set-up>
 
 	<tear-down>
-		<execute macro="WikiPage#tearDownCP" />
+		<var method="TestPropsUtil#get('test.portal.instance')" name="testPortalInstance" />
 
-		<execute macro="WikiNode#tearDownCP" />
+		<if>
+			<equals arg1="${testPortalInstance}" arg2="true" />
+			<then>
+				<execute macro="PortalInstances#tearDownCP" />
+			</then>
+			<else>
+				<execute macro="WikiPage#tearDownCP" />
 
-		<execute macro="Page#tearDownPG" />
+				<execute macro="WikiNode#tearDownCP" />
+
+				<execute macro="Page#tearDownPG" />
+			</else>
+		</if>
 	</tear-down>
 
-	<command name="AddWikiFrontPage" priority="4">
+	<command name="AddWikiFrontPage" priority="5">
 		<var name="wikiPageContent" value="Wiki FrontPage Content" />
 
 		<execute macro="Page#gotoPG">
@@ -90,7 +109,7 @@
 	<command name="AddWikiFrontPageChildPageFormatHTML" priority="4">
 		<var name="welcomeToLiferay">
 			<![CDATA[
-				<p><a href=http://www.liferay.com>Welcome to LIFERAY</a><p>
+				<p><a href="http://www.liferay.com">Welcome to LIFERAY</a></p>
 			]]>
 		</var>
 		<var name="wikiChildPageHTMLContent" value="Welcome to LIFERAY" />
@@ -110,20 +129,37 @@
 			<var name="wikiPageTitle" value="${wikiPageTitle}" />
 		</execute>
 
-		<execute macro="WikiPage#addFrontPageChildPageFormatHTML">
-			<var name="wikiChildPageHTMLContent" value="${wikiChildPageHTMLContent}" />
-			<var name="wikiChildPageTitle" value="${wikiChildPageTitle}" />
-			<var name="wikiPageText" value="${wikiPageText}" />
+		<execute function="AssertClick" locator1="Wiki#LINK_ADD_CHILD_PAGE" value1="Add Child Page" />
+
+		<execute macro="WikiEntry#addPageTitle">
+			<var name="wikiPageTitle" value="Wiki FrontPage Child Page Title" />
 		</execute>
+
+		<execute macro="WikiEntry#selectPageFormat">
+			<var name="pageFormat" value="HTML" />
+		</execute>
+
+		<execute macro="WikiEntry#confirmHTML" />
+
+		<execute function="Click#clickAt" locator1="Wiki#RICH_TEXT_EDITOR" />
+
+		<execute function="Click" locator1="AlloyEditor#CONTENT_EDITOR_SWITCH_ACE_EDITOR" />
+
+		<execute function="Type#typeAceEditor" locator1="TextArea#ACE_EDITOR" value1="${welcomeToLiferay}" />
+
+		<execute macro="WikiEntry#publish" />
 
 		<execute macro="Page#gotoPG">
 			<var name="pageName" value="${pageName}" />
 		</execute>
 
-		<execute macro="WikiPage#viewChildPagePGViaWD">
+		<execute macro="WikiPage#gotoChildPagePG">
+			<var name="wikiChildPageTitle" value="${wikiChildPageTitle}" />
+		</execute>
+
+		<execute macro="WikiPage#viewChildPagePG">
 			<var name="wikiChildPageContent" value="${wikiChildPageHTMLContent}" />
 			<var name="wikiChildPageTitle" value="${wikiChildPageTitle}" />
-			<var name="wikiPageTitle" value="${wikiPageTitle}" />
 		</execute>
 	</command>
 
@@ -350,11 +386,21 @@
 			<var name="pageName" value="${pageName}" />
 		</execute>
 
-		<execute macro="WikiPage#addFrontPagePG">
-			<var name="htmlSource" value="true" />
-			<var name="wikiPageContent" value="${wikiPageContent}" />
-			<var name="wikiPageText" value="${wikiPageText}" />
+		<execute function="AssertClick" locator1="Wiki#FRONTPAGE_DEFAULT_MESSAGE" value1="This page is empty. Edit it to add some text." />
+
+		<execute macro="WikiEntry#selectPageFormat">
+			<var name="pageFormat" value="HTML" />
 		</execute>
+
+		<execute macro="WikiEntry#confirmHTML" />
+
+		<execute function="Click#clickAt" locator1="Wiki#RICH_TEXT_EDITOR" />
+
+		<execute function="Click" locator1="AlloyEditor#CONTENT_EDITOR_SWITCH_ACE_EDITOR" />
+
+		<execute function="Type#typeAceEditor" locator1="TextArea#ACE_EDITOR" value1="${wikiPageContent}" />
+
+		<execute macro="WikiEntry#publish" />
 
 		<execute macro="Page#gotoPG">
 			<var name="pageName" value="${pageName}" />
@@ -401,10 +447,23 @@
 			<var name="pageName" value="${pageName}" />
 		</execute>
 
-		<execute macro="WikiPage#addFrontPagePG">
-			<var name="htmlSource" value="true" />
-			<var name="wikiPageContent"><![CDATA[<a href="/">Home</a>]]></var>
+		<execute function="AssertClick" locator1="Wiki#FRONTPAGE_DEFAULT_MESSAGE" value1="This page is empty. Edit it to add some text." />
+
+		<execute macro="WikiEntry#selectPageFormat">
+			<var name="pageFormat" value="HTML" />
 		</execute>
+
+		<execute macro="WikiEntry#confirmHTML" />
+
+		<execute function="Click#clickAt" locator1="Wiki#RICH_TEXT_EDITOR" />
+
+		<execute function="Click" locator1="AlloyEditor#CONTENT_EDITOR_SWITCH_ACE_EDITOR" />
+
+		<var name="home"><![CDATA[<p><a href="/">Home</a></p>]]></var>
+
+		<execute function="Type#typeAceEditor" locator1="TextArea#ACE_EDITOR" value1="${home}" />
+
+		<execute macro="WikiEntry#publish" />
 
 		<execute macro="Page#gotoPG">
 			<var name="pageName" value="${pageName}" />
@@ -425,7 +484,7 @@
 		</execute>
 	</command>
 
-	<command name="AddWikiPage" priority="4">
+	<command name="AddWikiPage" priority="5">
 		<var name="wikiPageContent" value="Wiki Page Content" />
 		<var name="wikiPageTitle" value="Wiki Page Title" />
 
@@ -457,7 +516,7 @@
 		</execute>
 	</command>
 
-	<command name="AddWikiPageChildPage" priority="4">
+	<command name="AddWikiPageChildPage" priority="5">
 		<var name="wikiChildPageContent" value="Wiki Child Page Content" />
 		<var name="wikiChildPageTitle" value="Wiki Child Page Title" />
 		<var name="wikiPageContent" value="Wiki Page Content" />
@@ -506,10 +565,10 @@
 		</execute>
 	</command>
 
-	<command name="AddWikiPageFormatHTML" priority="4">
+	<command name="AddWikiPageFormatHTML" priority="5">
 		<var name="welcomeToLiferay">
 			<![CDATA[
-				<p><a href=http://www.liferay.com>Welcome to LIFERAY</a><p>
+				<p><a href="http://www.liferay.com">Welcome to LIFERAY</a></p>
 			]]>
 		</var>
 		<var name="wikiPageContent" value="Welcome to LIFERAY" />
@@ -521,11 +580,25 @@
 
 		<execute macro="WikiPage#gotoAllPagesPG" />
 
-		<execute macro="WikiPage#addPG">
-			<var name="htmlSource" value="true" />
-			<var name="welcomeToLiferay" value="${welcomeToLiferay}" />
-			<var name="wikiPageTitle" value="${wikiPageTitle}" />
+		<execute function="AssertClick" locator1="Wiki#ADD_PAGE" value1="Add Page" />
+
+		<execute macro="WikiEntry#addPageTitle">
+			<var name="wikiPageTitle" value="Wiki Page Title" />
 		</execute>
+
+		<execute macro="WikiEntry#selectPageFormat">
+			<var name="pageFormat" value="HTML" />
+		</execute>
+
+		<execute macro="WikiEntry#confirmHTML" />
+
+		<execute function="Click#clickAt" locator1="Wiki#RICH_TEXT_EDITOR" />
+
+		<execute function="Click" locator1="AlloyEditor#CONTENT_EDITOR_SWITCH_ACE_EDITOR" />
+
+		<execute function="Type#typeAceEditor" locator1="TextArea#ACE_EDITOR" value1="${welcomeToLiferay}" />
+
+		<execute macro="WikiEntry#publish" />
 
 		<execute macro="Page#gotoPG">
 			<var name="pageName" value="${pageName}" />
@@ -551,7 +624,7 @@
 
 		<execute macro="WikiNavigator#gotoAllPages" />
 
-		<execute function="AssertClick" locator1="Button#ADD_PAGE" value1="Add Page" />
+		<execute function="AssertClick" locator1="Wiki#ADD_PAGE" value1="Add Page" />
 
 		<execute macro="WikiEntry#addPageTitle">
 			<var name="wikiPageTitle" value="Wiki Page Title" />
@@ -589,7 +662,7 @@
 		</execute>
 	</command>
 
-	<command name="AddWikiPages" priority="4">
+	<command name="AddWikiPages" priority="5">
 		<var name="wikiPageCounterList" value="1,2,3" />
 
 		<execute macro="Page#gotoPG">
@@ -624,14 +697,14 @@
 		</for>
 	</command>
 
-	<command name="CancelAddPage" priority="4">
+	<command name="CancelAddPage" priority="5">
 		<execute macro="Page#gotoPG">
 			<var name="pageName" value="Wiki Test Page" />
 		</execute>
 
 		<execute macro="WikiNavigator#gotoAllPages" />
 
-		<execute function="AssertClick" locator1="Button#ADD_PAGE" value1="Add Page" />
+		<execute function="AssertClick" locator1="Wiki#ADD_PAGE" value1="Add Page" />
 
 		<execute macro="WikiEntry#addPageTitle">
 			<var name="wikiPageTitle" value="Wiki Page Title" />
@@ -648,14 +721,14 @@
 		</execute>
 	</command>
 
-	<command name="CancelEditPage" priority="4">
+	<command name="CancelEditPage" priority="5">
 		<execute macro="Page#gotoPG">
 			<var name="pageName" value="Wiki Test Page" />
 		</execute>
 
 		<execute macro="WikiNavigator#gotoAllPages" />
 
-		<execute function="AssertClick" locator1="Button#ADD_PAGE" value1="Add Page" />
+		<execute function="AssertClick" locator1="Wiki#ADD_PAGE" value1="Add Page" />
 
 		<execute macro="WikiEntry#addPageTitle">
 			<var name="wikiPageTitle" value="Wiki Page Title" />
@@ -678,7 +751,7 @@
 		</execute>
 
 		<execute macro="WikiEntry#addPageContent">
-			<var name="wikiPageContent" value="Edited " />
+			<var name="wikiPageContent" value="Edited Wiki Page Content" />
 		</execute>
 
 		<execute macro="WikiEntry#cancel" />
@@ -753,7 +826,7 @@
 
 		<execute macro="WikiNavigator#gotoAllPages" />
 
-		<execute function="AssertClick" locator1="Button#ADD_PAGE" value1="Add Page" />
+		<execute function="AssertClick" locator1="Wiki#ADD_PAGE" value1="Add Page" />
 
 		<execute macro="WikiEntry#addPageTitle">
 			<var name="wikiPageTitle" value="Wiki Page Title" />
@@ -780,7 +853,7 @@
 		</execute>
 
 		<execute macro="WikiEntry#addPageContent">
-			<var name="wikiPageContent" value="Copied " />
+			<var name="wikiPageContent" value="Copied Wiki Page Content" />
 		</execute>
 
 		<execute macro="WikiEntry#publish" />
@@ -828,7 +901,7 @@
 		</execute>
 	</command>
 
-	<command name="DeleteWikiPage" priority="4">
+	<command name="DeleteWikiPage" priority="5">
 		<var name="wikiPageContent" value="Wiki Page Content" />
 		<var name="wikiPageTitle" value="Wiki Page Title" />
 
@@ -864,14 +937,14 @@
 		</execute>
 	</command>
 
-	<command name="EditDraftPage" priority="4">
+	<command name="EditDraftPage" priority="5">
 		<execute macro="Page#gotoPG">
 			<var name="pageName" value="Wiki Test Page" />
 		</execute>
 
 		<execute macro="WikiNavigator#gotoAllPages" />
 
-		<execute function="AssertClick" locator1="Button#ADD_PAGE" value1="Add Page" />
+		<execute function="AssertClick" locator1="Wiki#ADD_PAGE" value1="Add Page" />
 
 		<execute macro="WikiEntry#addPageTitle">
 			<var name="wikiPageTitle" value="Wiki Page Title" />
@@ -894,7 +967,7 @@
 		</execute>
 
 		<execute macro="WikiEntry#addPageContent">
-			<var name="wikiPageContent" value="Edited " />
+			<var name="wikiPageContent" value="Edited Wiki Page Content" />
 		</execute>
 
 		<execute macro="WikiEntry#publish" />
@@ -1024,7 +1097,7 @@
 
 		<execute macro="WikiNavigator#gotoAllPages" />
 
-		<execute function="AssertClick" locator1="Button#ADD_PAGE" value1="Add Page" />
+		<execute function="AssertClick" locator1="Wiki#ADD_PAGE" value1="Add Page" />
 
 		<execute macro="WikiEntry#addPageTitle">
 			<var name="wikiPageTitle" value="Wiki Page Title" />
@@ -1047,7 +1120,7 @@
 		</execute>
 
 		<execute macro="WikiEntry#addPageContent">
-			<var name="wikiPageContent" value="Edited " />
+			<var name="wikiPageContent" value="Edited Wiki Page Content" />
 		</execute>
 
 		<execute function="AssertClick" locator1="Button#PREVIEW" value1="Preview" />
@@ -1068,7 +1141,7 @@
 
 		<execute macro="WikiNavigator#gotoAllPages" />
 
-		<execute function="AssertClick" locator1="Button#ADD_PAGE" value1="Add Page" />
+		<execute function="AssertClick" locator1="Wiki#ADD_PAGE" value1="Add Page" />
 
 		<execute macro="WikiEntry#addPageTitle">
 			<var name="wikiPageTitle" value="Wiki Page Title" />
@@ -1089,7 +1162,7 @@
 		</execute>
 	</command>
 
-	<command name="RemoveRedirectLinkFromWikiPage" priority="4">
+	<command name="RemoveRedirectLinkFromWikiPage" priority="3">
 		<execute macro="Page#gotoPG">
 			<var name="pageName" value="${pageName}" />
 		</execute>
@@ -1257,7 +1330,7 @@
 			<var name="wikiPage1Title" value="${wikiPage1Title}" />
 			<var name="wikiPage2Content" value="${wikiPage2Content}" />
 			<var name="wikiPage2Title" value="${wikiPage2Title}" />
-			<var name="wikiVersion1Summary" value="Changed parent from &quot;.&quot;" />
+			<var name="wikiVersion1Summary" value="Changed parent from" />
 			<var name="wikiVersion2Summary" value="Reverted to 1.0" />
 		</execute>
 
@@ -1377,7 +1450,7 @@
 
 		<execute macro="WikiNavigator#gotoAllPages" />
 
-		<execute function="AssertClick" locator1="Button#ADD_PAGE" value1="Add Page" />
+		<execute function="AssertClick" locator1="Wiki#ADD_PAGE" value1="Add Page" />
 
 		<execute macro="WikiEntry#addPageTitle">
 			<var name="wikiPageTitle" value="Wiki Page Title" />
@@ -1400,7 +1473,7 @@
 		</execute>
 
 		<execute macro="WikiEntry#addPageContent">
-			<var name="wikiPageContent" value="Edited " />
+			<var name="wikiPageContent" value="Edited Wiki Page Content" />
 		</execute>
 
 		<execute macro="WikiEntry#saveAsDraft" />

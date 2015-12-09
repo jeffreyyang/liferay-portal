@@ -12,34 +12,66 @@
 		</if>
 	</command>
 
+	<command name="gotoAddPage">
+		<var name="key_page" value="${page}" />
+
+		<execute function="AssertClick" locator1="ProductMenu#PAGES" value1="${page}" />
+
+		<execute macro="ProductMenuHelper#openProductMenu" />
+	</command>
+
 	<command name="gotoControlPanel">
 		<execute macro="ProductMenuHelper#openProductMenu" />
 
-		<execute macro="ProductMenuHelper#gotoTab">
-			<var name="tab" value="Control Panel" />
-		</execute>
+		<if>
+			<condition function="IsElementPresent" locator1="ProductMenu#PRODUCT_MENU_TABS_CONTROL_PANEL_COLLAPSED" />
+			<then>
+				<execute function="Click" locator1="ProductMenu#PRODUCT_MENU_TABS_CONTROL_PANEL_COLLAPSED" />
+
+				<execute function="AssertElementPresent" locator1="ProductMenu#PRODUCT_MENU_TABS_CONTROL_PANEL_EXPANDED" />
+			</then>
+		</if>
 	</command>
 
-	<command name="gotoMySpace">
+	<command name="gotoEditPage">
 		<execute macro="ProductMenuHelper#openProductMenu" />
 
-		<execute macro="ProductMenuHelper#gotoTab">
-			<var name="tab" value="My Space" />
-		</execute>
+		<var name="key_page" value="${page}" />
+
+		<execute function="Click" locator1="SitePages#PAGE_TREE_PAGE_EDIT_COG" value1="${page}" />
+	</command>
+
+	<command name="gotoEditPublicPages">
+		<execute macro="ProductMenuHelper#openProductMenu" />
+
+		<execute function="Click" locator1="ProductMenu#PUBLIC_PAGES" />
 	</command>
 
 	<command name="gotoPortlet">
 		<var name="key_portlet" value="${portlet}" />
 
 		<execute function="AssertClick" locator1="ProductMenu#PORTLET" value1="${portlet}" />
+
+		<execute macro-mobile="MobileNavigator#clickRemoveIcon" />
+	</command>
+
+	<command name="gotoSite">
+		<var name="key_site" value="${site}" />
+
+		<execute function="AssertClick" locator1="ProductMenu#SITE" value1="${site}" />
 	</command>
 
 	<command name="gotoSites">
 		<execute macro="ProductMenuHelper#openProductMenu" />
 
-		<execute macro="ProductMenuHelper#gotoTab">
-			<var name="tab" value="Sites" />
-		</execute>
+		<if>
+			<condition function="IsElementPresent" locator1="ProductMenu#PRODUCT_MENU_TABS_SITES_COLLAPSED" />
+			<then>
+				<execute function="Click" locator1="ProductMenu#PRODUCT_MENU_TABS_SITES_COLLAPSED" />
+
+				<execute function="AssertElementPresent" locator1="ProductMenu#PRODUCT_MENU_TABS_SITES_EXPANDED" />
+			</then>
+		</if>
 	</command>
 
 	<command name="gotoTab">
@@ -48,7 +80,30 @@
 		<execute function="Click" locator1="ProductMenu#TAB" />
 	</command>
 
+	<command name="gotoUser">
+		<execute macro="ProductMenuHelper#openProductMenu" />
+
+		<if>
+			<condition function="IsElementPresent" locator1="ProductMenu#PRODUCT_MENU_TABS_USER_COLLAPSED" />
+			<then>
+				<execute function="Click" locator1="ProductMenu#PRODUCT_MENU_TABS_USER_COLLAPSED" />
+
+				<execute function="AssertElementPresent" locator1="ProductMenu#PRODUCT_MENU_TABS_USER_EXPANDED" />
+			</then>
+		</if>
+	</command>
+
 	<command name="openProductMenu">
+		<if>
+			<and>
+				<condition function="IsElementPresent" locator1="DockbarAddpanelcontent#CONTENT_TAB" />
+				<condition function="IsVisible" locator1="DockbarAddpanelcontent#CONTENT_TAB" />
+			</and>
+			<then>
+				<execute function="Click#clickAt" locator1="Dockbar#ADD_ICON" />
+			</then>
+		</if>
+
 		<if>
 			<not>
 				<condition function="IsElementPresent" locator1="ProductMenu#PRODUCT_MENU_OPENED" />
@@ -59,5 +114,17 @@
 				<execute function="AssertVisible" locator1="ProductMenu#PRODUCT_MENU_OPENED" />
 			</then>
 		</if>
+	</command>
+
+	<command name="viewNoSite">
+		<var name="key_site" value="${site}" />
+
+		<execute function="AssertElementNotPresent" locator1="ProductMenu#SITE" value1="${site}" />
+	</command>
+
+	<command name="viewSite">
+		<var name="key_site" value="${site}" />
+
+		<execute function="AssertTextEquals" locator1="ProductMenu#SITE" value1="${site}" />
 	</command>
 </definition>

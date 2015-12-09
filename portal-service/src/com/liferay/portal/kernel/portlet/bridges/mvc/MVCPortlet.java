@@ -21,6 +21,7 @@ import com.liferay.portal.kernel.servlet.SessionMessages;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.StringPool;
+import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.util.PortalUtil;
@@ -256,6 +257,8 @@ public class MVCPortlet extends LiferayPortlet {
 			RenderRequest renderRequest, RenderResponse renderResponse)
 		throws IOException, PortletException {
 
+		invokeHideDefaultSuccessMessage(renderRequest);
+
 		String mvcRenderCommandName = ParamUtil.getString(
 			renderRequest, "mvcRenderCommandName", "/");
 
@@ -285,6 +288,8 @@ public class MVCPortlet extends LiferayPortlet {
 	public void serveResource(
 			ResourceRequest resourceRequest, ResourceResponse resourceResponse)
 		throws IOException, PortletException {
+
+		invokeHideDefaultSuccessMessage(resourceRequest);
 
 		String path = getPath(resourceRequest, resourceResponse);
 
@@ -317,8 +322,10 @@ public class MVCPortlet extends LiferayPortlet {
 			throw new PortletException(e);
 		}
 
-		String actionName = ParamUtil.getString(
+		String[] actionNames = ParamUtil.getParameterValues(
 			actionRequest, ActionRequest.ACTION_NAME);
+
+		String actionName = StringUtil.merge(actionNames);
 
 		if (!actionName.contains(StringPool.COMMA)) {
 			MVCActionCommand mvcActionCommand =
@@ -326,6 +333,17 @@ public class MVCPortlet extends LiferayPortlet {
 					actionName);
 
 			if (mvcActionCommand != MVCActionCommand.EMPTY) {
+				if (mvcActionCommand instanceof FormMVCActionCommand) {
+					FormMVCActionCommand formMVCActionCommand =
+						(FormMVCActionCommand)mvcActionCommand;
+
+					if (!formMVCActionCommand.validateForm(
+							actionRequest, actionResponse)) {
+
+						return false;
+					}
+				}
+
 				return mvcActionCommand.processAction(
 					actionRequest, actionResponse);
 			}
@@ -336,6 +354,22 @@ public class MVCPortlet extends LiferayPortlet {
 					actionName);
 
 			if (!mvcActionCommands.isEmpty()) {
+				boolean valid = true;
+
+				for (MVCActionCommand mvcActionCommand : mvcActionCommands) {
+					if (mvcActionCommand instanceof FormMVCActionCommand) {
+						FormMVCActionCommand formMVCActionCommand =
+							(FormMVCActionCommand)mvcActionCommand;
+
+						valid &= formMVCActionCommand.validateForm(
+							actionRequest, actionResponse);
+					}
+				}
+
+				if (!valid) {
+					return false;
+				}
+
 				for (MVCActionCommand mvcActionCommand : mvcActionCommands) {
 					if (!mvcActionCommand.processAction(
 							actionRequest, actionResponse)) {
@@ -539,6 +573,17 @@ public class MVCPortlet extends LiferayPortlet {
 		include(
 			path, resourceRequest, resourceResponse,
 			PortletRequest.RESOURCE_PHASE);
+	}
+
+	protected void invokeHideDefaultSuccessMessage(
+		PortletRequest portletRequest) {
+
+		boolean hideDefaultSuccessMessage = ParamUtil.getBoolean(
+			portletRequest, "hideDefaultSuccessMessage");
+
+		if (hideDefaultSuccessMessage) {
+			hideDefaultSuccessMessage(portletRequest);
+		}
 	}
 
 	protected String aboutTemplate;

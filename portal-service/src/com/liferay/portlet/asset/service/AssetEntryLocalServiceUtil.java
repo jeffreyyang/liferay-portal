@@ -408,15 +408,6 @@ public class AssetEntryLocalServiceUtil {
 		return getService().getAssetTagPrimaryKeys(entryId);
 	}
 
-	/**
-	* Returns the Spring bean ID for this bean.
-	*
-	* @return the Spring bean ID for this bean
-	*/
-	public static java.lang.String getBeanIdentifier() {
-		return getService().getBeanIdentifier();
-	}
-
 	public static java.util.List<com.liferay.portlet.asset.model.AssetEntry> getChildEntries(
 		long entryId)
 		throws com.liferay.portal.kernel.exception.PortalException {
@@ -487,10 +478,23 @@ public class AssetEntryLocalServiceUtil {
 		return getService().getGroupEntries(groupId);
 	}
 
+	public static com.liferay.portal.kernel.dao.orm.IndexableActionableDynamicQuery getIndexableActionableDynamicQuery() {
+		return getService().getIndexableActionableDynamicQuery();
+	}
+
 	public static com.liferay.portlet.asset.model.AssetEntry getNextEntry(
 		long entryId)
 		throws com.liferay.portal.kernel.exception.PortalException {
 		return getService().getNextEntry(entryId);
+	}
+
+	/**
+	* Returns the OSGi service identifier.
+	*
+	* @return the OSGi service identifier
+	*/
+	public static java.lang.String getOSGiServiceIdentifier() {
+		return getService().getOSGiServiceIdentifier();
 	}
 
 	public static com.liferay.portlet.asset.model.AssetEntry getParentEntry(
@@ -690,15 +694,6 @@ public class AssetEntryLocalServiceUtil {
 	}
 
 	/**
-	* Sets the Spring bean ID for this bean.
-	*
-	* @param beanIdentifier the Spring bean ID for this bean
-	*/
-	public static void setBeanIdentifier(java.lang.String beanIdentifier) {
-		getService().setBeanIdentifier(beanIdentifier);
-	}
-
-	/**
 	* Updates the asset entry in the database or adds it if it does not yet exist. Also notifies the appropriate model listeners.
 	*
 	* @param assetEntry the asset entry
@@ -830,6 +825,12 @@ public class AssetEntryLocalServiceUtil {
 		java.lang.String className, long classPK, boolean visible)
 		throws com.liferay.portal.kernel.exception.PortalException {
 		return getService().updateVisible(className, classPK, visible);
+	}
+
+	public static com.liferay.portlet.asset.model.AssetEntry updateVisible(
+		com.liferay.portlet.asset.model.AssetEntry entry, boolean visible)
+		throws com.liferay.portal.kernel.exception.PortalException {
+		return getService().updateVisible(entry, visible);
 	}
 
 	/**

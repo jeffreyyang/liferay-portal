@@ -113,16 +113,11 @@ public class UserTestUtil {
 
 		User organizationUser = addUser(organization.getGroupId());
 
-		long[] userIds = {organizationUser.getUserId()};
+		UserLocalServiceUtil.addOrganizationUser(
+			organization.getOrganizationId(), organizationUser.getUserId());
 
-		UserLocalServiceUtil.addOrganizationUsers(
-			organization.getOrganizationId(), userIds);
-
-		Role role = RoleLocalServiceUtil.getRole(
-			TestPropsValues.getCompanyId(), roleName);
-
-		UserGroupRoleLocalServiceUtil.addUserGroupRoles(
-			userIds, organization.getGroupId(), role.getRoleId());
+		addUserGroupRole(
+			organizationUser.getUserId(), organization.getGroupId(), roleName);
 
 		return organizationUser;
 	}
@@ -271,6 +266,17 @@ public class UserTestUtil {
 			ServiceContextTestUtil.getServiceContext());
 	}
 
+	public static void addUserGroupRole(
+			long userId, long groupId, String roleName)
+		throws Exception {
+
+		Role role = RoleLocalServiceUtil.getRole(
+			TestPropsValues.getCompanyId(), roleName);
+
+		UserGroupRoleLocalServiceUtil.addUserGroupRoles(
+			new long[] {userId}, groupId, role.getRoleId());
+	}
+
 	public static User getAdminUser(long companyId) throws PortalException {
 		Role role = RoleLocalServiceUtil.getRole(
 			companyId, RoleConstants.ADMINISTRATOR);
@@ -319,15 +325,10 @@ public class UserTestUtil {
 		int birthdayDay = 1;
 		int birthdayYear = 1970;
 		String smsSn = StringPool.BLANK;
-		String aimSn = StringPool.BLANK;
 		String facebookSn = StringPool.BLANK;
-		String icqSn = StringPool.BLANK;
 		String jabberSn = StringPool.BLANK;
-		String msnSn = StringPool.BLANK;
-		String mySpaceSn = StringPool.BLANK;
 		String skypeSn = StringPool.BLANK;
 		String twitterSn = StringPool.BLANK;
-		String ymSn = StringPool.BLANK;
 		String jobTitle = StringPool.BLANK;
 		long[] groupIds = null;
 		long[] organizationIds = null;
@@ -341,9 +342,9 @@ public class UserTestUtil {
 			screenName, emailAddress, facebookId, openId, languageId,
 			timeZoneId, greeting, comments, firstName, middleName, lastName,
 			prefixId, suffixId, male, birthdayMonth, birthdayDay, birthdayYear,
-			smsSn, aimSn, facebookSn, icqSn, jabberSn, msnSn, mySpaceSn,
-			skypeSn, twitterSn, ymSn, jobTitle, groupIds, organizationIds,
-			roleIds, userGroupRoles, userGroupIds, serviceContext);
+			smsSn, facebookSn, jabberSn, skypeSn, twitterSn, jobTitle, groupIds,
+			organizationIds, roleIds, userGroupRoles, userGroupIds,
+			serviceContext);
 	}
 
 }

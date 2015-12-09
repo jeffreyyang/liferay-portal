@@ -14,6 +14,7 @@
 
 package com.liferay.portal.model.impl;
 
+import com.liferay.portal.kernel.application.type.ApplicationType;
 import com.liferay.portal.kernel.atom.AtomCollectionAdapter;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
@@ -160,7 +161,6 @@ public class PortletImpl extends PortletBaseImpl {
 		String popMessageListenerClass,
 		List<String> socialActivityInterpreterClasses,
 		String socialRequestInterpreterClass,
-		boolean socialInteractionsConfiguration,
 		String userNotificationDefinitions,
 		List<String> userNotificationHandlerClasses, String webDAVStorageToken,
 		String webDAVStorageClass, String xmlRpcMethodClass,
@@ -233,7 +233,6 @@ public class PortletImpl extends PortletBaseImpl {
 		_popMessageListenerClass = popMessageListenerClass;
 		_socialActivityInterpreterClasses = socialActivityInterpreterClasses;
 		_socialRequestInterpreterClass = socialRequestInterpreterClass;
-		_socialInteractionsConfiguration = socialInteractionsConfiguration;
 		_userNotificationDefinitions = userNotificationDefinitions;
 		_userNotificationHandlerClasses = userNotificationHandlerClasses;
 		_webDAVStorageToken = webDAVStorageToken;
@@ -302,7 +301,17 @@ public class PortletImpl extends PortletBaseImpl {
 	}
 
 	/**
-	 * Adds a supported processing event.
+	 * Adds an application type.
+	 *
+	 * @param applicationType an application type
+	 */
+	@Override
+	public void addApplicationType(ApplicationType applicationType) {
+		_applicationTypes.add(applicationType);
+	}
+
+	/**
+	 * Adds a processing event.
 	 */
 	@Override
 	public void addProcessingEvent(QName processingEvent) {
@@ -312,9 +321,9 @@ public class PortletImpl extends PortletBaseImpl {
 	}
 
 	/**
-	 * Adds a supported public render parameter.
+	 * Adds a public render parameter.
 	 *
-	 * @param publicRenderParameter a supported public render parameter
+	 * @param publicRenderParameter a public render parameter
 	 */
 	@Override
 	public void addPublicRenderParameter(
@@ -340,7 +349,7 @@ public class PortletImpl extends PortletBaseImpl {
 	}
 
 	/**
-	 * Adds a supported publishing event.
+	 * Adds a publishing event.
 	 */
 	@Override
 	public void addPublishingEvent(QName publishingEvent) {
@@ -376,7 +385,6 @@ public class PortletImpl extends PortletBaseImpl {
 			getPollerProcessorClass(), getPopMessageListenerClass(),
 			getSocialActivityInterpreterClasses(),
 			getSocialRequestInterpreterClass(),
-			getSocialInteractionsConfiguration(),
 			getUserNotificationDefinitions(),
 			getUserNotificationHandlerClasses(), getWebDAVStorageToken(),
 			getWebDAVStorageClass(), getXmlRpcMethodClass(),
@@ -409,8 +417,8 @@ public class PortletImpl extends PortletBaseImpl {
 			getPublishingEvents(), getPublicRenderParameters(),
 			getPortletApp());
 
+		portlet.setApplicationTypes(getApplicationTypes());
 		portlet.setId(getId());
-		portlet.setFullPageDisplayable(isFullPageDisplayable());
 		portlet.setUndeployedPortlet(isUndeployedPortlet());
 
 		return portlet;
@@ -500,9 +508,9 @@ public class PortletImpl extends PortletBaseImpl {
 	}
 
 	/**
-	 * Returns a list of all portlet modes supported by the portlet.
+	 * Returns the portlet modes of the portlet.
 	 *
-	 * @return a list of all portlet modes supported by the portlet
+	 * @return the portlet modes of the portlet
 	 */
 	@Override
 	public Set<String> getAllPortletModes() {
@@ -520,9 +528,9 @@ public class PortletImpl extends PortletBaseImpl {
 	}
 
 	/**
-	 * Returns a list of all window states supported by the portlet.
+	 * Returns the window states of the portlet.
 	 *
-	 * @return a list of all window states supported by the portlet
+	 * @return the window states of the portlet
 	 */
 	@Override
 	public Set<String> getAllWindowStates() {
@@ -537,6 +545,16 @@ public class PortletImpl extends PortletBaseImpl {
 		}
 
 		return allWindowStates;
+	}
+
+	/**
+	 * Returns the application types of the portlet.
+	 *
+	 * @return the application types of the portlet
+	 */
+	@Override
+	public Set<ApplicationType> getApplicationTypes() {
+		return _applicationTypes;
 	}
 
 	/**
@@ -1355,6 +1373,10 @@ public class PortletImpl extends PortletBaseImpl {
 	public PortletLayoutListener getPortletLayoutListenerInstance() {
 		PortletBag portletBag = PortletBagPool.get(getRootPortletId());
 
+		if ( portletBag == null) {
+			return null;
+		}
+
 		List<PortletLayoutListener> portletLayoutListenerInstances =
 			portletBag.getPortletLayoutListenerInstances();
 
@@ -1466,13 +1488,11 @@ public class PortletImpl extends PortletBaseImpl {
 	}
 
 	/**
-	 * Returns the supported processing event from a namespace URI and a local
-	 * part.
+	 * Returns the processing event from a namespace URI and a local part.
 	 *
 	 * @param  uri the namespace URI
 	 * @param  localPart the local part
-	 * @return the supported processing event from a namespace URI and a local
-	 *         part
+	 * @return the processing event from a namespace URI and a local part
 	 */
 	@Override
 	public QName getProcessingEvent(String uri, String localPart) {
@@ -1481,9 +1501,9 @@ public class PortletImpl extends PortletBaseImpl {
 	}
 
 	/**
-	 * Returns the supported processing events of the portlet.
+	 * Returns the processing events of the portlet.
 	 *
-	 * @return supported processing events of the portlet
+	 * @return the processing events of the portlet
 	 */
 	@Override
 	public Set<QName> getProcessingEvents() {
@@ -1491,10 +1511,10 @@ public class PortletImpl extends PortletBaseImpl {
 	}
 
 	/**
-	 * Returns the supported public render parameter from an identifier.
+	 * Returns the public render parameter from an identifier.
 	 *
 	 * @param  identifier the identifier
-	 * @return the supported public render parameter from an identifier
+	 * @return the public render parameter from an identifier
 	 */
 	@Override
 	public PublicRenderParameter getPublicRenderParameter(String identifier) {
@@ -1502,13 +1522,13 @@ public class PortletImpl extends PortletBaseImpl {
 	}
 
 	/**
-	 * Returns the supported public render parameter from a namespace URI and a
-	 * local part.
+	 * Returns the spublic render parameter from a namespace URI and a local
+	 * part.
 	 *
 	 * @param  uri the namespace URI
 	 * @param  localPart the local part
-	 * @return the supported public render parameter from a namespace URI and a
-	 *         local part
+	 * @return the spublic render parameter from a namespace URI and a local
+	 *         part
 	 */
 	@Override
 	public PublicRenderParameter getPublicRenderParameter(
@@ -1519,9 +1539,9 @@ public class PortletImpl extends PortletBaseImpl {
 	}
 
 	/**
-	 * Returns the supported public render parameters of the portlet.
+	 * Returns the public render parameters of the portlet.
 	 *
-	 * @return the supported public render parameters of the portlet
+	 * @return the public render parameters of the portlet
 	 */
 	@Override
 	public Set<PublicRenderParameter> getPublicRenderParameters() {
@@ -1529,9 +1549,9 @@ public class PortletImpl extends PortletBaseImpl {
 	}
 
 	/**
-	 * Returns the supported publishing events of the portlet.
+	 * Returns the publishing events of the portlet.
 	 *
-	 * @return supported publishing events of the portlet
+	 * @return the publishing events of the portlet
 	 */
 	@Override
 	public Set<QName> getPublishingEvents() {
@@ -1724,18 +1744,6 @@ public class PortletImpl extends PortletBaseImpl {
 	}
 
 	/**
-	 * Returns <code>true</code> if the portlet uses Social Interactions
-	 * Configuration
-	 *
-	 * @return <code>true</code> if the portlet uses Social Interactions
-	 *         Configuration
-	 */
-	@Override
-	public boolean getSocialInteractionsConfiguration() {
-		return _socialInteractionsConfiguration;
-	}
-
-	/**
 	 * Returns the name of the social request interpreter class of the portlet.
 	 *
 	 * @return the name of the social request interpreter class of the portlet
@@ -1869,7 +1877,7 @@ public class PortletImpl extends PortletBaseImpl {
 	/**
 	 * Returns the supported locales of the portlet.
 	 *
-	 * @return supported locales of the portlet
+	 * @return the supported locales of the portlet
 	 */
 	@Override
 	public Set<String> getSupportedLocales() {
@@ -2419,7 +2427,8 @@ public class PortletImpl extends PortletBaseImpl {
 
 	@Override
 	public boolean isFullPageDisplayable() {
-		return _fullPageDisplayable;
+		return _applicationTypes.contains(
+			ApplicationType.FULL_PAGE_APPLICATION);
 	}
 
 	/**
@@ -2648,18 +2657,6 @@ public class PortletImpl extends PortletBaseImpl {
 	}
 
 	/**
-	 * Returns <code>true</code> if the portlet uses Social Interactions
-	 * Configuration
-	 *
-	 * @return <code>true</code> if the portlet uses Social Interactions
-	 *         Configuration
-	 */
-	@Override
-	public boolean isSocialInteractionsConfiguration() {
-		return _socialInteractionsConfiguration;
-	}
-
-	/**
 	 * Returns <code>true</code> if the portlet is a static portlet that is
 	 * cannot be moved.
 	 *
@@ -2807,6 +2804,18 @@ public class PortletImpl extends PortletBaseImpl {
 	@Override
 	public void setAjaxable(boolean ajaxable) {
 		_ajaxable = ajaxable;
+	}
+
+	/**
+	 * Sets the application types of the portlet.
+	 *
+	 * @param applicationTypes the application types of the portlet
+	 */
+	@Override
+	public void setApplicationTypes(Set<ApplicationType> applicationTypes) {
+		for (ApplicationType applicationType : applicationTypes) {
+			addApplicationType(applicationType);
+		}
 	}
 
 	/**
@@ -3061,11 +3070,6 @@ public class PortletImpl extends PortletBaseImpl {
 	@Override
 	public void setFriendlyURLRoutes(String friendlyURLRoutes) {
 		_friendlyURLRoutes = friendlyURLRoutes;
-	}
-
-	@Override
-	public void setFullPageDisplayable(boolean fullPageDisplayable) {
-		_fullPageDisplayable = fullPageDisplayable;
 	}
 
 	/**
@@ -3465,9 +3469,9 @@ public class PortletImpl extends PortletBaseImpl {
 	}
 
 	/**
-	 * Sets the supported processing events of the portlet.
+	 * Sets the processing events of the portlet.
 	 *
-	 * @param processingEvents the supported processing events of the portlet
+	 * @param processingEvents the processing events of the portlet
 	 */
 	@Override
 	public void setProcessingEvents(Set<QName> processingEvents) {
@@ -3477,10 +3481,9 @@ public class PortletImpl extends PortletBaseImpl {
 	}
 
 	/**
-	 * Sets the supported public render parameters of the portlet.
+	 * Sets the public render parameters of the portlet.
 	 *
-	 * @param publicRenderParameters the supported public render parameters of
-	 *        the portlet
+	 * @param publicRenderParameters the public render parameters of the portlet
 	 */
 	@Override
 	public void setPublicRenderParameters(
@@ -3494,9 +3497,9 @@ public class PortletImpl extends PortletBaseImpl {
 	}
 
 	/**
-	 * Sets the supported publishing events of the portlet.
+	 * Sets the publishing events of the portlet.
 	 *
-	 * @param publishingEvents the supported publishing events of the portlet
+	 * @param publishingEvents the publishing events of the portlet
 	 */
 	@Override
 	public void setPublishingEvents(Set<QName> publishingEvents) {
@@ -3709,13 +3712,6 @@ public class PortletImpl extends PortletBaseImpl {
 		List<String> socialActivityInterpreterClasses) {
 
 		_socialActivityInterpreterClasses = socialActivityInterpreterClasses;
-	}
-
-	@Override
-	public void setSocialInteractionsConfiguration(
-		boolean socialInteractionsConfiguration) {
-
-		_socialInteractionsConfiguration = socialInteractionsConfiguration;
 	}
 
 	/**
@@ -4030,6 +4026,11 @@ public class PortletImpl extends PortletBaseImpl {
 	private boolean _ajaxable = true;
 
 	/**
+	 * The application types of the portlet.
+	 */
+	private final Set<ApplicationType> _applicationTypes = new HashSet<>();
+
+	/**
 	 * The names of the classes that represents asset types associated with the
 	 * portlet.
 	 */
@@ -4147,12 +4148,6 @@ public class PortletImpl extends PortletBaseImpl {
 	 * portlet.
 	 */
 	private String _friendlyURLRoutes;
-
-	/**
-	 * <code>True</code> if the portlet can be displayed as a full page of the
-	 * view.
-	 */
-	private boolean _fullPageDisplayable;
 
 	/**
 	 * A list of CSS files that will be referenced from the page's header
@@ -4338,37 +4333,36 @@ public class PortletImpl extends PortletBaseImpl {
 	private boolean _privateSessionAttributes = true;
 
 	/**
-	 * The supported processing events of the portlet.
+	 * The processing events of the portlet.
 	 */
 	private final Set<QName> _processingEvents = new HashSet<>();
 
 	/**
-	 * Map of the supported processing events of the portlet keyed by the QName.
+	 * Map of the processing events of the portlet keyed by the QName.
 	 */
 	private final Map<String, QName> _processingEventsByQName = new HashMap<>();
 
 	/**
-	 * The supported public render parameters of the portlet.
+	 * The public render parameters of the portlet.
 	 */
 	private final Set<PublicRenderParameter> _publicRenderParameters =
 		new HashSet<>();
 
 	/**
-	 * Map of the supported public render parameters of the portlet keyed by the
+	 * Map of the public render parameters of the portlet keyed by the
 	 * identifier.
 	 */
 	private final Map<String, PublicRenderParameter>
 		_publicRenderParametersByIdentifier = new HashMap<>();
 
 	/**
-	 * Map of the supported public render parameters of the portlet keyed by the
-	 * QName.
+	 * Map of the public render parameters of the portlet keyed by the QName.
 	 */
 	private final Map<String, PublicRenderParameter>
 		_publicRenderParametersByQName = new HashMap<>();
 
 	/**
-	 * The supported publishing events of the portlet.
+	 * The publishing events of the portlet.
 	 */
 	private final Set<QName> _publishingEvents = new HashSet<>();
 
@@ -4451,11 +4445,6 @@ public class PortletImpl extends PortletBaseImpl {
 	 * associated with the portlet.
 	 */
 	private List<String> _socialActivityInterpreterClasses;
-
-	/**
-	 * <code>True</code> if the portlet uses Social Interactions Configuration.
-	 */
-	private boolean _socialInteractionsConfiguration;
 
 	/**
 	 * The name of the social request interpreter class of the portlet.

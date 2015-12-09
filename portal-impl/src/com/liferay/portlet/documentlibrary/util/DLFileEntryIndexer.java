@@ -17,6 +17,7 @@ package com.liferay.portlet.documentlibrary.util;
 import com.liferay.portal.kernel.comment.Comment;
 import com.liferay.portal.kernel.dao.orm.ActionableDynamicQuery;
 import com.liferay.portal.kernel.dao.orm.DynamicQuery;
+import com.liferay.portal.kernel.dao.orm.IndexableActionableDynamicQuery;
 import com.liferay.portal.kernel.dao.orm.Property;
 import com.liferay.portal.kernel.dao.orm.PropertyFactoryUtil;
 import com.liferay.portal.kernel.exception.PortalException;
@@ -224,10 +225,10 @@ public class DLFileEntryIndexer
 				DDMStructureManager.STRUCTURE_INDEXER_FIELD_SEPARATOR);
 
 			DDMStructure ddmStructure = DDMStructureManagerUtil.getStructure(
-				GetterUtil.getLong(ddmStructureFieldNameParts[1]));
+				GetterUtil.getLong(ddmStructureFieldNameParts[2]));
 
 			String fieldName = StringUtil.replaceLast(
-				ddmStructureFieldNameParts[2],
+				ddmStructureFieldNameParts[3],
 				StringPool.UNDERLINE.concat(
 					LocaleUtil.toLanguageId(searchContext.getLocale())),
 				StringPool.BLANK);
@@ -573,10 +574,10 @@ public class DLFileEntryIndexer
 			long companyId, final long groupId, final long dataRepositoryId)
 		throws PortalException {
 
-		final ActionableDynamicQuery actionableDynamicQuery =
-			DLFileEntryLocalServiceUtil.getActionableDynamicQuery();
+		final IndexableActionableDynamicQuery indexableActionableDynamicQuery =
+			DLFileEntryLocalServiceUtil.getIndexableActionableDynamicQuery();
 
-		actionableDynamicQuery.setAddCriteriaMethod(
+		indexableActionableDynamicQuery.setAddCriteriaMethod(
 			new ActionableDynamicQuery.AddCriteriaMethod() {
 
 				@Override
@@ -590,20 +591,19 @@ public class DLFileEntryIndexer
 				}
 
 			});
-		actionableDynamicQuery.setCompanyId(companyId);
-		actionableDynamicQuery.setGroupId(groupId);
-		actionableDynamicQuery.setPerformActionMethod(
-			new ActionableDynamicQuery.PerformActionMethod() {
+		indexableActionableDynamicQuery.setCompanyId(companyId);
+		indexableActionableDynamicQuery.setGroupId(groupId);
+		indexableActionableDynamicQuery.setPerformActionMethod(
+			new ActionableDynamicQuery.PerformActionMethod<DLFileEntry>() {
 
 				@Override
-				public void performAction(Object object) {
-					DLFileEntry dlFileEntry = (DLFileEntry)object;
-
+				public void performAction(DLFileEntry dlFileEntry) {
 					try {
 						Document document = getDocument(dlFileEntry);
 
 						if (document != null) {
-							actionableDynamicQuery.addDocument(document);
+							indexableActionableDynamicQuery.addDocuments(
+								document);
 						}
 					}
 					catch (PortalException pe) {
@@ -617,9 +617,9 @@ public class DLFileEntryIndexer
 				}
 
 			});
-		actionableDynamicQuery.setSearchEngineId(getSearchEngineId());
+		indexableActionableDynamicQuery.setSearchEngineId(getSearchEngineId());
 
-		actionableDynamicQuery.performActions();
+		indexableActionableDynamicQuery.performActions();
 	}
 
 	protected void reindexFolders(final long companyId) throws PortalException {
@@ -628,13 +628,11 @@ public class DLFileEntryIndexer
 
 		actionableDynamicQuery.setCompanyId(companyId);
 		actionableDynamicQuery.setPerformActionMethod(
-			new ActionableDynamicQuery.PerformActionMethod() {
+			new ActionableDynamicQuery.PerformActionMethod<DLFolder>() {
 
 				@Override
-				public void performAction(Object object)
+				public void performAction(DLFolder dlFolder)
 					throws PortalException {
-
-					DLFolder dlFolder = (DLFolder)object;
 
 					long groupId = dlFolder.getGroupId();
 					long folderId = dlFolder.getFolderId();
@@ -658,14 +656,10 @@ public class DLFileEntryIndexer
 
 		actionableDynamicQuery.setCompanyId(companyId);
 		actionableDynamicQuery.setPerformActionMethod(
-			new ActionableDynamicQuery.PerformActionMethod() {
+			new ActionableDynamicQuery.PerformActionMethod<Group>() {
 
 				@Override
-				public void performAction(Object object)
-					throws PortalException {
-
-					Group group = (Group)object;
-
+				public void performAction(Group group) throws PortalException {
 					long groupId = group.getGroupId();
 					long folderId = groupId;
 

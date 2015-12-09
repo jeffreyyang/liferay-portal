@@ -14,6 +14,7 @@
 
 package com.liferay.portal.verify;
 
+import com.liferay.portal.kernel.cache.CacheRegistryUtil;
 import com.liferay.portal.kernel.dao.orm.ActionableDynamicQuery;
 import com.liferay.portal.kernel.dao.orm.DynamicQuery;
 import com.liferay.portal.kernel.dao.orm.ProjectionFactoryUtil;
@@ -45,6 +46,8 @@ public class VerifyPortletPreferences extends VerifyProcess {
 		ActionableDynamicQuery actionableDynamicQuery =
 			getPortletPreferencesActionableDynamicQuery();
 
+		actionableDynamicQuery.setParallel(true);
+
 		actionableDynamicQuery.performActions();
 	}
 
@@ -73,14 +76,12 @@ public class VerifyPortletPreferences extends VerifyProcess {
 
 			});
 		portletPreferencesActionableDynamicQuery.setPerformActionMethod(
-			new ActionableDynamicQuery.PerformActionMethod() {
+			new ActionableDynamicQuery.
+				PerformActionMethod<PortletPreferences>() {
 
 				@Override
-				public void performAction(Object object)
+				public void performAction(PortletPreferences portletPreferences)
 					throws PortalException {
-
-					PortletPreferences portletPreferences =
-						(PortletPreferences)object;
 
 					long layoutRevisionId = portletPreferences.getPlid();
 
@@ -126,7 +127,14 @@ public class VerifyPortletPreferences extends VerifyProcess {
 
 	@Override
 	protected void doVerify() throws Exception {
-		cleanUpLayoutRevisionPortletPreferences();
+		CacheRegistryUtil.setActive(true);
+
+		try {
+			cleanUpLayoutRevisionPortletPreferences();
+		}
+		finally {
+			CacheRegistryUtil.setActive(false);
+		}
 	}
 
 	private static final Log _log = LogFactoryUtil.getLog(

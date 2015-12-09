@@ -2,14 +2,98 @@
 	<property name="testray.main.component.name" value="Breadcrumb" />
 
 	<set-up>
+		<var method="TestPropsUtil#get('test.portal.instance')" name="testPortalInstance" />
+
+		<if>
+			<equals arg1="${testPortalInstance}" arg2="true" />
+			<then>
+				<execute macro="SignIn#signInPortalInstanceSetUp" />
+			</then>
+		</if>
+
 		<execute macro="User#firstLoginPG" />
 	</set-up>
 
 	<tear-down>
-		<execute macro="Page#tearDownPG" />
+		<var method="TestPropsUtil#get('test.portal.instance')" name="testPortalInstance" />
 
-		<execute macro="Site#tearDownCP" />
+		<if>
+			<equals arg1="${testPortalInstance}" arg2="true" />
+			<then>
+				<execute macro="PortalInstances#tearDownCP" />
+			</then>
+			<else>
+				<execute macro="Page#tearDownPG" />
+
+				<execute macro="Site#tearDownCP" />
+			</else>
+		</if>
 	</tear-down>
+
+	<command name="ConfigureNoSave" priority="3">
+		<execute macro="Page#gotoCP">
+			<var name="portletName" value="Sites" />
+		</execute>
+
+		<execute macro="Site#addBlankCP">
+			<var name="siteName" value="Site Name" />
+		</execute>
+
+		<execute macro="ProductMenu#gotoSitesPages">
+			<var name="page" value="Public Pages" />
+			<var name="site" value="Site Name" />
+		</execute>
+
+		<execute macro="SitePage#addCP">
+			<var name="page" value="Public Pages" />
+			<var name="siteName" value="Site Name" />
+			<var name="sitePageName" value="Parent Page Name" />
+			<var name="siteScopeSelected" value="true" />
+		</execute>
+
+		<execute macro="Page#gotoCP">
+			<var name="portletName" value="Sites" />
+		</execute>
+
+		<execute macro="SitePage#addChildCP">
+			<var name="page" value="Public Pages" />
+			<var name="siteChildPageName" value="Child Page Name" />
+			<var name="siteName" value="Site Name" />
+			<var name="sitePageName" value="Parent Page Name" />
+		</execute>
+
+		<execute macro="Page#gotoChildPagePG">
+			<var name="childPageName" value="Child Page Name" />
+			<var name="pageName" value="Parent Page Name" />
+			<var name="siteName" value="Site Name" />
+			<var name="siteURL" value="true" />
+		</execute>
+
+		<execute macro="Portlet#addPG">
+			<var name="portletName" value="Breadcrumb" />
+		</execute>
+
+		<execute macro="Portlet#gotoPortletOptions">
+			<var name="portletOption" value="Configuration" />
+		</execute>
+
+		<execute macro="Breadcrumb#configureBreadcrumb">
+			<var name="uncheckSetupName" value="Show Current Site,Show Guest Site,Show Page,Show Parent Sites,Show Application Breadcrumb" />
+		</execute>
+
+		<execute macro="Breadcrumb#viewConfigurationPreview">
+			<var name="breadcrumbListNotVisible" value="Liferay,Site Name,Parent Page Name,Child Page Name" />
+		</execute>
+
+		<execute macro="Breadcrumb#configureBreadcrumb">
+			<var name="checkSetupName" value="Show Current Site,Show Guest Site,Show Page,Show Parent Sites,Show Application Breadcrumb" />
+			<var name="configureWithoutSave" value="true" />
+		</execute>
+
+		<execute macro="Breadcrumb#viewConfigurationPreview">
+			<var name="breadcrumbListVisible" value="Liferay,Site Name,Parent Page Name,Child Page Name" />
+		</execute>
+	</command>
 
 	<command name="DisableShowApplicationBreadcrumb" priority="4">
 		<execute macro="Page#gotoCP">
@@ -25,9 +109,9 @@
 		</execute>
 
 		<execute macro="SitePage#addCP">
+			<var name="page" value="Public Pages" />
 			<var name="siteName" value="Site Name" />
 			<var name="sitePageName" value="Page Name" />
-			<var name="sitePagePrivacy" value="Public" />
 		</execute>
 
 		<execute macro="Page#gotoPG">
@@ -178,6 +262,8 @@
 	</command>
 
 	<command name="DisableShowCurrentSite" priority="5">
+		<property name="portal.acceptance" value="true" />
+
 		<execute macro="Page#gotoCP">
 			<var name="portletName" value="Sites" />
 		</execute>
@@ -191,9 +277,9 @@
 		</execute>
 
 		<execute macro="SitePage#addCP">
+			<var name="page" value="Public Pages" />
 			<var name="siteName" value="Site Name" />
 			<var name="sitePageName" value="Parent Page Name" />
-			<var name="sitePagePrivacy" value="Public" />
 		</execute>
 
 		<execute macro="Page#gotoCP">
@@ -201,10 +287,10 @@
 		</execute>
 
 		<execute macro="SitePage#addChildCP">
+			<var name="page" value="Public Pages" />
 			<var name="siteChildPageName" value="Child Page Name" />
 			<var name="siteName" value="Site Name" />
 			<var name="sitePageName" value="Parent Page Name" />
-			<var name="sitePagePrivacy" value="Public" />
 		</execute>
 
 		<execute macro="Page#gotoChildPagePG">
@@ -281,15 +367,15 @@
 	</command>
 
 	<command name="DisableShowPage" priority="5">
-		<execute macro="Page#gotoCP">
-			<var name="portletName" value="Sites" />
+		<execute macro="ProductMenu#gotoSitesPages">
+			<var name="page" value="Public Pages" />
 		</execute>
 
 		<execute macro="SitePage#addChildCP">
+			<var name="page" value="Public Pages" />
 			<var name="siteChildPageName" value="Child Page Name" />
-			<var name="siteName" value="Liferay" />
 			<var name="sitePageName" value="Welcome" />
-			<var name="sitePagePrivacy" value="Public" />
+			<var name="siteScopeSelected" value="true" />
 		</execute>
 
 		<execute macro="Page#gotoChildPagePG">
@@ -353,9 +439,9 @@
 		</execute>
 
 		<execute macro="SitePage#addCP">
+			<var name="page" value="Public Pages" />
 			<var name="siteName" value="Site Name" />
 			<var name="sitePageName" value="Page Name" />
-			<var name="sitePagePrivacy" value="Public" />
 		</execute>
 
 		<execute macro="Page#gotoCP">
@@ -372,9 +458,9 @@
 		</execute>
 
 		<execute macro="SitePage#addCP">
+			<var name="page" value="Public Pages" />
 			<var name="siteName" value="Child SiteName" />
 			<var name="sitePageName" value="Parent Page Name" />
-			<var name="sitePagePrivacy" value="Public" />
 		</execute>
 
 		<execute macro="Page#gotoCP">
@@ -382,10 +468,10 @@
 		</execute>
 
 		<execute macro="SitePage#addChildCP">
+			<var name="page" value="Public Pages" />
 			<var name="siteChildPageName" value="Child Page Name" />
 			<var name="siteName" value="Child SiteName" />
 			<var name="sitePageName" value="Parent Page Name" />
-			<var name="sitePagePrivacy" value="Public" />
 		</execute>
 
 		<execute macro="Page#gotoChildPagePG">
@@ -431,66 +517,16 @@
 		</execute>
 	</command>
 
-	<command name="DisplayTemplateWithArrowsStyle" priority="4">
-		<execute macro="Page#gotoCP">
-			<var name="portletName" value="Sites" />
-		</execute>
-
-		<execute macro="SitePage#addChildCP">
-			<var name="siteChildPageName" value="Child Page Name" />
-			<var name="siteName" value="Liferay" />
-			<var name="sitePageName" value="Welcome" />
-			<var name="sitePagePrivacy" value="Public" />
-		</execute>
-
-		<execute macro="Page#gotoChildPagePG">
-			<var name="childPageName" value="Child Page Name" />
-			<var name="pageName" value="Welcome" />
-		</execute>
-
-		<execute macro="Portlet#addPG">
-			<var name="portletName" value="Breadcrumb" />
-		</execute>
-
-		<execute macro="Portlet#gotoPortletOptions">
-			<var name="portletOption" value="Configuration" />
-		</execute>
-
-		<execute macro="Breadcrumb#displayTemplatePreview">
-			<var name="displayStyle" value="Arrows" />
-		</execute>
-
-		<execute macro="Breadcrumb#viewConfigurationPreview">
-			<var name="breadcrumbListVisible" value="Welcome,Child Page Name" />
-		</execute>
-
-		<execute macro="Breadcrumb#saveDisplayPreview" />
-
-		<execute macro="Breadcrumb#viewConfigurationPreview">
-			<var name="breadcrumbListVisible" value="Welcome,Child Page Name" />
-		</execute>
-
-		<execute macro="Page#gotoChildPagePG">
-			<var name="childPageName" value="Child Page Name" />
-			<var name="pageName" value="Welcome" />
-		</execute>
-
-		<execute macro="Breadcrumb#viewPG">
-			<var name="breadcrumbListVisible" value="Welcome,Child Page Name" />
-			<var name="pathLocator" value="PAGE" />
-		</execute>
-	</command>
-
 	<command name="DisplayTemplateWithHorizontalStyle" priority="4">
-		<execute macro="Page#gotoCP">
-			<var name="portletName" value="Sites" />
+		<execute macro="ProductMenu#gotoSitesPages">
+			<var name="page" value="Public Pages" />
 		</execute>
 
 		<execute macro="SitePage#addChildCP">
+			<var name="page" value="Public Pages" />
 			<var name="siteChildPageName" value="Child Page Name" />
-			<var name="siteName" value="Liferay" />
 			<var name="sitePageName" value="Welcome" />
-			<var name="sitePagePrivacy" value="Public" />
+			<var name="siteScopeSelected" value="true" />
 		</execute>
 
 		<execute macro="Page#gotoChildPagePG">
@@ -528,15 +564,15 @@
 	</command>
 
 	<command name="DisplayTemplateWithVerticalStyle" priority="4">
-		<execute macro="Page#gotoCP">
-			<var name="portletName" value="Sites" />
+		<execute macro="ProductMenu#gotoSitesPages">
+			<var name="page" value="Public Pages" />
 		</execute>
 
 		<execute macro="SitePage#addChildCP">
+			<var name="page" value="Public Pages" />
 			<var name="siteChildPageName" value="Child Page Name" />
-			<var name="siteName" value="Liferay" />
 			<var name="sitePageName" value="Welcome" />
-			<var name="sitePagePrivacy" value="Public" />
+			<var name="siteScopeSelected" value="true" />
 		</execute>
 
 		<execute macro="Page#gotoChildPagePG">
@@ -574,15 +610,15 @@
 	</command>
 
 	<command name="EnableShowGuestSite" priority="4">
-		<execute macro="Page#gotoCP">
-			<var name="portletName" value="Sites" />
+		<execute macro="ProductMenu#gotoSitesPages">
+			<var name="page" value="Public Pages" />
 		</execute>
 
 		<execute macro="SitePage#addChildCP">
+			<var name="page" value="Public Pages" />
 			<var name="siteChildPageName" value="Child Page Name" />
-			<var name="siteName" value="Liferay" />
 			<var name="sitePageName" value="Welcome" />
-			<var name="sitePagePrivacy" value="Public" />
+			<var name="siteScopeSelected" value="true" />
 		</execute>
 
 		<execute macro="Page#gotoChildPagePG">

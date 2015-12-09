@@ -3,39 +3,58 @@
 	<property name="testray.main.component.name" value="Kaleo Forms Admin" />
 
 	<set-up>
+		<var method="TestPropsUtil#get('test.portal.instance')" name="testPortalInstance" />
+
+		<if>
+			<equals arg1="${testPortalInstance}" arg2="true" />
+			<then>
+				<execute macro="SignIn#signInPortalInstanceSetUp" />
+			</then>
+		</if>
+
 		<execute macro="User#firstLoginPG" />
 	</set-up>
 
 	<tear-down>
-		<execute macro="User#firstLoginPG" />
+		<var method="TestPropsUtil#get('test.portal.instance')" name="testPortalInstance" />
 
-		<execute macro="KaleoFormsAdmin#tearDownProcess" />
+		<if>
+			<equals arg1="${testPortalInstance}" arg2="true" />
+			<then>
+				<execute macro="PortalInstances#tearDownCP" />
+			</then>
+			<else>
+				<execute macro="User#firstLoginPG" />
 
-		<execute macro="DDLTemplate#tearDownTemplateCP" />
+				<execute macro="KaleoFormsAdmin#tearDownProcess" />
 
-		<execute macro="DDLTemplate#tearDownTemplateCP">
-			<var name="ddlDataDefinitionName" value="To Do" />
-		</execute>
+				<execute macro="DDLTemplate#tearDownTemplateCP" />
 
-		<execute macro="DDLTemplate#tearDownTemplateCP">
-			<var name="ddlDataDefinitionName" value="Inventory" />
-		</execute>
+				<execute macro="DDLTemplate#tearDownTemplateCP">
+					<var name="ddlDataDefinitionName" value="To Do" />
+				</execute>
 
-		<execute macro="DDLDataDefinition#tearDownCP" />
+				<execute macro="DDLTemplate#tearDownTemplateCP">
+					<var name="ddlDataDefinitionName" value="Inventory" />
+				</execute>
 
-		<execute macro="DMDocument#tearDownCP" />
+				<execute macro="DDLDataDefinition#tearDownCP" />
 
-		<execute macro="Page#tearDownPG" />
+				<execute macro="DMDocument#tearDownCP" />
 
-		<execute macro="Workflow#tearDownSpecificWorkflowDefinition">
-			<var name="workflowDefinitionTitle" value="Edited Workflow Definition" />
-		</execute>
+				<execute macro="Page#tearDownPG" />
 
-		<execute macro="Workflow#tearDownWorkflowDefinitionsViaWorkflowCP" />
+				<execute macro="Workflow#tearDownSpecificWorkflowDefinition">
+					<var name="workflowDefinitionTitle" value="Edited Workflow Definition" />
+				</execute>
 
-		<execute macro="User#tearDownCP" />
+				<execute macro="Workflow#tearDownWorkflowDefinitionsViaWorkflowCP" />
 
-		<execute macro="Role#tearDownCP" />
+				<execute macro="User#tearDownCP" />
+
+				<execute macro="Role#tearDownCP" />
+			</else>
+		</if>
 	</tear-down>
 
 	<command name="AssertCanEditPendingForm" priority="4">
@@ -1891,28 +1910,28 @@
 		<var name="role1Name" value="Administrator" />
 		<var name="role2Name" value="Reviewer Name" />
 		<var name="role3Name" value="Updater Name" />
-		<var name="user1EmailAddress" property-value="email.address.2" />
+		<var method="TestPropsUtil#get('email.address.2')" name="user1EmailAddress" />
 		<var name="user1FirstName" value="userfn" />
 		<var name="user1LastName" value="Creator" />
 		<var name="user1ScreenName" value="creator" />
-		<var name="user2EmailAddress" property-value="email.address.3" />
-		<var name="user2EmailPassword" property-value="email.password.3" />
+		<var method="TestPropsUtil#get('email.address.3')" name="user2EmailAddress" />
+		<var method="TestPropsUtil#get('email.password.3')" name="user2EmailPassword" />
 		<var name="user2FirstName" value="userfn" />
 		<var name="user2LastName" value="Reviewer" />
 		<var name="user2ScreenName" value="reviewer" />
-		<var name="user3EmailAddress" property-value="email.address.4" />
-		<var name="user3EmailPassword" property-value="email.password.4" />
+		<var method="TestPropsUtil#get('email.address.4')" name="user3EmailAddress" />
+		<var method="TestPropsUtil#get('email.password.4')" name="user3EmailPassword" />
 		<var name="user3FirstName" value="userfn" />
 		<var name="user3LastName" value="Updater" />
 		<var name="user3ScreenName" value="updater" />
 
-		<execute macro="Page#gotoCP">
-			<var name="portletName" value="Server Administration" />
+		<execute macro="ProductMenu#gotoControlPanelSystem">
+			<var name="portlet" value="Server Administration" />
 		</execute>
 
 		<execute macro="ServerAdministration#configureMailServerSettings">
-			<var name="userName" property-value="email.address.1" />
-			<var name="userPassword" property-value="email.password.1" />
+			<var method="TestPropsUtil#get('email.address.1')" name="userName" />
+			<var method="TestPropsUtil#get('email.password.1')" name="userPassword" />
 		</execute>
 
 		<execute macro="Page#gotoCP">
@@ -2364,8 +2383,10 @@
 		<var name="pageName" value="Kaleo Forms" />
 		<var name="workflowDefinitionTitle" value="Single Approver" />
 
-		<execute macro="Page#gotoContentCP">
-			<var name="portletName" value="Dynamic Data Lists" />
+		<execute macro="Navigator#openURL" />
+
+		<execute macro="ProductMenu#gotoSitesContent">
+			<var name="portlet" value="Dynamic Data Lists" />
 		</execute>
 
 		<execute macro="DDLDataDefinition#addCP">
@@ -3004,11 +3025,6 @@
 			<var name="kfProcessFieldData" value="Userfn" />
 		</execute>
 
-		<execute macro="KaleoFormsPortlet#populateFieldSelect">
-			<var name="fieldName" value="imService" />
-			<var name="kfProcessFieldData" value="AOL" />
-		</execute>
-
 		<execute macro="KaleoFormsPortlet#populateFieldText">
 			<var name="fieldName" value="imUserName" />
 			<var name="kfProcessFieldData" value="IMUsername" />
@@ -3073,11 +3089,6 @@
 		<execute macro="KaleoFormsPortlet#viewMyCompletedRequestsField">
 			<var name="fieldName" value="First Name" />
 			<var name="kfProcessFieldData" value="Userfn" />
-		</execute>
-
-		<execute macro="KaleoFormsPortlet#viewMyCompletedRequestsField">
-			<var name="fieldName" value="Instant Messenger Service" />
-			<var name="kfProcessFieldData" value="AOL" />
 		</execute>
 
 		<execute macro="KaleoFormsPortlet#viewMyCompletedRequestsField">
@@ -6026,8 +6037,10 @@
 			<var name="fieldName" value="quantity" />
 		</execute>
 
-		<execute macro="Page#gotoContentCP">
-			<var name="portletName" value="Dynamic Data Lists" />
+		<execute macro="Navigator#openURL" />
+
+		<execute macro="ProductMenu#gotoSitesContent">
+			<var name="portlet" value="Dynamic Data Lists" />
 		</execute>
 
 		<execute macro="DDLTemplate#deleteTemplateCP">
@@ -6284,8 +6297,10 @@
 
 		<execute function="AssertElementNotPresent" locator1="DDLEditRecord#TEXT_FIELD" />
 
-		<execute macro="Page#gotoContentCP">
-			<var name="portletName" value="Dynamic Data Lists" />
+		<execute macro="Navigator#openURL" />
+
+		<execute macro="ProductMenu#gotoSitesContent">
+			<var name="portlet" value="Dynamic Data Lists" />
 		</execute>
 
 		<execute macro="DDLTemplate#deleteTemplateCP">
@@ -6749,8 +6764,10 @@
 		<var name="pageName" value="Kaleo Forms" />
 		<var name="workflowDefinitionTitle" value="Single Approver" />
 
-		<execute macro="Page#gotoContentCP">
-			<var name="portletName" value="Dynamic Data Lists" />
+		<execute macro="Navigator#openURL" />
+
+		<execute macro="ProductMenu#gotoSitesContent">
+			<var name="portlet" value="Dynamic Data Lists" />
 		</execute>
 
 		<execute macro="DDLDataDefinition#addCP">
@@ -6885,8 +6902,10 @@
 		<var name="pageName" value="Kaleo Forms" />
 		<var name="workflowDefinitionTitle" value="Single Approver" />
 
-		<execute macro="Page#gotoContentCP">
-			<var name="portletName" value="Dynamic Data Lists" />
+		<execute macro="Navigator#openURL" />
+
+		<execute macro="ProductMenu#gotoSitesContent">
+			<var name="portlet" value="Dynamic Data Lists" />
 		</execute>
 
 		<execute macro="DDLDataDefinition#addCP">
@@ -7051,8 +7070,10 @@
 		<var name="pageName" value="Kaleo Forms" />
 		<var name="workflowDefinitionTitle" value="Single Approver" />
 
-		<execute macro="Page#gotoContentCP">
-			<var name="portletName" value="Dynamic Data Lists" />
+		<execute macro="Navigator#openURL" />
+
+		<execute macro="ProductMenu#gotoSitesContent">
+			<var name="portlet" value="Dynamic Data Lists" />
 		</execute>
 
 		<execute macro="DDLDataDefinition#addCP">
@@ -7757,29 +7778,29 @@
 		<var name="role1Name" value="KaleoSubmitRole Name" />
 		<var name="role2Name" value="KaleoReviewRole Name" />
 		<var name="role3Name" value="Administrator" />
-		<var name="user1EmailAddress" property-value="email.address.2" />
-		<var name="user1EmailPassword" property-value="email.password.2" />
+		<var method="TestPropsUtil#get('email.address.2')" name="user1EmailAddress" />
+		<var method="TestPropsUtil#get('email.password.2')" name="user1EmailPassword" />
 		<var name="user1FirstName" value="userfn1" />
 		<var name="user1LastName" value="Submitter" />
 		<var name="user1ScreenName" value="kaloesubmitter" />
-		<var name="user2EmailAddress" property-value="email.address.3" />
-		<var name="user2EmailPassword" property-value="email.password.3" />
+		<var method="TestPropsUtil#get('email.address.3')" name="user2EmailAddress" />
+		<var method="TestPropsUtil#get('email.password.3')" name="user2EmailPassword" />
 		<var name="user2FirstName" value="userfn2" />
 		<var name="user2LastName" value="Updater" />
 		<var name="user2ScreenName" value="kaleoupdater" />
-		<var name="user3EmailAddress" property-value="email.address.4" />
-		<var name="user3EmailPassword" property-value="email.password.4" />
+		<var method="TestPropsUtil#get('email.address.4')" name="user3EmailAddress" />
+		<var method="TestPropsUtil#get('email.password.4')" name="user3EmailPassword" />
 		<var name="user3FirstName" value="userfn3" />
 		<var name="user3LastName" value="Administrator" />
 		<var name="user3ScreenName" value="admin" />
 
-		<execute macro="Page#gotoCP">
-			<var name="portletName" value="Server Administration" />
+		<execute macro="ProductMenu#gotoControlPanelSystem">
+			<var name="portlet" value="Server Administration" />
 		</execute>
 
 		<execute macro="ServerAdministration#configureMailServerSettings">
-			<var name="userName" property-value="email.address.1" />
-			<var name="userPassword" property-value="email.password.1" />
+			<var method="TestPropsUtil#get('email.address.1')" name="userName" />
+			<var method="TestPropsUtil#get('email.password.1')" name="userPassword" />
 		</execute>
 
 		<execute macro="Page#gotoCP">
@@ -8517,8 +8538,10 @@
 		<var name="pageName" value="Kaleo Forms" />
 		<var name="workflowDefinitionTitle" value="Single Approver" />
 
-		<execute macro="Page#gotoContentCP">
-			<var name="portletName" value="Dynamic Data Lists" />
+		<execute macro="Navigator#openURL" />
+
+		<execute macro="ProductMenu#gotoSitesContent">
+			<var name="portlet" value="Dynamic Data Lists" />
 		</execute>
 
 		<execute macro="DDLDataDefinition#addCP">
@@ -8936,8 +8959,10 @@
 		<var name="pageName" value="Kaleo Forms" />
 		<var name="workflowDefinitionTitle" value="Single Approver" />
 
-		<execute macro="Page#gotoContentCP">
-			<var name="portletName" value="Dynamic Data Lists" />
+		<execute macro="Navigator#openURL" />
+
+		<execute macro="ProductMenu#gotoSitesContent">
+			<var name="portlet" value="Dynamic Data Lists" />
 		</execute>
 
 		<execute macro="DDLDataDefinition#addCP">

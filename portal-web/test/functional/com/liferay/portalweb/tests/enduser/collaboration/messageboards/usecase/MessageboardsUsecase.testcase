@@ -5,19 +5,38 @@
 	<var name="portletName" value="Message Boards" />
 
 	<set-up>
+		<var method="TestPropsUtil#get('test.portal.instance')" name="testPortalInstance" />
+
+		<if>
+			<equals arg1="${testPortalInstance}" arg2="true" />
+			<then>
+				<execute macro="SignIn#signInPortalInstanceSetUp" />
+			</then>
+		</if>
+
 		<execute macro="User#firstLoginPG" />
 	</set-up>
 
 	<tear-down>
-		<execute macro="MessageboardsPortlet#tearDownConfigurationEmailCP" />
+		<var method="TestPropsUtil#get('test.portal.instance')" name="testPortalInstance" />
 
-		<execute macro="MessageboardsCategory#tearDownCP" />
+		<if>
+			<equals arg1="${testPortalInstance}" arg2="true" />
+			<then>
+				<execute macro="PortalInstances#tearDownCP" />
+			</then>
+			<else>
+				<execute macro="MessageboardsPortlet#tearDownConfigurationEmailCP" />
 
-		<execute macro="MessageboardsThread#tearDownCP" />
+				<execute macro="MessageboardsCategory#tearDownCP" />
 
-		<execute macro="Site#tearDownCP" />
+				<execute macro="MessageboardsThread#tearDownCP" />
 
-		<execute macro="Page#tearDownPG" />
+				<execute macro="Site#tearDownCP" />
+
+				<execute macro="Page#tearDownPG" />
+			</else>
+		</if>
 	</tear-down>
 
 	<command name="CopyAndPasteTextInCKEditor" priority="4">
@@ -70,8 +89,10 @@
 	</command>
 
 	<command name="DeleteMessageboardsThread" priority="5">
-		<execute macro="Page#gotoContentCP">
-			<var name="portletName" value="Message Boards" />
+		<execute macro="Navigator#openURL" />
+
+		<execute macro="ProductMenu#gotoSitesContent">
+			<var name="portlet" value="Message Boards" />
 		</execute>
 
 		<execute macro="MessageboardsThread#addCP">
@@ -79,8 +100,10 @@
 			<var name="threadSubject" value="MB Thread Message Subject" />
 		</execute>
 
-		<execute macro="Page#gotoContentCP">
-			<var name="portletName" value="Message Boards" />
+		<execute macro="Navigator#openURL" />
+
+		<execute macro="ProductMenu#gotoSitesContent">
+			<var name="portlet" value="Message Boards" />
 		</execute>
 
 		<execute macro="MessageboardsThread#moveToRecycleBinCP">
@@ -90,8 +113,10 @@
 			<var name="threadSubject" value="MB Thread Message Subject" />
 		</execute>
 
-		<execute macro="Page#gotoContentCP">
-			<var name="portletName" value="Recycle Bin" />
+		<execute macro="Navigator#openURL" />
+
+		<execute macro="ProductMenu#gotoSitesContent">
+			<var name="portlet" value="Recycle Bin" />
 		</execute>
 
 		<execute macro="RecycleBin#deleteCP">
@@ -99,16 +124,20 @@
 			<var name="assetType" value="Message Boards Thread" />
 		</execute>
 
-		<execute macro="Page#gotoContentCP">
-			<var name="portletName" value="Recycle Bin" />
+		<execute macro="Navigator#openURL" />
+
+		<execute macro="ProductMenu#gotoSitesContent">
+			<var name="portlet" value="Recycle Bin" />
 		</execute>
 
 		<execute macro="RecycleBin#viewDefaultCP">
 			<var name="assetName" value="MB Thread Message Subject" />
 		</execute>
 
-		<execute macro="Page#gotoContentCP">
-			<var name="portletName" value="Message Boards" />
+		<execute macro="Navigator#openURL" />
+
+		<execute macro="ProductMenu#gotoSitesContent">
+			<var name="portlet" value="Message Boards" />
 		</execute>
 
 		<execute macro="MessageboardsThread#viewDefaultCP">
@@ -117,8 +146,10 @@
 	</command>
 
 	<command name="RestoreMessageboardsThread" priority="5">
-		<execute macro="Page#gotoContentCP">
-			<var name="portletName" value="Message Boards" />
+		<execute macro="Navigator#openURL" />
+
+		<execute macro="ProductMenu#gotoSitesContent">
+			<var name="portlet" value="Message Boards" />
 		</execute>
 
 		<execute macro="MessageboardsThread#addCP">
@@ -126,8 +157,10 @@
 			<var name="threadSubject" value="MB Thread Message Subject" />
 		</execute>
 
-		<execute macro="Page#gotoContentCP">
-			<var name="portletName" value="Message Boards" />
+		<execute macro="Navigator#openURL" />
+
+		<execute macro="ProductMenu#gotoSitesContent">
+			<var name="portlet" value="Message Boards" />
 		</execute>
 
 		<execute macro="MessageboardsThread#moveToRecycleBinCP">
@@ -135,8 +168,10 @@
 			<var name="threadSubject" value="MB Thread Message Subject" />
 		</execute>
 
-		<execute macro="Page#gotoContentCP">
-			<var name="portletName" value="Recycle Bin" />
+		<execute macro="Navigator#openURL" />
+
+		<execute macro="ProductMenu#gotoSitesContent">
+			<var name="portlet" value="Recycle Bin" />
 		</execute>
 
 		<execute macro="RecycleBin#restoreCP">
@@ -146,16 +181,20 @@
 			<var name="assetType" value="Message Boards Thread" />
 		</execute>
 
-		<execute macro="Page#gotoContentCP">
-			<var name="portletName" value="Recycle Bin" />
+		<execute macro="Navigator#openURL" />
+
+		<execute macro="ProductMenu#gotoSitesContent">
+			<var name="portlet" value="Recycle Bin" />
 		</execute>
 
 		<execute macro="RecycleBin#viewDefaultCP">
 			<var name="assetName" value="MB Thread Message Subject" />
 		</execute>
 
-		<execute macro="Page#gotoContentCP">
-			<var name="portletName" value="Message Boards" />
+		<execute macro="Navigator#openURL" />
+
+		<execute macro="ProductMenu#gotoSitesContent">
+			<var name="portlet" value="Message Boards" />
 		</execute>
 
 		<execute macro="MessageboardsThread#viewCP">
@@ -193,19 +232,19 @@
 		</execute>
 
 		<execute macro="MessageboardsPortlet#searchPG">
-			<var name="searchTerm"><![CDATA["This is a *.docx file."]]></var>
+			<var name="searchTerm" value="This is a *.docx file." />
 		</execute>
 
 		<execute macro="MessageboardsPortlet#viewSearchResultPG">
 			<var name="mbThreadAttachment" value="Document_1.docx" />
-			<var name="searchTerm"><![CDATA[This is a *.docx file.]]></var>
+			<var name="searchTerm" value="This is a *.doc x file." />
 			<var name="threadBody" value="MB Thread Message Body" />
 			<var name="threadSubject" value="MB Thread Message Subject" />
 			<var name="userName" value="Test Test" />
 		</execute>
 	</command>
 
-	<command name="SplitMBThread" priority="4">
+	<command name="SplitMBThread" priority="3">
 		<var name="threadBody" value="MB Thread Message Body" />
 		<var name="threadReplyBody" value="MB Thread Reply Body" />
 		<var name="threadSplitReplyBody" value="Split Reply Thread Body" />
@@ -787,7 +826,7 @@
 		</execute>
 
 		<execute macro="MessageboardsPortlet#viewSearchResultPG">
-			<var name="threadBody" value="MB Thread1 Reply Body" />
+			<var name="threadBody" value="MB Thread3 Message Body" />
 			<var name="threadSubject" value="MB Thread3 Message Subject" />
 			<var name="userName" value="Test Test" />
 		</execute>
@@ -883,7 +922,7 @@
 		</execute>
 	</command>
 
-	<command name="ViewCorrectViewPermissionsInMessageBoardsQuickReplyInPrivateSite" priority="4">
+	<command name="ViewCorrectViewPermissionsInMessageBoardsQuickReplyInPrivateSite" priority="3">
 		<execute macro="Page#gotoCP">
 			<var name="portletName" value="Sites" />
 		</execute>
@@ -898,9 +937,9 @@
 		</execute>
 
 		<execute macro="SitePage#addCP">
+			<var name="page" value="Public Pages" />
 			<var name="siteName" value="Blank Site Name" />
 			<var name="sitePageName" value="Site Page Name" />
-			<var name="sitePagePrivacy" value="Public" />
 		</execute>
 
 		<execute macro="Page#gotoPG">

@@ -139,7 +139,7 @@
 			<then>
 				<execute argument1="//nav[@id='navigation']" selenium="clickAt" />
 
-				<execute argument1="//script[contains(@src,'/aui/sortable/sortable-min.js')]" selenium="waitForElementPresent" />
+				<execute argument1="//script[contains(@src,'/aui/sortable/sortable')]" selenium="waitForElementPresent" />
 
 				<execute selenium="mouseOver" />
 
@@ -178,6 +178,8 @@
 
 	<command name="assertTextClickTagSelector">
 		<execute function="AssertClick#assertTextClick" />
+
+		<execute function="SelectFrameTop" />
 
 		<execute argument1="//div[contains(@class,'lfr-tag-selector-popup')]" selenium="waitForVisible" />
 

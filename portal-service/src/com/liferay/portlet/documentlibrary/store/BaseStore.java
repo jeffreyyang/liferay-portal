@@ -56,12 +56,11 @@ public abstract class BaseStore implements Store {
 	/**
 	 * Adds a file based on a byte array.
 	 *
-	 * @param  companyId the primary key of the company
-	 * @param  repositoryId the primary key of the data repository (optionally
-	 *         {@link com.liferay.portal.model.CompanyConstants#SYSTEM})
-	 * @param  fileName the file name
-	 * @param  bytes the files's data
-	 * @throws PortalException if the file's information was invalid
+	 * @param companyId the primary key of the company
+	 * @param repositoryId the primary key of the data repository (optionally
+	 *        {@link com.liferay.portal.model.CompanyConstants#SYSTEM})
+	 * @param fileName the file name
+	 * @param bytes the files's data
 	 */
 	@Override
 	public void addFile(
@@ -86,12 +85,11 @@ public abstract class BaseStore implements Store {
 	/**
 	 * Adds a file based on a {@link File} object.
 	 *
-	 * @param  companyId the primary key of the company
-	 * @param  repositoryId the primary key of the data repository (optionally
-	 *         {@link com.liferay.portal.model.CompanyConstants#SYSTEM})
-	 * @param  fileName the file name
-	 * @param  file Name the file name
-	 * @throws PortalException if the file's information was invalid
+	 * @param companyId the primary key of the company
+	 * @param repositoryId the primary key of the data repository (optionally
+	 *        {@link com.liferay.portal.model.CompanyConstants#SYSTEM})
+	 * @param fileName the file name
+	 * @param file Name the file name
 	 */
 	@Override
 	public void addFile(
@@ -123,12 +121,11 @@ public abstract class BaseStore implements Store {
 	/**
 	 * Adds a file based on an {@link InputStream} object.
 	 *
-	 * @param  companyId the primary key of the company
-	 * @param  repositoryId the primary key of the data repository (optionally
-	 *         {@link com.liferay.portal.model.CompanyConstants#SYSTEM})
-	 * @param  fileName the file name
-	 * @param  is the files's data
-	 * @throws PortalException if the file's information was invalid
+	 * @param companyId the primary key of the company
+	 * @param repositoryId the primary key of the data repository (optionally
+	 *        {@link com.liferay.portal.model.CompanyConstants#SYSTEM})
+	 * @param fileName the file name
+	 * @param is the files's data
 	 */
 	@Override
 	public abstract void addFile(
@@ -153,13 +150,12 @@ public abstract class BaseStore implements Store {
 	 * String)}).
 	 * </p>
 	 *
-	 * @param  companyId the primary key of the company
-	 * @param  repositoryId the primary key of the data repository (optionally
-	 *         {@link com.liferay.portal.model.CompanyConstants#SYSTEM})
-	 * @param  fileName the original's file name
-	 * @param  fromVersionLabel the original file's version label
-	 * @param  toVersionLabel the new version label
-	 * @throws PortalException if the file's information was invalid
+	 * @param companyId the primary key of the company
+	 * @param repositoryId the primary key of the data repository (optionally
+	 *        {@link com.liferay.portal.model.CompanyConstants#SYSTEM})
+	 * @param fileName the original's file name
+	 * @param fromVersionLabel the original file's version label
+	 * @param toVersionLabel the new version label
 	 */
 	@Override
 	public void copyFileVersion(
@@ -232,7 +228,6 @@ public abstract class BaseStore implements Store {
 	 *         {@link com.liferay.portal.model.CompanyConstants#SYSTEM})
 	 * @param  fileName the file's name
 	 * @return Returns the {@link File} object with the file's name
-	 * @throws PortalException if the file's information was invalid
 	 */
 	@Override
 	public File getFile(long companyId, long repositoryId, String fileName)
@@ -263,7 +258,7 @@ public abstract class BaseStore implements Store {
 	 * @param  fileName the file's name
 	 * @param  versionLabel the file's version label
 	 * @return Returns the {@link File} object with the file's name
-	 * @throws PortalException if the file's information was invalid
+	 * @throws PortalException
 	 */
 	@Override
 	public File getFile(
@@ -282,7 +277,6 @@ public abstract class BaseStore implements Store {
 	 *         {@link com.liferay.portal.model.CompanyConstants#SYSTEM})
 	 * @param  fileName the file's name
 	 * @return Returns the byte array with the file's name
-	 * @throws PortalException if the file's information was invalid
 	 */
 	@Override
 	public byte[] getFileAsBytes(
@@ -312,7 +306,6 @@ public abstract class BaseStore implements Store {
 	 * @param  fileName the file's name
 	 * @param  versionLabel the file's version label
 	 * @return Returns the byte array with the file's name
-	 * @throws PortalException if the file's information was invalid
 	 */
 	@Override
 	public byte[] getFileAsBytes(
@@ -343,7 +336,6 @@ public abstract class BaseStore implements Store {
 	 *         {@link com.liferay.portal.model.CompanyConstants#SYSTEM})
 	 * @param  fileName the file's name
 	 * @return Returns the {@link InputStream} object with the file's name
-	 * @throws PortalException if the file's information was invalid
 	 */
 	@Override
 	public InputStream getFileAsStream(
@@ -363,7 +355,6 @@ public abstract class BaseStore implements Store {
 	 * @param  fileName the file's name
 	 * @param  versionLabel the file's version label
 	 * @return Returns the {@link InputStream} object with the file's name
-	 * @throws PortalException if the file's information was invalid
 	 */
 	@Override
 	public abstract InputStream getFileAsStream(
@@ -392,7 +383,6 @@ public abstract class BaseStore implements Store {
 	 *         {@link com.liferay.portal.model.CompanyConstants#SYSTEM})
 	 * @param  fileName the file's name
 	 * @return Returns the size of the file
-	 * @throws PortalException if the file's information was invalid
 	 */
 	@Override
 	public abstract long getFileSize(
@@ -458,11 +448,10 @@ public abstract class BaseStore implements Store {
 	/**
 	 * Moves a file to a new data repository.
 	 *
-	 * @param  companyId the primary key of the company
-	 * @param  repositoryId the primary key of the data repository
-	 * @param  newRepositoryId the primary key of the new data repository
-	 * @param  fileName the file's name
-	 * @throws PortalException if the file's information was invalid
+	 * @param companyId the primary key of the company
+	 * @param repositoryId the primary key of the data repository
+	 * @param newRepositoryId the primary key of the new data repository
+	 * @param fileName the file's name
 	 */
 	@Override
 	public abstract void updateFile(
@@ -473,13 +462,12 @@ public abstract class BaseStore implements Store {
 	/**
 	 * Updates a file based on a byte array.
 	 *
-	 * @param  companyId the primary key of the company
-	 * @param  repositoryId the primary key of the data repository (optionally
-	 *         {@link com.liferay.portal.model.CompanyConstants#SYSTEM})
-	 * @param  fileName the file name
-	 * @param  versionLabel the file's new version label
-	 * @param  bytes the new file's data
-	 * @throws PortalException if the file's information was invalid
+	 * @param companyId the primary key of the company
+	 * @param repositoryId the primary key of the data repository (optionally
+	 *        {@link com.liferay.portal.model.CompanyConstants#SYSTEM})
+	 * @param fileName the file name
+	 * @param versionLabel the file's new version label
+	 * @param bytes the new file's data
 	 */
 	@Override
 	public void updateFile(
@@ -505,13 +493,12 @@ public abstract class BaseStore implements Store {
 	/**
 	 * Updates a file based on a {@link File} object.
 	 *
-	 * @param  companyId the primary key of the company
-	 * @param  repositoryId the primary key of the data repository (optionally
-	 *         {@link com.liferay.portal.model.CompanyConstants#SYSTEM})
-	 * @param  fileName the file name
-	 * @param  versionLabel the file's new version label
-	 * @param  file Name the file name
-	 * @throws PortalException if the file's information was invalid
+	 * @param companyId the primary key of the company
+	 * @param repositoryId the primary key of the data repository (optionally
+	 *        {@link com.liferay.portal.model.CompanyConstants#SYSTEM})
+	 * @param fileName the file name
+	 * @param versionLabel the file's new version label
+	 * @param file Name the file name
 	 */
 	@Override
 	public void updateFile(
@@ -545,13 +532,12 @@ public abstract class BaseStore implements Store {
 	/**
 	 * Updates a file based on an {@link InputStream} object.
 	 *
-	 * @param  companyId the primary key of the company
-	 * @param  repositoryId the primary key of the data repository (optionally
-	 *         {@link com.liferay.portal.model.CompanyConstants#SYSTEM})
-	 * @param  fileName the file name
-	 * @param  versionLabel the file's new version label
-	 * @param  is the new file's data
-	 * @throws PortalException if the file's information was invalid
+	 * @param companyId the primary key of the company
+	 * @param repositoryId the primary key of the data repository (optionally
+	 *        {@link com.liferay.portal.model.CompanyConstants#SYSTEM})
+	 * @param fileName the file name
+	 * @param versionLabel the file's new version label
+	 * @param is the new file's data
 	 */
 	@Override
 	public abstract void updateFile(
@@ -564,13 +550,12 @@ public abstract class BaseStore implements Store {
 	 * long, String, String, String)} except that the old file version is
 	 * deleted.
 	 *
-	 * @param  companyId the primary key of the company
-	 * @param  repositoryId the primary key of the data repository (optionally
-	 *         {@link com.liferay.portal.model.CompanyConstants#SYSTEM})
-	 * @param  fileName the file's name
-	 * @param  fromVersionLabel the file's version label
-	 * @param  toVersionLabel the file's new version label
-	 * @throws PortalException if the file's information was invalid
+	 * @param companyId the primary key of the company
+	 * @param repositoryId the primary key of the data repository (optionally
+	 *        {@link com.liferay.portal.model.CompanyConstants#SYSTEM})
+	 * @param fileName the file's name
+	 * @param fromVersionLabel the file's version label
+	 * @param toVersionLabel the file's new version label
 	 */
 	@Override
 	public void updateFileVersion(
@@ -593,7 +578,14 @@ public abstract class BaseStore implements Store {
 	protected void logFailedDeletion(
 		long companyId, long repositoryId, String fileName) {
 
-		logFailedDeletion(companyId, repositoryId, fileName, null);
+		logFailedDeletion(companyId, repositoryId, fileName, null, null);
+	}
+
+	protected void logFailedDeletion(
+		long companyId, long repositoryId, String fileName,
+		Exception exception) {
+
+		logFailedDeletion(companyId, repositoryId, fileName, null, exception);
 	}
 
 	protected void logFailedDeletion(
@@ -608,7 +600,9 @@ public abstract class BaseStore implements Store {
 		long companyId, long repositoryId, String fileName, String versionLabel,
 		Exception cause) {
 
-		if (_log.isWarnEnabled()) {
+		if ((_log.isWarnEnabled() && (cause != null)) ||
+			(_log.isDebugEnabled() && (cause == null))) {
+
 			StringBundler sb = new StringBundler(9);
 
 			sb.append("Unable to delete file {companyId=");
@@ -625,11 +619,12 @@ public abstract class BaseStore implements Store {
 
 			sb.append("} because it does not exist");
 
-			if (cause == null) {
-				_log.warn(sb.toString());
-			}
-			else {
+			if (_log.isWarnEnabled() && (cause != null)) {
 				_log.warn(sb.toString(), cause);
+			}
+
+			if (_log.isDebugEnabled() && (cause == null)) {
+				_log.debug(sb.toString());
 			}
 		}
 	}

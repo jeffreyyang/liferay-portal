@@ -16,6 +16,7 @@ package com.liferay.portal.kernel.portlet;
 
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.util.StringPool;
+import com.liferay.portal.model.Group;
 import com.liferay.portal.util.PortalUtil;
 import com.liferay.portlet.asset.AssetRendererFactoryRegistryUtil;
 import com.liferay.portlet.asset.model.AssetEntry;
@@ -46,6 +47,20 @@ public class PortletProviderUtil {
 	}
 
 	public static PortletURL getPortletURL(
+			HttpServletRequest request, Group group, String className,
+			PortletProvider.Action action)
+		throws PortalException {
+
+		PortletProvider portletProvider = getPortletProvider(className, action);
+
+		if (portletProvider != null) {
+			return portletProvider.getPortletURL(request, group);
+		}
+
+		return null;
+	}
+
+	public static PortletURL getPortletURL(
 			HttpServletRequest request, String className,
 			PortletProvider.Action action)
 		throws PortalException {
@@ -57,6 +72,16 @@ public class PortletProviderUtil {
 		}
 
 		return null;
+	}
+
+	public static PortletURL getPortletURL(
+			PortletRequest portletRequest, Group group, String className,
+			PortletProvider.Action action)
+		throws PortalException {
+
+		return getPortletURL(
+			PortalUtil.getHttpServletRequest(portletRequest), group, className,
+			action);
 	}
 
 	public static PortletURL getPortletURL(
@@ -122,27 +147,19 @@ public class PortletProviderUtil {
 	}
 
 	private static final ServiceTrackerMap<String, AddPortletProvider>
-		_addServiceTrackerMap = ServiceTrackerCollections.singleValueMap(
+		_addServiceTrackerMap = ServiceTrackerCollections.openSingleValueMap(
 			AddPortletProvider.class, "model.class.name");
 	private static final ServiceTrackerMap<String, BrowsePortletProvider>
-		_browseServiceTrackerMap = ServiceTrackerCollections.singleValueMap(
+		_browseServiceTrackerMap = ServiceTrackerCollections.openSingleValueMap(
 			BrowsePortletProvider.class, "model.class.name");
 	private static final ServiceTrackerMap<String, EditPortletProvider>
-		_editServiceTrackerMap = ServiceTrackerCollections.singleValueMap(
+		_editServiceTrackerMap = ServiceTrackerCollections.openSingleValueMap(
 			EditPortletProvider.class, "model.class.name");
 	private static final ServiceTrackerMap<String, ManagePortletProvider>
-		_manageServiceTrackerMap = ServiceTrackerCollections.singleValueMap(
+		_manageServiceTrackerMap = ServiceTrackerCollections.openSingleValueMap(
 			ManagePortletProvider.class, "model.class.name");
 	private static final ServiceTrackerMap<String, ViewPortletProvider>
-		_viewServiceTrackerMap = ServiceTrackerCollections.singleValueMap(
+		_viewServiceTrackerMap = ServiceTrackerCollections.openSingleValueMap(
 			ViewPortletProvider.class, "model.class.name");
-
-	static {
-		_addServiceTrackerMap.open();
-		_browseServiceTrackerMap.open();
-		_editServiceTrackerMap.open();
-		_manageServiceTrackerMap.open();
-		_viewServiceTrackerMap.open();
-	}
 
 }

@@ -14,24 +14,11 @@
  */
 --%>
 
-<%@ include file="/html/taglib/init.jsp" %>
+<%@ include file="/html/taglib/ui/search_iterator/init.jsp" %>
 
 <%
-SearchContainer searchContainer = (SearchContainer)request.getAttribute("liferay-ui:search:searchContainer");
-
-boolean paginate = GetterUtil.getBoolean((String)request.getAttribute("liferay-ui:search-iterator:paginate"));
-String type = (String)request.getAttribute("liferay-ui:search:type");
-
-String id = searchContainer.getId(request, namespace);
-
 int end = searchContainer.getEnd();
 int total = searchContainer.getTotal();
-List resultRows = searchContainer.getResultRows();
-List<String> headerNames = searchContainer.getHeaderNames();
-List<String> normalizedHeaderNames = searchContainer.getNormalizedHeaderNames();
-Map orderableHeaders = searchContainer.getOrderableHeaders();
-String emptyResultsMessage = searchContainer.getEmptyResultsMessage();
-RowChecker rowChecker = searchContainer.getRowChecker();
 
 if (end > total) {
 	end = total;
@@ -54,12 +41,10 @@ if (iteratorURL != null) {
 	url = HttpUtil.removeParameter(url, namespace + searchContainer.getOrderByColParam());
 	url = HttpUtil.removeParameter(url, namespace + searchContainer.getOrderByTypeParam());
 }
-
-JSONArray primaryKeysJSONArray = JSONFactoryUtil.createJSONArray();
 %>
 
-<c:if test="<%= resultRows.isEmpty() && (emptyResultsMessage != null) %>">
-	<div class="alert alert-info">
+<c:if test="<%= emptyResultsMessage != null %>">
+	<div class="alert alert-info <%= resultRows.isEmpty() ? StringPool.BLANK : "hide" %>" id="<%= namespace + id %>EmptyResultsMessage">
 		<%= LanguageUtil.get(request, emptyResultsMessage) %>
 	</div>
 </c:if>
@@ -126,13 +111,13 @@ JSONArray primaryKeysJSONArray = JSONFactoryUtil.createJSONArray();
 						if (HtmlUtil.escapeAttribute(orderByType).equals("desc")) {
 							cssClass += " table-sorted-desc";
 						}
+					}
 
-						if (orderByType.equals("asc")) {
-							orderByType = "desc";
-						}
-						else {
-							orderByType = "asc";
-						}
+					if (Validator.equals(orderByType, "asc")) {
+						orderByType = "desc";
+					}
+					else {
+						orderByType = "asc";
 					}
 				%>
 
@@ -209,14 +194,6 @@ JSONArray primaryKeysJSONArray = JSONFactoryUtil.createJSONArray();
 		</c:if>
 
 		<tbody class="table-data">
-
-		<c:if test="<%= resultRows.isEmpty() && (emptyResultsMessage != null) %>">
-			<tr>
-				<td class="table-cell">
-					<%= LanguageUtil.get(request, emptyResultsMessage) %>
-				</td>
-			</tr>
-		</c:if>
 
 		<%
 		boolean allRowsIsChecked = true;
@@ -351,26 +328,10 @@ JSONArray primaryKeysJSONArray = JSONFactoryUtil.createJSONArray();
 	<aui:script use="liferay-search-container">
 		var searchContainer = new Liferay.SearchContainer(
 			{
-				classNameHover: '<%= _CLASS_NAME_HOVER %>',
-				hover: <%= searchContainer.isHover() %>,
-				id: '<%= namespace + id %>',
-				rowClassNameAlternate: '<%= _ROW_CLASS_NAME_ALTERNATE %>',
-				rowClassNameAlternateHover: '<%= _ROW_CLASS_NAME_ALTERNATE_HOVER %>',
-				rowClassNameBody: '<%= _ROW_CLASS_NAME_BODY %>',
-				rowClassNameBodyHover: '<%= _ROW_CLASS_NAME_BODY %>'
+				id: '<%= namespace + id %>'
 			}
 		).render();
 
 		searchContainer.updateDataStore(<%= primaryKeysJSONArray.toString() %>);
 	</aui:script>
 </c:if>
-
-<%!
-private static final String _CLASS_NAME_HOVER = "hover";
-
-private static final String _ROW_CLASS_NAME_ALTERNATE = "";
-
-private static final String _ROW_CLASS_NAME_ALTERNATE_HOVER = "-hover";
-
-private static final String _ROW_CLASS_NAME_BODY = "";
-%>

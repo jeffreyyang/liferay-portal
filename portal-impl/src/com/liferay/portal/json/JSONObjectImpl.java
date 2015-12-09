@@ -84,6 +84,11 @@ public class JSONObjectImpl implements JSONObject {
 	}
 
 	@Override
+	public Object get(String key) {
+		return _jsonObject.opt(key);
+	}
+
+	@Override
 	public boolean getBoolean(String key) {
 		return _jsonObject.optBoolean(key);
 	}
@@ -271,7 +276,7 @@ public class JSONObjectImpl implements JSONObject {
 	@Override
 	public JSONObject put(String key, long value) {
 		try {
-			_jsonObject.put(key, value);
+			_jsonObject.put(key, String.valueOf(value));
 		}
 		catch (Exception e) {
 			if (_log.isWarnEnabled()) {

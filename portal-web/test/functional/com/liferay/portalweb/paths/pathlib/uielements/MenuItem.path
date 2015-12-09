@@ -40,12 +40,17 @@
 </tr>
 <tr>
 	<td>ADD_CHILD_SITE</td>
-	<td>//a[@role='menuitem' and contains(.,'Add Child Site')]</td>
+	<td>//div[contains(@class,'open')]//a[@role='menuitem' and contains(.,'Add Child Site')]</td>
 	<td></td>
 </tr>
 <tr>
 	<td>ADD_DISPLAY_TEMPLATE</td>
 	<td>//div[contains(@class,'open')]//a[contains(@id,'menuItem') and contains(.,'Add Display Template')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>ADD_FILE_ENTRY</td>
+	<td>//a[@role='menuitem' and contains(.,'Add File Entry')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -79,8 +84,23 @@
 	<td></td>
 </tr>
 <tr>
+	<td>ADD_SITE_ROLES_TO_USERS</td>
+	<td>//a[@role='menuitem' and contains(.,'Add Site Roles to Users')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>ADD_SITE_ROLES_TO_USER_GROUPS</td>
+	<td>//a[@role='menuitem' and contains(.,'Add Site Roles to User Groups')]</td>
+	<td></td>
+</tr>
+<tr>
 	<td>ADD_SUBCATEGORY</td>
 	<td>//div[contains(@class,'open')]//a[contains(.,'Add Subcategory')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>ADD_SUBFOLDER</td>
+	<td>//a[@role='menuitem' and contains(.,'Add Subfolder')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -90,7 +110,12 @@
 </tr>
 <tr>
 	<td>ADT_TEMPLATE</td>
-	<td>//a[@role='menuitem' and contains(.,'${key_adtType} Template')]</td>
+	<td>//a[contains(.,'${key_adtType} Template')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>APPROVE</td>
+	<td>//div[contains(@class,'open')]//a[contains(.,'Approve')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -106,6 +131,11 @@
 <tr>
 	<td>ASSIGN_SITE_ROLES</td>
 	<td>//div[contains(@class,'open')]//a[contains(.,'Assign Site Roles')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>ASSIGN_TO_ME</td>
+	<td>//div[contains(@class,'open')]//a[contains(.,'Assign to Me')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -180,7 +210,7 @@
 </tr>
 <tr>
 	<td>CONTRACT</td>
-	<td>//li[contains(@class,'open')]//a[@role='menuitem' and contains(.,'Contract')]</td>
+	<td>//a[@role='menuitem' and contains(.,'Contract')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -195,7 +225,7 @@
 </tr>
 <tr>
 	<td>DEACTIVATE</td>
-	<td>//a[@role='menuitem' and contains(.,'Deactivate')]</td>
+	<td>//div[contains(@class,'open')]//a[@role='menuitem' and contains(.,'Deactivate')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -205,7 +235,7 @@
 </tr>
 <tr>
 	<td>DELETE</td>
-	<td>//div[contains(@class,'open') and contains(@class,'dropdown')]//a[@role='menuitem' and contains(.,'Delete')]</td>
+	<td>//div[contains(@class,'open') and contains(@class,'dropdown')]//a[@role='menuitem' and contains(.,'Delete')] | //div[contains(@class,'open')]/ul[contains(@class,'dropdown')]//a[contains(.,'Delete')] | //li[contains(@class,'open')]/ul[contains(@class,'dropdown')]//a[contains(.,'Delete')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -235,12 +265,12 @@
 </tr>
 <tr>
 	<td>DOCUMENT_TYPE</td>
-	<td>//a[@role='menuitem' and contains(.,'${key_dmDocumentTypeName}')]</td>
+	<td>//div[contains(@class,'open')]//a[contains(.,'${key_dmDocumentTypeName}')]</td>
 	<td></td>
 </tr>
 <tr>
 	<td>DOCUMENT_TYPES</td>
-	<td>//li[contains(@class,'open')]//a[@role='menuitem' and contains(.,'Document Types')]</td>
+	<td>//a[@role='menuitem']//span[contains(.,'Document Types')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -250,7 +280,7 @@
 </tr>
 <tr>
 	<td>EDIT</td>
-	<td>//div[contains(@class,'open')]//a[contains(.,'Edit')] | //span[contains(.,'Edit')]</td>
+	<td>//div[contains(@class,'open')]//a[contains(.,'Edit')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -284,13 +314,18 @@
 	<td></td>
 </tr>
 <tr>
+	<td>GOOGLE_DOCS</td>
+	<td>//li[contains(@class,'open')]//a[contains(.,'Google Docs')] | //div[contains(@class,'open')]//a[contains(.,'Google Docs')]</td>
+	<td></td>
+</tr>
+<tr>
 	<td>IMPERSONATE_USER</td>
 	<td>//a[@role='menuitem' and contains(.,'Impersonate User')]</td>
 	<td></td>
 </tr>
 <tr>
 	<td>IMPORT</td>
-	<td>//div[contains(@class,'open') and contains(@class,'dropdown')]//a[contains(.,'Import')]</td>
+	<td>//div[contains(@class,'open') and contains(@class,'dropdown')]//a[contains(.,'Import')] | //li[contains(@class,'open') and contains(@class,'dropdown')]//a[contains(.,'Import')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -305,12 +340,12 @@
 </tr>
 <tr>
 	<td>ITEMS_PER_PAGE</td>
-	<td>//ul[contains(@class,'dropdown-menu')]/li/a/span[contains(.,'${key_itemsPerPage}')]</td>
+	<td>//ul[contains(@class,'dropdown-menu')]/li/a[contains(.,'${key_itemsPerPage}')]</td>
 	<td></td>
 </tr>
 <tr>
 	<td>LEAVE</td>
-	<td>//a[@role='menuitem' and contains(.,'Leave')]</td>
+	<td>//div[contains(@class,'open')]//a[@role='menuitem' and contains(.,'Leave')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -365,7 +400,7 @@
 </tr>
 <tr>
 	<td>MARKETING_BANNER</td>
-	<td>//li[contains(@class,'open')]//a[@role='menuitem' and contains(.,'Marketing Banner')]</td>
+	<td>//li[contains(@class,'open')]//a[contains(.,'Marketing Banner')] | //div[contains(@class,'open')]//a[contains(.,'Marketing Banner')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -380,7 +415,7 @@
 </tr>
 <tr>
 	<td>METADATA_SETS</td>
-	<td>//li[contains(@class,'open')]//a[@role='menuitem' and contains(.,'Metadata Sets')]</td>
+	<td>//a[@role='menuitem']//span[contains(.,'Metadata Sets')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -400,12 +435,12 @@
 </tr>
 <tr>
 	<td>MULTIPLE_DOCUMENTS</td>
-	<td>//li[contains(@class,'open')]//a[@role='menuitem' and contains(.,'Multiple Documents')]</td>
+	<td>//li[contains(@class,'open')]//a[contains(.,'Multiple Documents')] | //div[contains(@class,'open')]//a[contains(.,'Multiple Documents')]</td>
 	<td></td>
 </tr>
 <tr>
 	<td>ONLINE_TRAINING</td>
-	<td>//li[contains(@class,'open')]//a[@role='menuitem' and @title='Online Training']</td>
+	<td>//li[contains(@class,'open')]//a[contains(.,'Online Training')] | //div[contains(@class,'open')]//a[contains(.,'Online Training')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -430,7 +465,17 @@
 </tr>
 <tr>
 	<td>PERMISSIONS</td>
-	<td>//div[contains(@class,'open') and contains(@class,'dropdown')]//a[contains(.,'Permissions')] | //li[contains(@class,'open')]//a[contains(.,'Permissions')] | //a[contains(.,'Permissions')]</td>
+	<td>//div[contains(@class,'open')]//a[contains(.,'Permissions')] | //li[contains(@class,'open')]//a[contains(.,'Permissions')] | //ul[contains(@class,'dropdown')]//a[contains(.,'Permissions')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>PERMISSIONS_LEXICON</td>
+	<td>//div[contains(@class,'dropdown') and contains(@class,'open')]//a[contains(.,'Permissions')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>PLATFORM</td>
+	<td>//a[@role='menuitem' and contains(.,'Platform')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -454,6 +499,11 @@
 	<td></td>
 </tr>
 <tr>
+	<td>REJECT</td>
+	<td>//div[contains(@class,'open')]//a[contains(.,'Reject')]</td>
+	<td></td>
+</tr>
+<tr>
 	<td>REMOVE</td>
 	<td>//a[@role='menuitem' and contains(.,'Remove')]</td>
 	<td></td>
@@ -470,12 +520,17 @@
 </tr>
 <tr>
 	<td>REPOSITORY</td>
-	<td>//li[contains(@class,'open')]//a[@role='menuitem' and @title='Repository']</td>
+	<td>//li[contains(@class,'open')]//a[contains(.,'Repository')] | //div[contains(@class,'open')]//a[contains(.,'Repository')]</td>
 	<td></td>
 </tr>
 <tr>
 	<td>RESTORE</td>
 	<td>//div[contains(@class,'open')]//a[@role='menuitem' and contains(.,'Restore')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>RESUBMIT</td>
+	<td>//div[contains(@class,'open')]//a[contains(.,'Resubmit')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -490,7 +545,7 @@
 </tr>
 <tr>
 	<td>SALES_PRESENTATION</td>
-	<td>//li[contains(@class,'open')]//a[@role='menuitem' and contains(.,'Sales Presentation')]</td>
+	<td>//li[contains(@class,'open')]//a[contains(.,'Sales Presentation')] | //div[contains(@class,'open')]//a[contains(.,'Sales Presentation')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -515,12 +570,12 @@
 </tr>
 <tr>
 	<td>SHORTCUT</td>
-	<td>//li[contains(@class,'open')]//a[@role='menuitem' and contains(.,'Shortcut')]</td>
+	<td>//li[contains(@class,'open')]//a[contains(.,'Shortcut')] | //div[contains(@class,'open')]//a[contains(.,'Shortcut')]</td>
 	<td></td>
 </tr>
 <tr>
 	<td>SITE_ADMINISTRATION</td>
-	<td>//a[@role='menuitem' and contains(.,'Site Administration')]</td>
+	<td>//div[contains(@class,'open')]//a[@role='menuitem' and contains(.,'Site Administration')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -599,6 +654,11 @@
 	<td></td>
 </tr>
 <tr>
+	<td>UPDATE_DUE_DATE</td>
+	<td>//div[contains(@class,'open')]//a[contains(.,'Update Due Date')]</td>
+	<td></td>
+</tr>
+<tr>
 	<td>UNSUBSCRIBE</td>
 	<td>//a[@role='menuitem' and contains(.,'Unsubscribe')]</td>
 	<td></td>
@@ -639,18 +699,33 @@
 	<td></td>
 </tr>
 <tr>
+	<td>VIEW_HISTORY</td>
+	<td>//div[contains(@class,'open')]//a[contains(.,'View History')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>VIEW_ENTRIES</td>
+	<td>//li[contains(.,'${key_formName}')]//a[@role='menuitem' and contains(.,'View Entries')]</td>
+	<td></td>
+</tr>
+<tr>
 	<td>VIEW_REMOVED_ATTACHMENTS</td>
 	<td>//div[contains(@class,'open')]//a[@role='menuitem' and contains(.,'View Removed Attachments')]</td>
 	<td></td>
 </tr>
 <tr>
 	<td>WEB_CONTENT_LANGUAGE</td>
-	<td>//ul[contains(@class,'lfr-menu-list')]/li/a[contains(.,'${key_webContentTranslationLanguage}')]</td>
+	<td>//ul[contains(@class,'lfr-menu-list')]/li/a[contains(.,'${key_localizedLanguage}')]</td>
 	<td></td>
 </tr>
 <tr>
 	<td>WITHDRAW_SUBMISSION</td>
 	<td>//a[@role='menuitem' and contains(.,'Withdraw Submission')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>VIEW_MEMBERSHIP_REQUESTS</td>
+	<td>//a[@role='menuitem' and contains(.,'View Membership Requests')]</td>
 	<td></td>
 </tr>
 </tbody>

@@ -186,6 +186,38 @@ public class GroupServiceTest {
 	}
 
 	@Test
+	public void testDeleteOrganizationSiteOnlyRemovesSiteRoles()
+		throws Exception {
+
+		Organization organization = OrganizationTestUtil.addOrganization(true);
+
+		Group organizationSite = GroupLocalServiceUtil.getOrganizationGroup(
+			TestPropsValues.getCompanyId(), organization.getOrganizationId());
+
+		organizationSite.setManualMembership(true);
+
+		User user = UserTestUtil.addOrganizationOwnerUser(organization);
+
+		UserLocalServiceUtil.addGroupUser(
+			organizationSite.getGroupId(), user.getUserId());
+		UserLocalServiceUtil.addOrganizationUsers(
+			organization.getOrganizationId(), new long[] {user.getUserId()});
+
+		Role siteRole = RoleTestUtil.addRole(RoleConstants.TYPE_SITE);
+
+		UserGroupRoleLocalServiceUtil.addUserGroupRoles(
+			user.getUserId(), organizationSite.getGroupId(),
+			new long[] {siteRole.getRoleId()});
+
+		GroupLocalServiceUtil.deleteGroup(organizationSite);
+
+		Assert.assertEquals(
+			1,
+			UserGroupRoleLocalServiceUtil.getUserGroupRolesCount(
+				user.getUserId(), organizationSite.getGroupId()));
+	}
+
+	@Test
 	public void testDeleteSite() throws Exception {
 		Group group = GroupTestUtil.addGroup();
 
@@ -372,39 +404,6 @@ public class GroupServiceTest {
 			0,
 			GroupLocalServiceUtil.searchCount(
 				TestPropsValues.getCompanyId(), null, "cabina14", groupParams));
-	}
-
-	@Test
-	public void testGetUserSitesGroups() throws Exception {
-		Organization parentOrganization = OrganizationTestUtil.addOrganization(
-			true);
-
-		Group parentOrganizationGroup = parentOrganization.getGroup();
-
-		LayoutTestUtil.addLayout(parentOrganizationGroup);
-
-		Organization organization = OrganizationTestUtil.addOrganization(
-			parentOrganization.getOrganizationId(),
-			RandomTestUtil.randomString(), false);
-
-		_organizations.add(organization);
-		_organizations.add(parentOrganization);
-
-		UserLocalServiceUtil.addOrganizationUsers(
-			organization.getOrganizationId(),
-			new long[] {TestPropsValues.getUserId()});
-
-		try {
-			List<Group> groups = GroupServiceUtil.getUserSitesGroups(
-				TestPropsValues.getUserId(), null, QueryUtil.ALL_POS);
-
-			Assert.assertTrue(groups.contains(parentOrganizationGroup));
-		}
-		finally {
-			UserLocalServiceUtil.unsetOrganizationUsers(
-				organization.getOrganizationId(),
-				new long[] {TestPropsValues.getUserId()});
-		}
 	}
 
 	@Test

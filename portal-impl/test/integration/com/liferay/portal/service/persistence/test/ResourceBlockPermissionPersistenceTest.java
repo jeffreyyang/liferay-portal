@@ -39,6 +39,7 @@ import com.liferay.portal.test.rule.PersistenceTestRule;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -55,8 +56,9 @@ import java.util.Set;
  * @generated
  */
 public class ResourceBlockPermissionPersistenceTest {
+	@ClassRule
 	@Rule
-	public final AggregateTestRule aggregateTestRule = new AggregateTestRule(new LiferayIntegrationTestRule(),
+	public static final AggregateTestRule aggregateTestRule = new AggregateTestRule(new LiferayIntegrationTestRule(),
 			PersistenceTestRule.INSTANCE,
 			new TransactionalTestRule(Propagation.REQUIRED));
 
@@ -115,6 +117,8 @@ public class ResourceBlockPermissionPersistenceTest {
 
 		newResourceBlockPermission.setMvccVersion(RandomTestUtil.nextLong());
 
+		newResourceBlockPermission.setCompanyId(RandomTestUtil.nextLong());
+
 		newResourceBlockPermission.setResourceBlockId(RandomTestUtil.nextLong());
 
 		newResourceBlockPermission.setRoleId(RandomTestUtil.nextLong());
@@ -130,6 +134,8 @@ public class ResourceBlockPermissionPersistenceTest {
 			newResourceBlockPermission.getMvccVersion());
 		Assert.assertEquals(existingResourceBlockPermission.getResourceBlockPermissionId(),
 			newResourceBlockPermission.getResourceBlockPermissionId());
+		Assert.assertEquals(existingResourceBlockPermission.getCompanyId(),
+			newResourceBlockPermission.getCompanyId());
 		Assert.assertEquals(existingResourceBlockPermission.getResourceBlockId(),
 			newResourceBlockPermission.getResourceBlockId());
 		Assert.assertEquals(existingResourceBlockPermission.getRoleId(),
@@ -186,7 +192,8 @@ public class ResourceBlockPermissionPersistenceTest {
 	protected OrderByComparator<ResourceBlockPermission> getOrderByComparator() {
 		return OrderByComparatorFactoryUtil.create("ResourceBlockPermission",
 			"mvccVersion", true, "resourceBlockPermissionId", true,
-			"resourceBlockId", true, "roleId", true, "actionIds", true);
+			"companyId", true, "resourceBlockId", true, "roleId", true,
+			"actionIds", true);
 	}
 
 	@Test
@@ -300,11 +307,10 @@ public class ResourceBlockPermissionPersistenceTest {
 
 		ActionableDynamicQuery actionableDynamicQuery = ResourceBlockPermissionLocalServiceUtil.getActionableDynamicQuery();
 
-		actionableDynamicQuery.setPerformActionMethod(new ActionableDynamicQuery.PerformActionMethod() {
+		actionableDynamicQuery.setPerformActionMethod(new ActionableDynamicQuery.PerformActionMethod<ResourceBlockPermission>() {
 				@Override
-				public void performAction(Object object) {
-					ResourceBlockPermission resourceBlockPermission = (ResourceBlockPermission)object;
-
+				public void performAction(
+					ResourceBlockPermission resourceBlockPermission) {
 					Assert.assertNotNull(resourceBlockPermission);
 
 					count.increment();
@@ -420,6 +426,8 @@ public class ResourceBlockPermissionPersistenceTest {
 		ResourceBlockPermission resourceBlockPermission = _persistence.create(pk);
 
 		resourceBlockPermission.setMvccVersion(RandomTestUtil.nextLong());
+
+		resourceBlockPermission.setCompanyId(RandomTestUtil.nextLong());
 
 		resourceBlockPermission.setResourceBlockId(RandomTestUtil.nextLong());
 

@@ -5,13 +5,14 @@ Import-Package:\
 	com.liferay.portal.xml,\
 	*
 Export-Package:\
-    com.liferay.dynamic.data.mapping.configuration,\
+	com.liferay.dynamic.data.mapping.configuration,\
 	com.liferay.dynamic.data.mapping.model.impl,\
 	com.liferay.dynamic.data.mapping.search,\
 	com.liferay.dynamic.data.mapping.service.permission,\
 	com.liferay.dynamic.data.mapping.storage.impl,\
 	com.liferay.dynamic.data.mapping.template,\
 	com.liferay.dynamic.data.mapping.util.impl,\
+	com.liferay.dynamic.data.mapping.verify,\
 	com.liferay.dynamic.data.mapping.webdav
 Include-Resource:\
 	classes,\
@@ -24,5 +25,6 @@ Liferay-Service: true
 Require-Capability:\
 	liferay.extender;\
 	filter:="(&(liferay.extender=spring.extender)(version>=1.0)(!(version>=2.0)))"
+Require-SchemaVersion: 1.0.0
 Spring-Context: META-INF/spring
 -spring-dependency: com.liferay.portal.spring.extender.service.ServiceReference

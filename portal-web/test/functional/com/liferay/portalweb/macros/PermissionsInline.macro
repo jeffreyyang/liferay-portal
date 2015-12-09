@@ -54,12 +54,10 @@
 				<then>
 					<execute function="AssertNotChecked" locator1="Permissions#CONFIGURATION_PERMISSIONS_CONFIGURATION_CHECKBOX" />
 					<execute function="AssertNotChecked" locator1="Permissions#CONFIGURATION_PERMISSIONS_PERMISSIONS_CHECKBOX" />
-					<execute function="AssertNotChecked" locator1="Permissions#CONFIGURATION_PERMISSIONS_ACCESS_IN_CONTROL_PANEL_CHECKBOX" />
 				</then>
 				<else>
 					<execute function="AssertChecked" locator1="Permissions#CONFIGURATION_PERMISSIONS_CONFIGURATION_CHECKBOX" />
 					<execute function="AssertChecked" locator1="Permissions#CONFIGURATION_PERMISSIONS_PERMISSIONS_CHECKBOX" />
-					<execute function="AssertChecked" locator1="Permissions#CONFIGURATION_PERMISSIONS_ACCESS_IN_CONTROL_PANEL_CHECKBOX" />
 				</else>
 			</if>
 
@@ -93,23 +91,25 @@
 			<var name="virtualHostsURL" value="${virtualHostsURL}" />
 		</execute>
 
+		<execute function="Click" locator1="Icon#HEADER_VERTICAL_ELLIPSIS" />
+
 		<execute function="AssertClick" locator1="Blogs#PERMISSIONS" value1="Permissions" />
 
 		<execute function="SelectFrame" locator1="Permissions#PERMISSIONS_IFRAME" />
 	</command>
 
 	<command name="gotoBlogsEntryCP">
-		<execute macro="Page#gotoContentCP">
-			<var name="pageName" value="${pageName}" />
-			<var name="portletName" value="${portletName}" />
-			<var name="siteName" value="${siteName}" />
-			<var name="siteURL" value="${siteURLTemp}" />
+		<execute macro="Navigator#openURL" />
+
+		<execute macro="ProductMenu#gotoSitesContent">
+			<var name="portlet" value="Blogs" />
 		</execute>
 
-		<var name="key_entryTitle" value="${entryTitle}" />
+		<var name="key_assetEntry" value="${entryTitle}" />
 
-		<execute function="Click" locator1="CPBlogs#ENTRY_TABLE_ACTIONS" />
-		<execute function="AssertClick" locator1="CPBlogs#ENTRY_MENULIST_PERMISSIONS" value1="Permissions" />
+		<execute function="Click" locator1="Icon#DESCRIPTIVE_VERTICAL_ELLIPSIS" />
+
+		<execute function="AssertClick" locator1="MenuItem#PERMISSIONS_LEXICON" value1="Permissions" />
 
 		<execute function="SelectFrame" locator1="Permissions#PERMISSIONS_IFRAME" />
 	</command>
@@ -125,11 +125,11 @@
 			<var name="soPage" value="${soPage}" />
 		</execute>
 
-		<var name="key_entryTitle" value="${entryTitle}" />
+		<execute function="Click" locator1="Icon#BODY_VERTICAL_ELLIPSIS" />
 
-		<execute function="AssertClick" locator1="PGBlogs#ENTRY_PERMISSIONS" value1="Permissions" />
+		<execute function="AssertClick" locator1="MenuItem#PERMISSIONS_LEXICON" value1="Permissions" />
 
-		<execute function="SelectFrame" locator1="Permissions#PERMISSIONS_IFRAME" />
+		<execute function="SelectFrame" locator1="IFrame#DIALOG" />
 	</command>
 
 	<command name="gotoConfigurationPG">
@@ -141,6 +141,16 @@
 
 		<execute function="SelectFrame" locator1="BasePortletConfiguration#CONFIGURATION_IFRAME" />
 		<execute function="AssertClick" locator1="BasePortletConfiguration#NAVIGATION_PERMISSIONS" value1="Permissions" />
+	</command>
+
+	<command name="gotoDMDocumentCP">
+		<var name="key_assetEntry" value="${dmDocumentTitle}" />
+
+		<execute function="Click" locator1="Icon#DESCRIPTIVE_VERTICAL_ELLIPSIS" />
+
+		<execute function="AssertClick" locator1="MenuItem#PERMISSIONS_LEXICON" value1="Permissions" />
+
+		<execute function="SelectFrame" locator1="IFrame#DIALOG" />
 	</command>
 
 	<command name="gotoDMDocumentPG">
@@ -270,7 +280,7 @@
 
 		<execute function="Click" locator1="ControlMenu#EDIT_COG" />
 
-		<execute function="Click" locator1="MenuItem#PERMISSIONS" />
+		<execute function="Click" locator1="SitePages#TOOLBAR_PERMISSIONS" />
 
 		<execute function="SelectFrame" locator1="Permissions#PERMISSIONS_IFRAME" />
 	</command>
@@ -285,15 +295,10 @@
 	</command>
 
 	<command name="gotoSitepageCP">
-		<execute macro="SitePage#addCmd">
-			<var name="sitePagePrivacy" value="${sitePagePrivacy}" />
-		</execute>
-
-		<execute macro="SitePage#expandRootCP" />
-
 		<var name="key_sitePageName" value="${sitePageName}" />
 
-		<execute function="Click" locator1="SitePages#PAGE_TREE_PAGE_LINK_1" value1="${sitePageName}" />
+		<execute function="Click" locator1="SitePages#PAGE_TREE_PAGE_EDIT_COG" />
+
 		<execute function="AssertClick" locator1="SitePages#TOOLBAR_PERMISSIONS" value1="Permissions" />
 
 		<execute function="SelectFrame" locator1="Permissions#PERMISSIONS_IFRAME" />
@@ -305,10 +310,10 @@
 			<var name="siteScopeName" value="${siteScopeName}" />
 		</execute>
 
-		<var name="key_teamName" value="${teamName}" />
+		<var name="key_assetEntry" value="${teamName}" />
 
-		<execute function="Click" locator1="SiteTeams#TEAM_TABLE_ACTIONS" />
-		<execute function="AssertClick" locator1="MenuItem#PERMISSIONS" value1="Permissions" />
+		<execute function="Click" locator1="Icon#DESCRIPTIVE_VERTICAL_ELLIPSIS" />
+		<execute function="AssertClick" locator1="MenuItem#PERMISSIONS_LEXICON" value1="Permissions" />
 
 		<execute function="SelectFrame" locator1="Permissions#PERMISSIONS_IFRAME" />
 	</command>
@@ -321,7 +326,7 @@
 
 		<var name="key_sitePageName" value="${sitePageName}" />
 
-		<execute function="Click" locator1="SitePages#PAGE_TREE_PAGE_LINK_1" value1="${sitePageName}" />
+		<execute function="Click" locator1="SitePages#PAGE_TREE_PAGE_EDIT_COG" value1="${sitePageName}" />
 		<execute function="AssertClick" locator1="SitePages#TOOLBAR_PERMISSIONS" value1="Permissions" />
 
 		<execute function="SelectFrame" locator1="Permissions#PERMISSIONS_IFRAME" />
@@ -339,11 +344,10 @@
 	</command>
 
 	<command name="gotoWCArticle">
-		<var name="key_webContentTitle" value="${webContentTitle}" />
+		<var name="key_assetEntry" value="${webContentTitle}" />
 
-		<execute function="MouseOver" locator1="WC#ENTRY_DESCRIPTIVE_THUMBNAIL" />
-		<execute function="Click" locator1="WC#ENTRY_DESCRIPTIVE_MENULIST_ICON" />
-		<execute function="AssertClick" locator1="MenuItem#PERMISSIONS" value1="Permissions" />
+		<execute function="Click" locator1="Icon#DESCRIPTIVE_VERTICAL_ELLIPSIS" />
+		<execute function="AssertClick" locator1="MenuItem#PERMISSIONS_LEXICON" value1="Permissions" />
 
 		<execute function="SelectFrame" locator1="Permissions#PERMISSIONS_IFRAME" />
 		<execute function="AssertTextEquals" locator1="Permissions#HEADER_TITLE" value1="${webContentTitle}" />

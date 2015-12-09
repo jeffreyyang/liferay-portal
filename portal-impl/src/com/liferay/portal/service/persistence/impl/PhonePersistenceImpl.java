@@ -17,7 +17,10 @@ package com.liferay.portal.service.persistence.impl;
 import aQute.bnd.annotation.ProviderType;
 
 import com.liferay.portal.NoSuchPhoneException;
+import com.liferay.portal.kernel.bean.BeanReference;
+import com.liferay.portal.kernel.dao.orm.EntityCache;
 import com.liferay.portal.kernel.dao.orm.EntityCacheUtil;
+import com.liferay.portal.kernel.dao.orm.FinderCache;
 import com.liferay.portal.kernel.dao.orm.FinderCacheUtil;
 import com.liferay.portal.kernel.dao.orm.FinderPath;
 import com.liferay.portal.kernel.dao.orm.Query;
@@ -39,6 +42,7 @@ import com.liferay.portal.model.impl.PhoneImpl;
 import com.liferay.portal.model.impl.PhoneModelImpl;
 import com.liferay.portal.service.ServiceContext;
 import com.liferay.portal.service.ServiceContextThreadLocal;
+import com.liferay.portal.service.persistence.CompanyProvider;
 import com.liferay.portal.service.persistence.PhonePersistence;
 
 import java.io.Serializable;
@@ -150,6 +154,26 @@ public class PhonePersistenceImpl extends BasePersistenceImpl<Phone>
 	@Override
 	public List<Phone> findByUuid(String uuid, int start, int end,
 		OrderByComparator<Phone> orderByComparator) {
+		return findByUuid(uuid, start, end, orderByComparator, true);
+	}
+
+	/**
+	 * Returns an ordered range of all the phones where uuid = &#63;.
+	 *
+	 * <p>
+	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link PhoneModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
+	 * </p>
+	 *
+	 * @param uuid the uuid
+	 * @param start the lower bound of the range of phones
+	 * @param end the upper bound of the range of phones (not inclusive)
+	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
+	 * @param retrieveFromCache whether to retrieve from the finder cache
+	 * @return the ordered range of matching phones
+	 */
+	@Override
+	public List<Phone> findByUuid(String uuid, int start, int end,
+		OrderByComparator<Phone> orderByComparator, boolean retrieveFromCache) {
 		boolean pagination = true;
 		FinderPath finderPath = null;
 		Object[] finderArgs = null;
@@ -165,15 +189,19 @@ public class PhonePersistenceImpl extends BasePersistenceImpl<Phone>
 			finderArgs = new Object[] { uuid, start, end, orderByComparator };
 		}
 
-		List<Phone> list = (List<Phone>)FinderCacheUtil.getResult(finderPath,
-				finderArgs, this);
+		List<Phone> list = null;
 
-		if ((list != null) && !list.isEmpty()) {
-			for (Phone phone : list) {
-				if (!Validator.equals(uuid, phone.getUuid())) {
-					list = null;
+		if (retrieveFromCache) {
+			list = (List<Phone>)finderCache.getResult(finderPath, finderArgs,
+					this);
 
-					break;
+			if ((list != null) && !list.isEmpty()) {
+				for (Phone phone : list) {
+					if (!Validator.equals(uuid, phone.getUuid())) {
+						list = null;
+
+						break;
+					}
 				}
 			}
 		}
@@ -244,10 +272,10 @@ public class PhonePersistenceImpl extends BasePersistenceImpl<Phone>
 
 				cacheResult(list);
 
-				FinderCacheUtil.putResult(finderPath, finderArgs, list);
+				finderCache.putResult(finderPath, finderArgs, list);
 			}
 			catch (Exception e) {
-				FinderCacheUtil.removeResult(finderPath, finderArgs);
+				finderCache.removeResult(finderPath, finderArgs);
 
 				throw processException(e);
 			}
@@ -544,8 +572,7 @@ public class PhonePersistenceImpl extends BasePersistenceImpl<Phone>
 
 		Object[] finderArgs = new Object[] { uuid };
 
-		Long count = (Long)FinderCacheUtil.getResult(finderPath, finderArgs,
-				this);
+		Long count = (Long)finderCache.getResult(finderPath, finderArgs, this);
 
 		if (count == null) {
 			StringBundler query = new StringBundler(2);
@@ -583,10 +610,10 @@ public class PhonePersistenceImpl extends BasePersistenceImpl<Phone>
 
 				count = (Long)q.uniqueResult();
 
-				FinderCacheUtil.putResult(finderPath, finderArgs, count);
+				finderCache.putResult(finderPath, finderArgs, count);
 			}
 			catch (Exception e) {
-				FinderCacheUtil.removeResult(finderPath, finderArgs);
+				finderCache.removeResult(finderPath, finderArgs);
 
 				throw processException(e);
 			}
@@ -672,6 +699,28 @@ public class PhonePersistenceImpl extends BasePersistenceImpl<Phone>
 	@Override
 	public List<Phone> findByUuid_C(String uuid, long companyId, int start,
 		int end, OrderByComparator<Phone> orderByComparator) {
+		return findByUuid_C(uuid, companyId, start, end, orderByComparator, true);
+	}
+
+	/**
+	 * Returns an ordered range of all the phones where uuid = &#63; and companyId = &#63;.
+	 *
+	 * <p>
+	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link PhoneModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
+	 * </p>
+	 *
+	 * @param uuid the uuid
+	 * @param companyId the company ID
+	 * @param start the lower bound of the range of phones
+	 * @param end the upper bound of the range of phones (not inclusive)
+	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
+	 * @param retrieveFromCache whether to retrieve from the finder cache
+	 * @return the ordered range of matching phones
+	 */
+	@Override
+	public List<Phone> findByUuid_C(String uuid, long companyId, int start,
+		int end, OrderByComparator<Phone> orderByComparator,
+		boolean retrieveFromCache) {
 		boolean pagination = true;
 		FinderPath finderPath = null;
 		Object[] finderArgs = null;
@@ -691,16 +740,20 @@ public class PhonePersistenceImpl extends BasePersistenceImpl<Phone>
 				};
 		}
 
-		List<Phone> list = (List<Phone>)FinderCacheUtil.getResult(finderPath,
-				finderArgs, this);
+		List<Phone> list = null;
 
-		if ((list != null) && !list.isEmpty()) {
-			for (Phone phone : list) {
-				if (!Validator.equals(uuid, phone.getUuid()) ||
-						(companyId != phone.getCompanyId())) {
-					list = null;
+		if (retrieveFromCache) {
+			list = (List<Phone>)finderCache.getResult(finderPath, finderArgs,
+					this);
 
-					break;
+			if ((list != null) && !list.isEmpty()) {
+				for (Phone phone : list) {
+					if (!Validator.equals(uuid, phone.getUuid()) ||
+							(companyId != phone.getCompanyId())) {
+						list = null;
+
+						break;
+					}
 				}
 			}
 		}
@@ -775,10 +828,10 @@ public class PhonePersistenceImpl extends BasePersistenceImpl<Phone>
 
 				cacheResult(list);
 
-				FinderCacheUtil.putResult(finderPath, finderArgs, list);
+				finderCache.putResult(finderPath, finderArgs, list);
 			}
 			catch (Exception e) {
-				FinderCacheUtil.removeResult(finderPath, finderArgs);
+				finderCache.removeResult(finderPath, finderArgs);
 
 				throw processException(e);
 			}
@@ -1094,8 +1147,7 @@ public class PhonePersistenceImpl extends BasePersistenceImpl<Phone>
 
 		Object[] finderArgs = new Object[] { uuid, companyId };
 
-		Long count = (Long)FinderCacheUtil.getResult(finderPath, finderArgs,
-				this);
+		Long count = (Long)finderCache.getResult(finderPath, finderArgs, this);
 
 		if (count == null) {
 			StringBundler query = new StringBundler(3);
@@ -1137,10 +1189,10 @@ public class PhonePersistenceImpl extends BasePersistenceImpl<Phone>
 
 				count = (Long)q.uniqueResult();
 
-				FinderCacheUtil.putResult(finderPath, finderArgs, count);
+				finderCache.putResult(finderPath, finderArgs, count);
 			}
 			catch (Exception e) {
-				FinderCacheUtil.removeResult(finderPath, finderArgs);
+				finderCache.removeResult(finderPath, finderArgs);
 
 				throw processException(e);
 			}
@@ -1223,6 +1275,26 @@ public class PhonePersistenceImpl extends BasePersistenceImpl<Phone>
 	@Override
 	public List<Phone> findByCompanyId(long companyId, int start, int end,
 		OrderByComparator<Phone> orderByComparator) {
+		return findByCompanyId(companyId, start, end, orderByComparator, true);
+	}
+
+	/**
+	 * Returns an ordered range of all the phones where companyId = &#63;.
+	 *
+	 * <p>
+	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link PhoneModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
+	 * </p>
+	 *
+	 * @param companyId the company ID
+	 * @param start the lower bound of the range of phones
+	 * @param end the upper bound of the range of phones (not inclusive)
+	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
+	 * @param retrieveFromCache whether to retrieve from the finder cache
+	 * @return the ordered range of matching phones
+	 */
+	@Override
+	public List<Phone> findByCompanyId(long companyId, int start, int end,
+		OrderByComparator<Phone> orderByComparator, boolean retrieveFromCache) {
 		boolean pagination = true;
 		FinderPath finderPath = null;
 		Object[] finderArgs = null;
@@ -1238,15 +1310,19 @@ public class PhonePersistenceImpl extends BasePersistenceImpl<Phone>
 			finderArgs = new Object[] { companyId, start, end, orderByComparator };
 		}
 
-		List<Phone> list = (List<Phone>)FinderCacheUtil.getResult(finderPath,
-				finderArgs, this);
+		List<Phone> list = null;
 
-		if ((list != null) && !list.isEmpty()) {
-			for (Phone phone : list) {
-				if ((companyId != phone.getCompanyId())) {
-					list = null;
+		if (retrieveFromCache) {
+			list = (List<Phone>)finderCache.getResult(finderPath, finderArgs,
+					this);
 
-					break;
+			if ((list != null) && !list.isEmpty()) {
+				for (Phone phone : list) {
+					if ((companyId != phone.getCompanyId())) {
+						list = null;
+
+						break;
+					}
 				}
 			}
 		}
@@ -1303,10 +1379,10 @@ public class PhonePersistenceImpl extends BasePersistenceImpl<Phone>
 
 				cacheResult(list);
 
-				FinderCacheUtil.putResult(finderPath, finderArgs, list);
+				finderCache.putResult(finderPath, finderArgs, list);
 			}
 			catch (Exception e) {
-				FinderCacheUtil.removeResult(finderPath, finderArgs);
+				finderCache.removeResult(finderPath, finderArgs);
 
 				throw processException(e);
 			}
@@ -1590,8 +1666,7 @@ public class PhonePersistenceImpl extends BasePersistenceImpl<Phone>
 
 		Object[] finderArgs = new Object[] { companyId };
 
-		Long count = (Long)FinderCacheUtil.getResult(finderPath, finderArgs,
-				this);
+		Long count = (Long)finderCache.getResult(finderPath, finderArgs, this);
 
 		if (count == null) {
 			StringBundler query = new StringBundler(2);
@@ -1615,10 +1690,10 @@ public class PhonePersistenceImpl extends BasePersistenceImpl<Phone>
 
 				count = (Long)q.uniqueResult();
 
-				FinderCacheUtil.putResult(finderPath, finderArgs, count);
+				finderCache.putResult(finderPath, finderArgs, count);
 			}
 			catch (Exception e) {
-				FinderCacheUtil.removeResult(finderPath, finderArgs);
+				finderCache.removeResult(finderPath, finderArgs);
 
 				throw processException(e);
 			}
@@ -1696,6 +1771,26 @@ public class PhonePersistenceImpl extends BasePersistenceImpl<Phone>
 	@Override
 	public List<Phone> findByUserId(long userId, int start, int end,
 		OrderByComparator<Phone> orderByComparator) {
+		return findByUserId(userId, start, end, orderByComparator, true);
+	}
+
+	/**
+	 * Returns an ordered range of all the phones where userId = &#63;.
+	 *
+	 * <p>
+	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link PhoneModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
+	 * </p>
+	 *
+	 * @param userId the user ID
+	 * @param start the lower bound of the range of phones
+	 * @param end the upper bound of the range of phones (not inclusive)
+	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
+	 * @param retrieveFromCache whether to retrieve from the finder cache
+	 * @return the ordered range of matching phones
+	 */
+	@Override
+	public List<Phone> findByUserId(long userId, int start, int end,
+		OrderByComparator<Phone> orderByComparator, boolean retrieveFromCache) {
 		boolean pagination = true;
 		FinderPath finderPath = null;
 		Object[] finderArgs = null;
@@ -1711,15 +1806,19 @@ public class PhonePersistenceImpl extends BasePersistenceImpl<Phone>
 			finderArgs = new Object[] { userId, start, end, orderByComparator };
 		}
 
-		List<Phone> list = (List<Phone>)FinderCacheUtil.getResult(finderPath,
-				finderArgs, this);
+		List<Phone> list = null;
 
-		if ((list != null) && !list.isEmpty()) {
-			for (Phone phone : list) {
-				if ((userId != phone.getUserId())) {
-					list = null;
+		if (retrieveFromCache) {
+			list = (List<Phone>)finderCache.getResult(finderPath, finderArgs,
+					this);
 
-					break;
+			if ((list != null) && !list.isEmpty()) {
+				for (Phone phone : list) {
+					if ((userId != phone.getUserId())) {
+						list = null;
+
+						break;
+					}
 				}
 			}
 		}
@@ -1776,10 +1875,10 @@ public class PhonePersistenceImpl extends BasePersistenceImpl<Phone>
 
 				cacheResult(list);
 
-				FinderCacheUtil.putResult(finderPath, finderArgs, list);
+				finderCache.putResult(finderPath, finderArgs, list);
 			}
 			catch (Exception e) {
-				FinderCacheUtil.removeResult(finderPath, finderArgs);
+				finderCache.removeResult(finderPath, finderArgs);
 
 				throw processException(e);
 			}
@@ -2063,8 +2162,7 @@ public class PhonePersistenceImpl extends BasePersistenceImpl<Phone>
 
 		Object[] finderArgs = new Object[] { userId };
 
-		Long count = (Long)FinderCacheUtil.getResult(finderPath, finderArgs,
-				this);
+		Long count = (Long)finderCache.getResult(finderPath, finderArgs, this);
 
 		if (count == null) {
 			StringBundler query = new StringBundler(2);
@@ -2088,10 +2186,10 @@ public class PhonePersistenceImpl extends BasePersistenceImpl<Phone>
 
 				count = (Long)q.uniqueResult();
 
-				FinderCacheUtil.putResult(finderPath, finderArgs, count);
+				finderCache.putResult(finderPath, finderArgs, count);
 			}
 			catch (Exception e) {
-				FinderCacheUtil.removeResult(finderPath, finderArgs);
+				finderCache.removeResult(finderPath, finderArgs);
 
 				throw processException(e);
 			}
@@ -2174,6 +2272,29 @@ public class PhonePersistenceImpl extends BasePersistenceImpl<Phone>
 	@Override
 	public List<Phone> findByC_C(long companyId, long classNameId, int start,
 		int end, OrderByComparator<Phone> orderByComparator) {
+		return findByC_C(companyId, classNameId, start, end, orderByComparator,
+			true);
+	}
+
+	/**
+	 * Returns an ordered range of all the phones where companyId = &#63; and classNameId = &#63;.
+	 *
+	 * <p>
+	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link PhoneModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
+	 * </p>
+	 *
+	 * @param companyId the company ID
+	 * @param classNameId the class name ID
+	 * @param start the lower bound of the range of phones
+	 * @param end the upper bound of the range of phones (not inclusive)
+	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
+	 * @param retrieveFromCache whether to retrieve from the finder cache
+	 * @return the ordered range of matching phones
+	 */
+	@Override
+	public List<Phone> findByC_C(long companyId, long classNameId, int start,
+		int end, OrderByComparator<Phone> orderByComparator,
+		boolean retrieveFromCache) {
 		boolean pagination = true;
 		FinderPath finderPath = null;
 		Object[] finderArgs = null;
@@ -2193,16 +2314,20 @@ public class PhonePersistenceImpl extends BasePersistenceImpl<Phone>
 				};
 		}
 
-		List<Phone> list = (List<Phone>)FinderCacheUtil.getResult(finderPath,
-				finderArgs, this);
+		List<Phone> list = null;
 
-		if ((list != null) && !list.isEmpty()) {
-			for (Phone phone : list) {
-				if ((companyId != phone.getCompanyId()) ||
-						(classNameId != phone.getClassNameId())) {
-					list = null;
+		if (retrieveFromCache) {
+			list = (List<Phone>)finderCache.getResult(finderPath, finderArgs,
+					this);
 
-					break;
+			if ((list != null) && !list.isEmpty()) {
+				for (Phone phone : list) {
+					if ((companyId != phone.getCompanyId()) ||
+							(classNameId != phone.getClassNameId())) {
+						list = null;
+
+						break;
+					}
 				}
 			}
 		}
@@ -2263,10 +2388,10 @@ public class PhonePersistenceImpl extends BasePersistenceImpl<Phone>
 
 				cacheResult(list);
 
-				FinderCacheUtil.putResult(finderPath, finderArgs, list);
+				finderCache.putResult(finderPath, finderArgs, list);
 			}
 			catch (Exception e) {
-				FinderCacheUtil.removeResult(finderPath, finderArgs);
+				finderCache.removeResult(finderPath, finderArgs);
 
 				throw processException(e);
 			}
@@ -2569,8 +2694,7 @@ public class PhonePersistenceImpl extends BasePersistenceImpl<Phone>
 
 		Object[] finderArgs = new Object[] { companyId, classNameId };
 
-		Long count = (Long)FinderCacheUtil.getResult(finderPath, finderArgs,
-				this);
+		Long count = (Long)finderCache.getResult(finderPath, finderArgs, this);
 
 		if (count == null) {
 			StringBundler query = new StringBundler(3);
@@ -2598,10 +2722,10 @@ public class PhonePersistenceImpl extends BasePersistenceImpl<Phone>
 
 				count = (Long)q.uniqueResult();
 
-				FinderCacheUtil.putResult(finderPath, finderArgs, count);
+				finderCache.putResult(finderPath, finderArgs, count);
 			}
 			catch (Exception e) {
-				FinderCacheUtil.removeResult(finderPath, finderArgs);
+				finderCache.removeResult(finderPath, finderArgs);
 
 				throw processException(e);
 			}
@@ -2695,6 +2819,30 @@ public class PhonePersistenceImpl extends BasePersistenceImpl<Phone>
 	public List<Phone> findByC_C_C(long companyId, long classNameId,
 		long classPK, int start, int end,
 		OrderByComparator<Phone> orderByComparator) {
+		return findByC_C_C(companyId, classNameId, classPK, start, end,
+			orderByComparator, true);
+	}
+
+	/**
+	 * Returns an ordered range of all the phones where companyId = &#63; and classNameId = &#63; and classPK = &#63;.
+	 *
+	 * <p>
+	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link PhoneModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
+	 * </p>
+	 *
+	 * @param companyId the company ID
+	 * @param classNameId the class name ID
+	 * @param classPK the class p k
+	 * @param start the lower bound of the range of phones
+	 * @param end the upper bound of the range of phones (not inclusive)
+	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
+	 * @param retrieveFromCache whether to retrieve from the finder cache
+	 * @return the ordered range of matching phones
+	 */
+	@Override
+	public List<Phone> findByC_C_C(long companyId, long classNameId,
+		long classPK, int start, int end,
+		OrderByComparator<Phone> orderByComparator, boolean retrieveFromCache) {
 		boolean pagination = true;
 		FinderPath finderPath = null;
 		Object[] finderArgs = null;
@@ -2714,17 +2862,21 @@ public class PhonePersistenceImpl extends BasePersistenceImpl<Phone>
 				};
 		}
 
-		List<Phone> list = (List<Phone>)FinderCacheUtil.getResult(finderPath,
-				finderArgs, this);
+		List<Phone> list = null;
 
-		if ((list != null) && !list.isEmpty()) {
-			for (Phone phone : list) {
-				if ((companyId != phone.getCompanyId()) ||
-						(classNameId != phone.getClassNameId()) ||
-						(classPK != phone.getClassPK())) {
-					list = null;
+		if (retrieveFromCache) {
+			list = (List<Phone>)finderCache.getResult(finderPath, finderArgs,
+					this);
 
-					break;
+			if ((list != null) && !list.isEmpty()) {
+				for (Phone phone : list) {
+					if ((companyId != phone.getCompanyId()) ||
+							(classNameId != phone.getClassNameId()) ||
+							(classPK != phone.getClassPK())) {
+						list = null;
+
+						break;
+					}
 				}
 			}
 		}
@@ -2789,10 +2941,10 @@ public class PhonePersistenceImpl extends BasePersistenceImpl<Phone>
 
 				cacheResult(list);
 
-				FinderCacheUtil.putResult(finderPath, finderArgs, list);
+				finderCache.putResult(finderPath, finderArgs, list);
 			}
 			catch (Exception e) {
-				FinderCacheUtil.removeResult(finderPath, finderArgs);
+				finderCache.removeResult(finderPath, finderArgs);
 
 				throw processException(e);
 			}
@@ -3116,8 +3268,7 @@ public class PhonePersistenceImpl extends BasePersistenceImpl<Phone>
 
 		Object[] finderArgs = new Object[] { companyId, classNameId, classPK };
 
-		Long count = (Long)FinderCacheUtil.getResult(finderPath, finderArgs,
-				this);
+		Long count = (Long)finderCache.getResult(finderPath, finderArgs, this);
 
 		if (count == null) {
 			StringBundler query = new StringBundler(4);
@@ -3149,10 +3300,10 @@ public class PhonePersistenceImpl extends BasePersistenceImpl<Phone>
 
 				count = (Long)q.uniqueResult();
 
-				FinderCacheUtil.putResult(finderPath, finderArgs, count);
+				finderCache.putResult(finderPath, finderArgs, count);
 			}
 			catch (Exception e) {
-				FinderCacheUtil.removeResult(finderPath, finderArgs);
+				finderCache.removeResult(finderPath, finderArgs);
 
 				throw processException(e);
 			}
@@ -3256,6 +3407,31 @@ public class PhonePersistenceImpl extends BasePersistenceImpl<Phone>
 	public List<Phone> findByC_C_C_P(long companyId, long classNameId,
 		long classPK, boolean primary, int start, int end,
 		OrderByComparator<Phone> orderByComparator) {
+		return findByC_C_C_P(companyId, classNameId, classPK, primary, start,
+			end, orderByComparator, true);
+	}
+
+	/**
+	 * Returns an ordered range of all the phones where companyId = &#63; and classNameId = &#63; and classPK = &#63; and primary = &#63;.
+	 *
+	 * <p>
+	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link PhoneModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
+	 * </p>
+	 *
+	 * @param companyId the company ID
+	 * @param classNameId the class name ID
+	 * @param classPK the class p k
+	 * @param primary the primary
+	 * @param start the lower bound of the range of phones
+	 * @param end the upper bound of the range of phones (not inclusive)
+	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
+	 * @param retrieveFromCache whether to retrieve from the finder cache
+	 * @return the ordered range of matching phones
+	 */
+	@Override
+	public List<Phone> findByC_C_C_P(long companyId, long classNameId,
+		long classPK, boolean primary, int start, int end,
+		OrderByComparator<Phone> orderByComparator, boolean retrieveFromCache) {
 		boolean pagination = true;
 		FinderPath finderPath = null;
 		Object[] finderArgs = null;
@@ -3275,18 +3451,22 @@ public class PhonePersistenceImpl extends BasePersistenceImpl<Phone>
 				};
 		}
 
-		List<Phone> list = (List<Phone>)FinderCacheUtil.getResult(finderPath,
-				finderArgs, this);
+		List<Phone> list = null;
 
-		if ((list != null) && !list.isEmpty()) {
-			for (Phone phone : list) {
-				if ((companyId != phone.getCompanyId()) ||
-						(classNameId != phone.getClassNameId()) ||
-						(classPK != phone.getClassPK()) ||
-						(primary != phone.getPrimary())) {
-					list = null;
+		if (retrieveFromCache) {
+			list = (List<Phone>)finderCache.getResult(finderPath, finderArgs,
+					this);
 
-					break;
+			if ((list != null) && !list.isEmpty()) {
+				for (Phone phone : list) {
+					if ((companyId != phone.getCompanyId()) ||
+							(classNameId != phone.getClassNameId()) ||
+							(classPK != phone.getClassPK()) ||
+							(primary != phone.getPrimary())) {
+						list = null;
+
+						break;
+					}
 				}
 			}
 		}
@@ -3355,10 +3535,10 @@ public class PhonePersistenceImpl extends BasePersistenceImpl<Phone>
 
 				cacheResult(list);
 
-				FinderCacheUtil.putResult(finderPath, finderArgs, list);
+				finderCache.putResult(finderPath, finderArgs, list);
 			}
 			catch (Exception e) {
-				FinderCacheUtil.removeResult(finderPath, finderArgs);
+				finderCache.removeResult(finderPath, finderArgs);
 
 				throw processException(e);
 			}
@@ -3705,8 +3885,7 @@ public class PhonePersistenceImpl extends BasePersistenceImpl<Phone>
 				companyId, classNameId, classPK, primary
 			};
 
-		Long count = (Long)FinderCacheUtil.getResult(finderPath, finderArgs,
-				this);
+		Long count = (Long)finderCache.getResult(finderPath, finderArgs, this);
 
 		if (count == null) {
 			StringBundler query = new StringBundler(5);
@@ -3742,10 +3921,10 @@ public class PhonePersistenceImpl extends BasePersistenceImpl<Phone>
 
 				count = (Long)q.uniqueResult();
 
-				FinderCacheUtil.putResult(finderPath, finderArgs, count);
+				finderCache.putResult(finderPath, finderArgs, count);
 			}
 			catch (Exception e) {
-				FinderCacheUtil.removeResult(finderPath, finderArgs);
+				finderCache.removeResult(finderPath, finderArgs);
 
 				throw processException(e);
 			}
@@ -3773,7 +3952,7 @@ public class PhonePersistenceImpl extends BasePersistenceImpl<Phone>
 	 */
 	@Override
 	public void cacheResult(Phone phone) {
-		EntityCacheUtil.putResult(PhoneModelImpl.ENTITY_CACHE_ENABLED,
+		entityCache.putResult(PhoneModelImpl.ENTITY_CACHE_ENABLED,
 			PhoneImpl.class, phone.getPrimaryKey(), phone);
 
 		phone.resetOriginalValues();
@@ -3787,7 +3966,7 @@ public class PhonePersistenceImpl extends BasePersistenceImpl<Phone>
 	@Override
 	public void cacheResult(List<Phone> phones) {
 		for (Phone phone : phones) {
-			if (EntityCacheUtil.getResult(PhoneModelImpl.ENTITY_CACHE_ENABLED,
+			if (entityCache.getResult(PhoneModelImpl.ENTITY_CACHE_ENABLED,
 						PhoneImpl.class, phone.getPrimaryKey()) == null) {
 				cacheResult(phone);
 			}
@@ -3801,41 +3980,41 @@ public class PhonePersistenceImpl extends BasePersistenceImpl<Phone>
 	 * Clears the cache for all phones.
 	 *
 	 * <p>
-	 * The {@link com.liferay.portal.kernel.dao.orm.EntityCache} and {@link com.liferay.portal.kernel.dao.orm.FinderCache} are both cleared by this method.
+	 * The {@link EntityCache} and {@link FinderCache} are both cleared by this method.
 	 * </p>
 	 */
 	@Override
 	public void clearCache() {
-		EntityCacheUtil.clearCache(PhoneImpl.class);
+		entityCache.clearCache(PhoneImpl.class);
 
-		FinderCacheUtil.clearCache(FINDER_CLASS_NAME_ENTITY);
-		FinderCacheUtil.clearCache(FINDER_CLASS_NAME_LIST_WITH_PAGINATION);
-		FinderCacheUtil.clearCache(FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION);
+		finderCache.clearCache(FINDER_CLASS_NAME_ENTITY);
+		finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITH_PAGINATION);
+		finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION);
 	}
 
 	/**
 	 * Clears the cache for the phone.
 	 *
 	 * <p>
-	 * The {@link com.liferay.portal.kernel.dao.orm.EntityCache} and {@link com.liferay.portal.kernel.dao.orm.FinderCache} are both cleared by this method.
+	 * The {@link EntityCache} and {@link FinderCache} are both cleared by this method.
 	 * </p>
 	 */
 	@Override
 	public void clearCache(Phone phone) {
-		EntityCacheUtil.removeResult(PhoneModelImpl.ENTITY_CACHE_ENABLED,
+		entityCache.removeResult(PhoneModelImpl.ENTITY_CACHE_ENABLED,
 			PhoneImpl.class, phone.getPrimaryKey());
 
-		FinderCacheUtil.clearCache(FINDER_CLASS_NAME_LIST_WITH_PAGINATION);
-		FinderCacheUtil.clearCache(FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION);
+		finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITH_PAGINATION);
+		finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION);
 	}
 
 	@Override
 	public void clearCache(List<Phone> phones) {
-		FinderCacheUtil.clearCache(FINDER_CLASS_NAME_LIST_WITH_PAGINATION);
-		FinderCacheUtil.clearCache(FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION);
+		finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITH_PAGINATION);
+		finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION);
 
 		for (Phone phone : phones) {
-			EntityCacheUtil.removeResult(PhoneModelImpl.ENTITY_CACHE_ENABLED,
+			entityCache.removeResult(PhoneModelImpl.ENTITY_CACHE_ENABLED,
 				PhoneImpl.class, phone.getPrimaryKey());
 		}
 	}
@@ -3999,10 +4178,10 @@ public class PhonePersistenceImpl extends BasePersistenceImpl<Phone>
 			closeSession(session);
 		}
 
-		FinderCacheUtil.clearCache(FINDER_CLASS_NAME_LIST_WITH_PAGINATION);
+		finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITH_PAGINATION);
 
 		if (isNew || !PhoneModelImpl.COLUMN_BITMASK_ENABLED) {
-			FinderCacheUtil.clearCache(FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION);
+			finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION);
 		}
 
 		else {
@@ -4010,14 +4189,14 @@ public class PhonePersistenceImpl extends BasePersistenceImpl<Phone>
 					FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_UUID.getColumnBitmask()) != 0) {
 				Object[] args = new Object[] { phoneModelImpl.getOriginalUuid() };
 
-				FinderCacheUtil.removeResult(FINDER_PATH_COUNT_BY_UUID, args);
-				FinderCacheUtil.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_UUID,
+				finderCache.removeResult(FINDER_PATH_COUNT_BY_UUID, args);
+				finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_UUID,
 					args);
 
 				args = new Object[] { phoneModelImpl.getUuid() };
 
-				FinderCacheUtil.removeResult(FINDER_PATH_COUNT_BY_UUID, args);
-				FinderCacheUtil.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_UUID,
+				finderCache.removeResult(FINDER_PATH_COUNT_BY_UUID, args);
+				finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_UUID,
 					args);
 			}
 
@@ -4028,16 +4207,16 @@ public class PhonePersistenceImpl extends BasePersistenceImpl<Phone>
 						phoneModelImpl.getOriginalCompanyId()
 					};
 
-				FinderCacheUtil.removeResult(FINDER_PATH_COUNT_BY_UUID_C, args);
-				FinderCacheUtil.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_UUID_C,
+				finderCache.removeResult(FINDER_PATH_COUNT_BY_UUID_C, args);
+				finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_UUID_C,
 					args);
 
 				args = new Object[] {
 						phoneModelImpl.getUuid(), phoneModelImpl.getCompanyId()
 					};
 
-				FinderCacheUtil.removeResult(FINDER_PATH_COUNT_BY_UUID_C, args);
-				FinderCacheUtil.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_UUID_C,
+				finderCache.removeResult(FINDER_PATH_COUNT_BY_UUID_C, args);
+				finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_UUID_C,
 					args);
 			}
 
@@ -4047,16 +4226,14 @@ public class PhonePersistenceImpl extends BasePersistenceImpl<Phone>
 						phoneModelImpl.getOriginalCompanyId()
 					};
 
-				FinderCacheUtil.removeResult(FINDER_PATH_COUNT_BY_COMPANYID,
-					args);
-				FinderCacheUtil.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_COMPANYID,
+				finderCache.removeResult(FINDER_PATH_COUNT_BY_COMPANYID, args);
+				finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_COMPANYID,
 					args);
 
 				args = new Object[] { phoneModelImpl.getCompanyId() };
 
-				FinderCacheUtil.removeResult(FINDER_PATH_COUNT_BY_COMPANYID,
-					args);
-				FinderCacheUtil.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_COMPANYID,
+				finderCache.removeResult(FINDER_PATH_COUNT_BY_COMPANYID, args);
+				finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_COMPANYID,
 					args);
 			}
 
@@ -4064,14 +4241,14 @@ public class PhonePersistenceImpl extends BasePersistenceImpl<Phone>
 					FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_USERID.getColumnBitmask()) != 0) {
 				Object[] args = new Object[] { phoneModelImpl.getOriginalUserId() };
 
-				FinderCacheUtil.removeResult(FINDER_PATH_COUNT_BY_USERID, args);
-				FinderCacheUtil.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_USERID,
+				finderCache.removeResult(FINDER_PATH_COUNT_BY_USERID, args);
+				finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_USERID,
 					args);
 
 				args = new Object[] { phoneModelImpl.getUserId() };
 
-				FinderCacheUtil.removeResult(FINDER_PATH_COUNT_BY_USERID, args);
-				FinderCacheUtil.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_USERID,
+				finderCache.removeResult(FINDER_PATH_COUNT_BY_USERID, args);
+				finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_USERID,
 					args);
 			}
 
@@ -4082,8 +4259,8 @@ public class PhonePersistenceImpl extends BasePersistenceImpl<Phone>
 						phoneModelImpl.getOriginalClassNameId()
 					};
 
-				FinderCacheUtil.removeResult(FINDER_PATH_COUNT_BY_C_C, args);
-				FinderCacheUtil.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_C_C,
+				finderCache.removeResult(FINDER_PATH_COUNT_BY_C_C, args);
+				finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_C_C,
 					args);
 
 				args = new Object[] {
@@ -4091,8 +4268,8 @@ public class PhonePersistenceImpl extends BasePersistenceImpl<Phone>
 						phoneModelImpl.getClassNameId()
 					};
 
-				FinderCacheUtil.removeResult(FINDER_PATH_COUNT_BY_C_C, args);
-				FinderCacheUtil.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_C_C,
+				finderCache.removeResult(FINDER_PATH_COUNT_BY_C_C, args);
+				finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_C_C,
 					args);
 			}
 
@@ -4104,8 +4281,8 @@ public class PhonePersistenceImpl extends BasePersistenceImpl<Phone>
 						phoneModelImpl.getOriginalClassPK()
 					};
 
-				FinderCacheUtil.removeResult(FINDER_PATH_COUNT_BY_C_C_C, args);
-				FinderCacheUtil.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_C_C_C,
+				finderCache.removeResult(FINDER_PATH_COUNT_BY_C_C_C, args);
+				finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_C_C_C,
 					args);
 
 				args = new Object[] {
@@ -4114,8 +4291,8 @@ public class PhonePersistenceImpl extends BasePersistenceImpl<Phone>
 						phoneModelImpl.getClassPK()
 					};
 
-				FinderCacheUtil.removeResult(FINDER_PATH_COUNT_BY_C_C_C, args);
-				FinderCacheUtil.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_C_C_C,
+				finderCache.removeResult(FINDER_PATH_COUNT_BY_C_C_C, args);
+				finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_C_C_C,
 					args);
 			}
 
@@ -4128,8 +4305,8 @@ public class PhonePersistenceImpl extends BasePersistenceImpl<Phone>
 						phoneModelImpl.getOriginalPrimary()
 					};
 
-				FinderCacheUtil.removeResult(FINDER_PATH_COUNT_BY_C_C_C_P, args);
-				FinderCacheUtil.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_C_C_C_P,
+				finderCache.removeResult(FINDER_PATH_COUNT_BY_C_C_C_P, args);
+				finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_C_C_C_P,
 					args);
 
 				args = new Object[] {
@@ -4138,13 +4315,13 @@ public class PhonePersistenceImpl extends BasePersistenceImpl<Phone>
 						phoneModelImpl.getClassPK(), phoneModelImpl.getPrimary()
 					};
 
-				FinderCacheUtil.removeResult(FINDER_PATH_COUNT_BY_C_C_C_P, args);
-				FinderCacheUtil.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_C_C_C_P,
+				finderCache.removeResult(FINDER_PATH_COUNT_BY_C_C_C_P, args);
+				finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_C_C_C_P,
 					args);
 			}
 		}
 
-		EntityCacheUtil.putResult(PhoneModelImpl.ENTITY_CACHE_ENABLED,
+		entityCache.putResult(PhoneModelImpl.ENTITY_CACHE_ENABLED,
 			PhoneImpl.class, phone.getPrimaryKey(), phone, false);
 
 		phone.resetOriginalValues();
@@ -4176,7 +4353,6 @@ public class PhonePersistenceImpl extends BasePersistenceImpl<Phone>
 		phoneImpl.setExtension(phone.getExtension());
 		phoneImpl.setTypeId(phone.getTypeId());
 		phoneImpl.setPrimary(phone.isPrimary());
-		phoneImpl.setLastPublishDate(phone.getLastPublishDate());
 
 		return phoneImpl;
 	}
@@ -4225,7 +4401,7 @@ public class PhonePersistenceImpl extends BasePersistenceImpl<Phone>
 	 */
 	@Override
 	public Phone fetchByPrimaryKey(Serializable primaryKey) {
-		Phone phone = (Phone)EntityCacheUtil.getResult(PhoneModelImpl.ENTITY_CACHE_ENABLED,
+		Phone phone = (Phone)entityCache.getResult(PhoneModelImpl.ENTITY_CACHE_ENABLED,
 				PhoneImpl.class, primaryKey);
 
 		if (phone == _nullPhone) {
@@ -4244,12 +4420,12 @@ public class PhonePersistenceImpl extends BasePersistenceImpl<Phone>
 					cacheResult(phone);
 				}
 				else {
-					EntityCacheUtil.putResult(PhoneModelImpl.ENTITY_CACHE_ENABLED,
+					entityCache.putResult(PhoneModelImpl.ENTITY_CACHE_ENABLED,
 						PhoneImpl.class, primaryKey, _nullPhone);
 				}
 			}
 			catch (Exception e) {
-				EntityCacheUtil.removeResult(PhoneModelImpl.ENTITY_CACHE_ENABLED,
+				entityCache.removeResult(PhoneModelImpl.ENTITY_CACHE_ENABLED,
 					PhoneImpl.class, primaryKey);
 
 				throw processException(e);
@@ -4299,7 +4475,7 @@ public class PhonePersistenceImpl extends BasePersistenceImpl<Phone>
 		Set<Serializable> uncachedPrimaryKeys = null;
 
 		for (Serializable primaryKey : primaryKeys) {
-			Phone phone = (Phone)EntityCacheUtil.getResult(PhoneModelImpl.ENTITY_CACHE_ENABLED,
+			Phone phone = (Phone)entityCache.getResult(PhoneModelImpl.ENTITY_CACHE_ENABLED,
 					PhoneImpl.class, primaryKey);
 
 			if (phone == null) {
@@ -4351,7 +4527,7 @@ public class PhonePersistenceImpl extends BasePersistenceImpl<Phone>
 			}
 
 			for (Serializable primaryKey : uncachedPrimaryKeys) {
-				EntityCacheUtil.putResult(PhoneModelImpl.ENTITY_CACHE_ENABLED,
+				entityCache.putResult(PhoneModelImpl.ENTITY_CACHE_ENABLED,
 					PhoneImpl.class, primaryKey, _nullPhone);
 			}
 		}
@@ -4406,6 +4582,25 @@ public class PhonePersistenceImpl extends BasePersistenceImpl<Phone>
 	@Override
 	public List<Phone> findAll(int start, int end,
 		OrderByComparator<Phone> orderByComparator) {
+		return findAll(start, end, orderByComparator, true);
+	}
+
+	/**
+	 * Returns an ordered range of all the phones.
+	 *
+	 * <p>
+	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link PhoneModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
+	 * </p>
+	 *
+	 * @param start the lower bound of the range of phones
+	 * @param end the upper bound of the range of phones (not inclusive)
+	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
+	 * @param retrieveFromCache whether to retrieve from the finder cache
+	 * @return the ordered range of phones
+	 */
+	@Override
+	public List<Phone> findAll(int start, int end,
+		OrderByComparator<Phone> orderByComparator, boolean retrieveFromCache) {
 		boolean pagination = true;
 		FinderPath finderPath = null;
 		Object[] finderArgs = null;
@@ -4421,8 +4616,12 @@ public class PhonePersistenceImpl extends BasePersistenceImpl<Phone>
 			finderArgs = new Object[] { start, end, orderByComparator };
 		}
 
-		List<Phone> list = (List<Phone>)FinderCacheUtil.getResult(finderPath,
-				finderArgs, this);
+		List<Phone> list = null;
+
+		if (retrieveFromCache) {
+			list = (List<Phone>)finderCache.getResult(finderPath, finderArgs,
+					this);
+		}
 
 		if (list == null) {
 			StringBundler query = null;
@@ -4469,10 +4668,10 @@ public class PhonePersistenceImpl extends BasePersistenceImpl<Phone>
 
 				cacheResult(list);
 
-				FinderCacheUtil.putResult(finderPath, finderArgs, list);
+				finderCache.putResult(finderPath, finderArgs, list);
 			}
 			catch (Exception e) {
-				FinderCacheUtil.removeResult(finderPath, finderArgs);
+				finderCache.removeResult(finderPath, finderArgs);
 
 				throw processException(e);
 			}
@@ -4502,7 +4701,7 @@ public class PhonePersistenceImpl extends BasePersistenceImpl<Phone>
 	 */
 	@Override
 	public int countAll() {
-		Long count = (Long)FinderCacheUtil.getResult(FINDER_PATH_COUNT_ALL,
+		Long count = (Long)finderCache.getResult(FINDER_PATH_COUNT_ALL,
 				FINDER_ARGS_EMPTY, this);
 
 		if (count == null) {
@@ -4515,11 +4714,11 @@ public class PhonePersistenceImpl extends BasePersistenceImpl<Phone>
 
 				count = (Long)q.uniqueResult();
 
-				FinderCacheUtil.putResult(FINDER_PATH_COUNT_ALL,
-					FINDER_ARGS_EMPTY, count);
+				finderCache.putResult(FINDER_PATH_COUNT_ALL, FINDER_ARGS_EMPTY,
+					count);
 			}
 			catch (Exception e) {
-				FinderCacheUtil.removeResult(FINDER_PATH_COUNT_ALL,
+				finderCache.removeResult(FINDER_PATH_COUNT_ALL,
 					FINDER_ARGS_EMPTY);
 
 				throw processException(e);
@@ -4549,12 +4748,16 @@ public class PhonePersistenceImpl extends BasePersistenceImpl<Phone>
 	}
 
 	public void destroy() {
-		EntityCacheUtil.removeCache(PhoneImpl.class.getName());
-		FinderCacheUtil.removeCache(FINDER_CLASS_NAME_ENTITY);
-		FinderCacheUtil.removeCache(FINDER_CLASS_NAME_LIST_WITH_PAGINATION);
-		FinderCacheUtil.removeCache(FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION);
+		entityCache.removeCache(PhoneImpl.class.getName());
+		finderCache.removeCache(FINDER_CLASS_NAME_ENTITY);
+		finderCache.removeCache(FINDER_CLASS_NAME_LIST_WITH_PAGINATION);
+		finderCache.removeCache(FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION);
 	}
 
+	@BeanReference(type = CompanyProvider.class)
+	protected CompanyProvider companyProvider;
+	protected EntityCache entityCache = EntityCacheUtil.getEntityCache();
+	protected FinderCache finderCache = FinderCacheUtil.getFinderCache();
 	private static final String _SQL_SELECT_PHONE = "SELECT phone FROM Phone phone";
 	private static final String _SQL_SELECT_PHONE_WHERE_PKS_IN = "SELECT phone FROM Phone phone WHERE phoneId IN (";
 	private static final String _SQL_SELECT_PHONE_WHERE = "SELECT phone FROM Phone phone WHERE ";

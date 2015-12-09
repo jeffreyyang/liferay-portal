@@ -59,13 +59,8 @@
 	<td></td>
 </tr>
 <tr>
-	<td>CHANGE_DEFAULT_LANGUAGE</td>
-	<td>//a[contains(@class,'change') and contains(@class,'locale')]</td>
-	<td></td>
-</tr>
-<tr>
 	<td>TEXT_FIELD_WIDTH</td>
-	<td>//div[contains(@data-fieldname,'Text')]/input[contains(@class,'input-${key_widthSize}')]</td>
+	<td>//div[contains(@data-fieldname,'Text')]//input[contains(@class,'input-${key_widthSize}')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -106,7 +101,7 @@
 <!--VIEW_HISTORY-->
 <tr>
 	<td>VIEW_HISTORY_VERSION_CHECKBOX</td>
-	<td>//tr[contains(.,'${key_webContentTitle}')]/td/input</td>
+	<td>//tr[contains(.,'${key_webContentTitle}')]/td//input</td>
 	<td></td>
 </tr>
 <tr>
@@ -132,22 +127,22 @@
 </tr>
 <tr>
 	<td>MENU_CATEGORIZATION</td>
-	<td>//a[contains(@id,'categorizationLink')]</td>
+	<td>//div[contains(@id,'CategorizationTitle')]/a</td>
 	<td></td>
 </tr>
 <tr>
 	<td>MENU_SCHEDULE</td>
-	<td>//a[contains(@id,'scheduleLink')]</td>
+	<td>//div[contains(@id,'ScheduleTitle')]/a</td>
 	<td></td>
 </tr>
 <tr>
 	<td>MENU_DISPLAY_PAGE</td>
-	<td>//a[contains(@id,'displayPageLink')]</td>
+	<td>//div[contains(@id,'display-pageTitle')]/a</td>
 	<td></td>
 </tr>
 <tr>
 	<td>MENU_RELATED_ASSETS</td>
-	<td>//a[contains(@id,'relatedAssetsLink')]</td>
+	<td>//div[contains(@id,'Related-AssetsTitle')]/a</td>
 	<td></td>
 </tr>
 <tr>
@@ -157,7 +152,7 @@
 </tr>
 <tr>
 	<td>MENU_CUSTOM_FIELDS</td>
-	<td>//a[contains(@id,'customFieldsLink')]</td>
+	<td>//div[contains(@id,'Custom-FieldsTitle')]/a</td>
 	<td></td>
 </tr>
 <tr>

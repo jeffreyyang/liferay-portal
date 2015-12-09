@@ -16,6 +16,8 @@ package com.liferay.portal.model;
 
 import aQute.bnd.annotation.ProviderType;
 
+import com.liferay.portal.kernel.util.Accessor;
+
 /**
  * The extended model interface for the User service. Represents a row in the &quot;User_&quot; database table, with each column mapped to a property of this class.
  *
@@ -32,6 +34,23 @@ public interface User extends UserModel, PersistedModel {
 	 *
 	 * Never modify this interface directly. Add methods to {@link com.liferay.portal.model.impl.UserImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
+	public static final Accessor<User, Long> USER_ID_ACCESSOR = new Accessor<User, Long>() {
+			@Override
+			public Long get(User user) {
+				return user.getUserId();
+			}
+
+			@Override
+			public Class<Long> getAttributeClass() {
+				return Long.class;
+			}
+
+			@Override
+			public Class<User> getTypeClass() {
+				return User.class;
+			}
+		};
+
 	public void addRemotePreference(
 		com.liferay.portal.kernel.util.RemotePreference remotePreference);
 
@@ -48,7 +67,6 @@ public interface User extends UserModel, PersistedModel {
 	* Returns the user's birth date.
 	*
 	* @return the user's birth date
-	* @throws PortalException if a portal exception occurred
 	*/
 	public java.util.Date getBirthday()
 		throws com.liferay.portal.kernel.exception.PortalException;
@@ -57,7 +75,6 @@ public interface User extends UserModel, PersistedModel {
 	* Returns the user's company's mail domain.
 	*
 	* @return the user's company's mail domain
-	* @throws PortalException if a portal exception occurred
 	*/
 	public java.lang.String getCompanyMx()
 		throws com.liferay.portal.kernel.exception.PortalException;
@@ -66,7 +83,6 @@ public interface User extends UserModel, PersistedModel {
 	* Returns the user's associated contact.
 	*
 	* @return the user's associated contact
-	* @throws PortalException if a portal exception occurred
 	* @see Contact
 	*/
 	public com.liferay.portal.model.Contact getContact()
@@ -113,7 +129,6 @@ public interface User extends UserModel, PersistedModel {
 	* @param portalURL the portal's URL
 	* @param mainPath the main path
 	* @return the user's display URL
-	* @throws PortalException if a portal exception occurred
 	* @deprecated As of 7.0.0, replaced by {@link #getDisplayURL(ThemeDisplay)}
 	*/
 	@java.lang.Deprecated()
@@ -151,7 +166,7 @@ public interface User extends UserModel, PersistedModel {
 	intranet(versus extranet)  site home page, if no friendly URL
 	is available for the user's profile
 	* @return the user's display URL
-	* @throws PortalException if a portal exception occurred
+	* @throws PortalException
 	* @deprecated As of 7.0.0, replaced by {@link #getDisplayURL(ThemeDisplay)}
 	*/
 	@java.lang.Deprecated()
@@ -182,7 +197,6 @@ public interface User extends UserModel, PersistedModel {
 	*
 	* @param themeDisplay the theme display
 	* @return the user's display URL
-	* @throws PortalException if a portal exception occurred
 	*/
 	public java.lang.String getDisplayURL(
 		com.liferay.portal.theme.ThemeDisplay themeDisplay)
@@ -217,7 +231,7 @@ public interface User extends UserModel, PersistedModel {
 	intranet (versus extranet) site home page, if no friendly URL is
 	available for the user's profile
 	* @return the user's display URL
-	* @throws PortalException if a portal exception occurred
+	* @throws PortalException
 	*/
 	public java.lang.String getDisplayURL(
 		com.liferay.portal.theme.ThemeDisplay themeDisplay,
@@ -236,7 +250,6 @@ public interface User extends UserModel, PersistedModel {
 	*
 	* @return <code>true</code> if the user is female; <code>false</code>
 	otherwise
-	* @throws PortalException if a portal exception occurred
 	*/
 	public boolean getFemale()
 		throws com.liferay.portal.kernel.exception.PortalException;
@@ -265,6 +278,8 @@ public interface User extends UserModel, PersistedModel {
 
 	public java.util.List<com.liferay.portal.model.Group> getGroups();
 
+	public java.lang.String getInitials();
+
 	public java.util.Locale getLocale();
 
 	public java.lang.String getLogin()
@@ -275,7 +290,6 @@ public interface User extends UserModel, PersistedModel {
 	*
 	* @return <code>true</code> if the user is male; <code>false</code>
 	otherwise
-	* @throws PortalException if a portal exception occurred
 	*/
 	public boolean getMale()
 		throws com.liferay.portal.kernel.exception.PortalException;
@@ -285,15 +299,6 @@ public interface User extends UserModel, PersistedModel {
 
 	public java.util.List<com.liferay.portal.model.Group> getMySiteGroups(
 		int max) throws com.liferay.portal.kernel.exception.PortalException;
-
-	/**
-	* @deprecated As of 6.2.0, replaced by {@link #getMySiteGroups(String[],
-	int)}
-	*/
-	@java.lang.Deprecated()
-	public java.util.List<com.liferay.portal.model.Group> getMySiteGroups(
-		java.lang.String[] classNames, boolean includeControlPanel, int max)
-		throws com.liferay.portal.kernel.exception.PortalException;
 
 	public java.util.List<com.liferay.portal.model.Group> getMySiteGroups(
 		java.lang.String[] classNames, int max)

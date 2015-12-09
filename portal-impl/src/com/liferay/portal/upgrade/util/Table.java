@@ -32,14 +32,17 @@ import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.SystemProperties;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.uuid.PortalUUIDUtil;
-import com.liferay.portal.util.PropsUtil;
+import com.liferay.portal.upgrade.AutoBatchPreparedStatementUtil;
 
 import java.io.FileReader;
 import java.io.FileWriter;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
 import java.sql.Clob;
 import java.sql.Connection;
-import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -146,9 +149,11 @@ public class Table {
 
 		boolean empty = true;
 
-		String tempFileName =
-			SystemProperties.get(SystemProperties.TMP_DIR) + "/temp-db-" +
-				_tableName + "-" + System.currentTimeMillis();
+		Path tempFilePath = Files.createTempFile(
+			Paths.get(SystemProperties.get(SystemProperties.TMP_DIR)),
+			"temp-db-" + _tableName + "-", null);
+
+		String tempFileName = tempFilePath.toString();
 
 		StopWatch stopWatch = new StopWatch();
 
@@ -200,7 +205,7 @@ public class Table {
 			throw e;
 		}
 		finally {
-			DataAccess.cleanUp(null, ps, rs);
+			DataAccess.cleanUp(ps, rs);
 
 			unsyncBufferedWriter.close();
 		}
@@ -470,25 +475,12 @@ public class Table {
 			return;
 		}
 
-		PreparedStatement ps = null;
+		try (PreparedStatement ps = AutoBatchPreparedStatementUtil.autoBatch(
+				con.prepareStatement(getInsertSQL()));
+			UnsyncBufferedReader unsyncBufferedReader =
+				new UnsyncBufferedReader(new FileReader(_tempFileName))) {
 
-		String insertSQL = getInsertSQL();
-
-		UnsyncBufferedReader unsyncBufferedReader = new UnsyncBufferedReader(
-			new FileReader(_tempFileName));
-
-		String line = null;
-
-		try {
-			DatabaseMetaData databaseMetaData = con.getMetaData();
-
-			if (!databaseMetaData.supportsBatchUpdates()) {
-				if (_log.isDebugEnabled()) {
-					_log.debug("Database does not support batch updates");
-				}
-			}
-
-			int count = 0;
+			String line = null;
 
 			while ((line = unsyncBufferedReader.readLine()) != null) {
 				String[] values = StringUtil.split(line);
@@ -501,10 +493,6 @@ public class Table {
 							"Attempted to insert row " + line + ".");
 				}
 
-				if (count == 0) {
-					ps = con.prepareStatement(insertSQL);
-				}
-
 				int[] order = getOrder();
 
 				for (int i = 0; i < order.length; i++) {
@@ -513,33 +501,10 @@ public class Table {
 					setColumn(ps, i, (Integer)columns[pos][1], values[pos]);
 				}
 
-				if (databaseMetaData.supportsBatchUpdates()) {
-					ps.addBatch();
-
-					if (count == _BATCH_SIZE) {
-						populateTableRows(ps, true);
-
-						count = 0;
-					}
-					else {
-						count++;
-					}
-				}
-				else {
-					populateTableRows(ps, false);
-				}
+				ps.addBatch();
 			}
 
-			if (databaseMetaData.supportsBatchUpdates()) {
-				if (count != 0) {
-					populateTableRows(ps, true);
-				}
-			}
-		}
-		finally {
-			DataAccess.cleanUp(null, ps);
-
-			unsyncBufferedReader.close();
+			ps.executeBatch();
 		}
 
 		if (_log.isDebugEnabled()) {
@@ -701,9 +666,6 @@ public class Table {
 			DataAccess.cleanUp(con, ps);
 		}
 	}
-
-	private static final int _BATCH_SIZE = GetterUtil.getInteger(
-		PropsUtil.get("hibernate.jdbc.batch_size"));
 
 	private static final String[][] _SAFE_TABLE_CHARS = {
 		{StringPool.COMMA, StringPool.NEW_LINE, StringPool.RETURN},

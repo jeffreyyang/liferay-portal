@@ -310,6 +310,10 @@
 
 		<column name="groupId" type="long" />
 
+		<!-- Audit fields -->
+
+		<column name="companyId" type="long" />
+
 		<!-- Other fields -->
 
 		<column name="nodeId" type="long" />
@@ -326,7 +330,6 @@
 		<exception>DuplicateNodeName</exception>
 		<exception>DuplicatePage</exception>
 		<exception>ImportFiles</exception>
-		<exception>NodeChange</exception>
 		<exception>NodeName</exception>
 		<exception>NoSuchNode</exception>
 		<exception>NoSuchPage</exception>

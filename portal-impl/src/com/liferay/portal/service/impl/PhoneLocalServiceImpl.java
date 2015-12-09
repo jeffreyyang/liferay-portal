@@ -15,6 +15,7 @@
 package com.liferay.portal.service.impl;
 
 import com.liferay.portal.PhoneNumberException;
+import com.liferay.portal.PhoneNumberExtensionException;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.format.PhoneNumberFormatUtil;
 import com.liferay.portal.kernel.systemevent.SystemEvent;
@@ -183,7 +184,7 @@ public class PhoneLocalServiceImpl extends PhoneLocalServiceBaseImpl {
 		if (Validator.isNotNull(extension)) {
 			for (int i = 0; i < extension.length(); i++) {
 				if (!Character.isDigit(extension.charAt(i))) {
-					throw new PhoneNumberException();
+					throw new PhoneNumberExtensionException();
 				}
 			}
 		}
@@ -203,7 +204,7 @@ public class PhoneLocalServiceImpl extends PhoneLocalServiceBaseImpl {
 			(classNameId ==
 				classNameLocalService.getClassNameId(Organization.class))) {
 
-			listTypeService.validate(
+			listTypeLocalService.validate(
 				typeId, classNameId, ListTypeConstants.PHONE);
 		}
 

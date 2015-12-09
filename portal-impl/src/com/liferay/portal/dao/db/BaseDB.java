@@ -219,11 +219,6 @@ public abstract class BaseDB implements DB {
 	}
 
 	@Override
-	public boolean isSupportsDateMilliseconds() {
-		return _SUPPORTS_DATE_MILLISECONDS;
-	}
-
-	@Override
 	public boolean isSupportsInlineDistinct() {
 		return _SUPPORTS_INLINE_DISTINCT;
 	}
@@ -520,6 +515,9 @@ public abstract class BaseDB implements DB {
 				validIndexNames.add(indexName);
 			}
 		}
+
+		indexesSQL = applyMaxStringIndexLengthLimitation(
+			_columnLengthPattern.matcher(indexesSQL));
 
 		addIndexes(con, indexesSQL, validIndexNames);
 	}
@@ -1117,8 +1115,6 @@ public abstract class BaseDB implements DB {
 	private static final boolean _SUPPORTS_ALTER_COLUMN_NAME = true;
 
 	private static final boolean _SUPPORTS_ALTER_COLUMN_TYPE = true;
-
-	private static final boolean _SUPPORTS_DATE_MILLISECONDS = true;
 
 	private static final boolean _SUPPORTS_INLINE_DISTINCT = true;
 

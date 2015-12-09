@@ -69,6 +69,7 @@ import com.liferay.portlet.usersadmin.util.UsersAdminUtil;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
@@ -88,14 +89,10 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 	/**
 	 * Adds the users to the group.
 	 *
-	 * @param  groupId the primary key of the group
-	 * @param  userIds the primary keys of the users
-	 * @param  serviceContext the service context to be applied (optionally
-	 *         <code>null</code>)
-	 * @throws PortalException if a group or user with the primary key could not
-	 *         be found, if the user did not have permission to assign group
-	 *         members, or if the operation was not allowed by the membership
-	 *         policy
+	 * @param groupId the primary key of the group
+	 * @param userIds the primary keys of the users
+	 * @param serviceContext the service context to be applied (optionally
+	 *        <code>null</code>)
 	 */
 	@Override
 	public void addGroupUsers(
@@ -150,13 +147,8 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 	/**
 	 * Adds the users to the organization.
 	 *
-	 * @param  organizationId the primary key of the organization
-	 * @param  userIds the primary keys of the users
-	 * @throws PortalException if an organization or user with the primary key
-	 *         could not be found, if the user did not have permission to assign
-	 *         organization members, if current user did not have an
-	 *         organization in common with a given user, or if the operation was
-	 *         not allowed by the membership policy
+	 * @param organizationId the primary key of the organization
+	 * @param userIds the primary keys of the users
 	 */
 	@Override
 	public void addOrganizationUsers(long organizationId, long[] userIds)
@@ -184,10 +176,8 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 	 * Assigns the password policy to the users, removing any other currently
 	 * assigned password policies.
 	 *
-	 * @param  passwordPolicyId the primary key of the password policy
-	 * @param  userIds the primary keys of the users
-	 * @throws PortalException if the user did not have permission to assign
-	 *         policy members
+	 * @param passwordPolicyId the primary key of the password policy
+	 * @param userIds the primary keys of the users
 	 */
 	@Override
 	public void addPasswordPolicyUsers(long passwordPolicyId, long[] userIds)
@@ -207,12 +197,8 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 	/**
 	 * Adds the users to the role.
 	 *
-	 * @param  roleId the primary key of the role
-	 * @param  userIds the primary keys of the users
-	 * @throws PortalException if a role or user with the primary key could not
-	 *         be found, if the user did not have permission to assign role
-	 *         members, or if the operation was not allowed by the membership
-	 *         policy
+	 * @param roleId the primary key of the role
+	 * @param userIds the primary keys of the users
 	 */
 	@Override
 	public void addRoleUsers(long roleId, long[] userIds)
@@ -236,11 +222,8 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 	/**
 	 * Adds the users to the team.
 	 *
-	 * @param  teamId the primary key of the team
-	 * @param  userIds the primary keys of the users
-	 * @throws PortalException if a team or user with the primary key could not
-	 *         be found or if the user did not have permission to assign team
-	 *         members
+	 * @param teamId the primary key of the team
+	 * @param userIds the primary keys of the users
 	 */
 	@Override
 	public void addTeamUsers(long teamId, long[] userIds)
@@ -300,10 +283,6 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 	 *         attribute), asset category IDs, asset tag names, and expando
 	 *         bridge attributes for the user.
 	 * @return the new user
-	 * @throws PortalException if the user's information was invalid, if the
-	 *         operation was not allowed by the membership policy, if the
-	 *         creator did not have permission to add users, or if the email
-	 *         address was reserved
 	 */
 	@Override
 	public User addUser(
@@ -383,10 +362,6 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 	 *         attribute), asset category IDs, asset tag names, and expando
 	 *         bridge attributes for the user.
 	 * @return the new user
-	 * @throws PortalException if the user's information was invalid, if the
-	 *         creator did not have permission to add users, if the email
-	 *         address was reserved, if the operation was not allowed by the
-	 *         membership policy, or if some other portal exception occurred
 	 */
 	@Override
 	public User addUser(
@@ -424,12 +399,8 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 	/**
 	 * Adds the users to the user group.
 	 *
-	 * @param  userGroupId the primary key of the user group
-	 * @param  userIds the primary keys of the users
-	 * @throws PortalException if a user group or user with the primary could
-	 *         could not be found, if the current user did not have permission
-	 *         to assign group members, or if the operation was not allowed by
-	 *         the membership policy
+	 * @param userGroupId the primary key of the user group
+	 * @param userIds the primary keys of the users
 	 */
 	@Override
 	public void addUserGroupUsers(long userGroupId, long[] userIds)
@@ -495,10 +466,6 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 	 *         attribute), asset category IDs, asset tag names, and expando
 	 *         bridge attributes for the user.
 	 * @return the new user
-	 * @throws PortalException if the user's information was invalid, if the
-	 *         operation was not allowed by the membership policy, if the
-	 *         creator did not have permission to add users, or if the email
-	 *         address was reserved
 	 */
 	@Override
 	public User addUserWithWorkflow(
@@ -594,10 +561,6 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 	 *         attribute), asset category IDs, asset tag names, and expando
 	 *         bridge attributes for the user.
 	 * @return the new user
-	 * @throws PortalException if the user's information was invalid, if the
-	 *         operation was not allowed by the membership policy, if the
-	 *         creator did not have permission to add users, if the email
-	 *         address was reserved, or if some other portal exception occurred
 	 */
 	@Override
 	public User addUserWithWorkflow(
@@ -664,10 +627,7 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 	/**
 	 * Deletes the user's portrait image.
 	 *
-	 * @param  userId the primary key of the user
-	 * @throws PortalException if a user with the primary key could not be
-	 *         found, if the user's portrait could not be found, or if the
-	 *         current user did not have permission to update the user
+	 * @param userId the primary key of the user
 	 */
 	@Override
 	public void deletePortrait(long userId) throws PortalException {
@@ -680,11 +640,8 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 	/**
 	 * Removes the user from the role.
 	 *
-	 * @param  roleId the primary key of the role
-	 * @param  userId the primary key of the user
-	 * @throws PortalException if a role or user with the primary key could not
-	 *         be found, or if the current user did not have permission to
-	 *         assign role members
+	 * @param roleId the primary key of the role
+	 * @param userId the primary key of the user
 	 */
 	@Override
 	public void deleteRoleUser(long roleId, long userId)
@@ -699,9 +656,7 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 	/**
 	 * Deletes the user.
 	 *
-	 * @param  userId the primary key of the user
-	 * @throws PortalException if a user with the primary key could not be found
-	 *         or if the current user did not have permission to delete the user
+	 * @param userId the primary key of the user
 	 */
 	@Override
 	public void deleteUser(long userId) throws PortalException {
@@ -749,8 +704,6 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 	 *
 	 * @param  groupId the primary key of the group
 	 * @return the primary keys of the users belonging to the group
-	 * @throws PortalException if the current user did not have permission to
-	 *         view group assignments
 	 */
 	@Override
 	public long[] getGroupUserIds(long groupId) throws PortalException {
@@ -765,8 +718,6 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 	 *
 	 * @param  groupId the primary key of the group
 	 * @return the users belonging to the group
-	 * @throws PortalException if the current user did not have permission to
-	 *         view group assignments
 	 */
 	@Override
 	public List<User> getGroupUsers(long groupId) throws PortalException {
@@ -781,8 +732,6 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 	 *
 	 * @param  organizationId the primary key of the organization
 	 * @return the primary keys of the users belonging to the organization
-	 * @throws PortalException if the current user did not have permission to
-	 *         view organization assignments
 	 */
 	@Override
 	public long[] getOrganizationUserIds(long organizationId)
@@ -799,8 +748,6 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 	 *
 	 * @param  organizationId the primary key of the organization
 	 * @return users belonging to the organization
-	 * @throws PortalException if the current user did not have permission to
-	 *         view organization assignments
 	 */
 	@Override
 	public List<User> getOrganizationUsers(long organizationId)
@@ -817,8 +764,6 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 	 *
 	 * @param  roleId the primary key of the role
 	 * @return the primary keys of the users belonging to the role
-	 * @throws PortalException if the current user did not have permission to
-	 *         view role members
 	 */
 	@Override
 	public long[] getRoleUserIds(long roleId) throws PortalException {
@@ -834,9 +779,6 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 	 * @param  companyId the primary key of the user's company
 	 * @param  emailAddress the user's email address
 	 * @return the user with the email address
-	 * @throws PortalException if a user with the email address could not be
-	 *         found or if the current user did not have permission to view the
-	 *         user
 	 */
 	@Override
 	public User getUserByEmailAddress(long companyId, String emailAddress)
@@ -856,8 +798,6 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 	 *
 	 * @param  userId the primary key of the user
 	 * @return the user with the primary key
-	 * @throws PortalException if a user with the primary key could not be found
-	 *         or if the current user did not have permission to view the user
 	 */
 	@Override
 	public User getUserById(long userId) throws PortalException {
@@ -875,8 +815,6 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 	 * @param  companyId the primary key of the user's company
 	 * @param  screenName the user's screen name
 	 * @return the user with the screen name
-	 * @throws PortalException if a user with the screen name could not be found
-	 *         or if the current user did not have permission to view the user
 	 */
 	@Override
 	public User getUserByScreenName(long companyId, String screenName)
@@ -906,8 +844,6 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 	 * @param  companyId the primary key of the user's company
 	 * @param  emailAddress the user's email address
 	 * @return the primary key of the user with the email address
-	 * @throws PortalException if a user with the email address could not be
-	 *         found
 	 */
 	@Override
 	public long getUserIdByEmailAddress(long companyId, String emailAddress)
@@ -927,7 +863,6 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 	 * @param  companyId the primary key of the user's company
 	 * @param  screenName the user's screen name
 	 * @return the primary key of the user with the screen name
-	 * @throws PortalException if a user with the screen name could not be found
 	 */
 	@Override
 	public long getUserIdByScreenName(long companyId, String screenName)
@@ -948,8 +883,6 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 	 * @param  userId the primary key of the user
 	 * @return <code>true</code> if the user is a member of the group;
 	 *         <code>false</code> otherwise
-	 * @throws PortalException if the current user did not have permission to
-	 *         view the user or group members
 	 */
 	@Override
 	public boolean hasGroupUser(long groupId, long userId)
@@ -972,8 +905,6 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 	 * @param  userId the primary key of the user
 	 * @return <code>true</code> if the user is a member of the role;
 	 *         <code>false</code> otherwise
-	 * @throws PortalException if the current user did not have permission to
-	 *         view the user or role members
 	 */
 	@Override
 	public boolean hasRoleUser(long roleId, long userId)
@@ -1001,7 +932,6 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 	 *         sites, etc.
 	 * @return <code>true</code> if the user has the role; <code>false</code>
 	 *         otherwise
-	 * @throws PortalException if a role with the name could not be found
 	 */
 	@Override
 	public boolean hasRoleUser(
@@ -1040,8 +970,6 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 	 * @return <code>true</code> if the notification email includes a new
 	 *         password; <code>false</code> if the notification email only
 	 *         contains a reset link
-	 * @throws PortalException if a user with the email address could not be
-	 *         found
 	 */
 	@Override
 	public boolean sendPasswordByEmailAddress(
@@ -1070,7 +998,6 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 	 * @return <code>true</code> if the notification email includes a new
 	 *         password; <code>false</code> if the notification email only
 	 *         contains a reset link
-	 * @throws PortalException if a user with the screen name could not be found
 	 */
 	@Override
 	public boolean sendPasswordByScreenName(long companyId, String screenName)
@@ -1096,7 +1023,6 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 	 * @return <code>true</code> if the notification email includes a new
 	 *         password; <code>false</code> if the notification email only
 	 *         contains a reset link
-	 * @throws PortalException if a user with the user ID could not be found
 	 */
 	@Override
 	public boolean sendPasswordByUserId(long userId) throws PortalException {
@@ -1107,11 +1033,8 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 	 * Sets the users in the role, removing and adding users to the role as
 	 * necessary.
 	 *
-	 * @param  roleId the primary key of the role
-	 * @param  userIds the primary keys of the users
-	 * @throws PortalException if the current user did not have permission to
-	 *         assign role members or if the operation was not allowed by the
-	 *         membership policy
+	 * @param roleId the primary key of the role
+	 * @param userIds the primary keys of the users
 	 */
 	@Override
 	public void setRoleUsers(long roleId, long[] userIds)
@@ -1152,10 +1075,8 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 	 * Sets the users in the user group, removing and adding users to the user
 	 * group as necessary.
 	 *
-	 * @param  userGroupId the primary key of the user group
-	 * @param  userIds the primary keys of the users
-	 * @throws PortalException if the current user did not have permission to
-	 *         assign group members
+	 * @param userGroupId the primary key of the user group
+	 * @param userIds the primary keys of the users
 	 */
 	@Override
 	public void setUserGroupUsers(long userGroupId, long[] userIds)
@@ -1197,10 +1118,8 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 	/**
 	 * Removes the users from the teams of a group.
 	 *
-	 * @param  groupId the primary key of the group
-	 * @param  userIds the primary keys of the users
-	 * @throws PortalException if the current user did not have permission to
-	 *         modify user group assignments
+	 * @param groupId the primary key of the group
+	 * @param userIds the primary keys of the users
 	 */
 	@Override
 	public void unsetGroupTeamsUsers(long groupId, long[] userIds)
@@ -1219,13 +1138,10 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 	/**
 	 * Removes the users from the group.
 	 *
-	 * @param  groupId the primary key of the group
-	 * @param  userIds the primary keys of the users
-	 * @param  serviceContext the service context to be applied (optionally
-	 *         <code>null</code>)
-	 * @throws PortalException if the current user did not have permission to
-	 *         modify group assignments or if the operation was not allowed by
-	 *         the membership policy
+	 * @param groupId the primary key of the group
+	 * @param userIds the primary keys of the users
+	 * @param serviceContext the service context to be applied (optionally
+	 *        <code>null</code>)
 	 */
 	@Override
 	public void unsetGroupUsers(
@@ -1285,11 +1201,8 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 	/**
 	 * Removes the users from the organization.
 	 *
-	 * @param  organizationId the primary key of the organization
-	 * @param  userIds the primary keys of the users
-	 * @throws PortalException if the current user did not have permission to
-	 *         modify organization assignments or if the operation was not
-	 *         allowed by the membership policy
+	 * @param organizationId the primary key of the organization
+	 * @param userIds the primary keys of the users
 	 */
 	@Override
 	public void unsetOrganizationUsers(long organizationId, long[] userIds)
@@ -1317,10 +1230,8 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 	/**
 	 * Removes the users from the password policy.
 	 *
-	 * @param  passwordPolicyId the primary key of the password policy
-	 * @param  userIds the primary keys of the users
-	 * @throws PortalException if the current user did not have permission to
-	 *         modify policy assignments
+	 * @param passwordPolicyId the primary key of the password policy
+	 * @param userIds the primary keys of the users
 	 */
 	@Override
 	public void unsetPasswordPolicyUsers(long passwordPolicyId, long[] userIds)
@@ -1340,11 +1251,8 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 	/**
 	 * Removes the users from the role.
 	 *
-	 * @param  roleId the primary key of the role
-	 * @param  userIds the primary keys of the users
-	 * @throws PortalException if the current user did not have permission to
-	 *         modify role assignments or if the operation was not allowed by
-	 *         the membership policy
+	 * @param roleId the primary key of the role
+	 * @param userIds the primary keys of the users
 	 */
 	@Override
 	public void unsetRoleUsers(long roleId, long[] userIds)
@@ -1368,10 +1276,8 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 	/**
 	 * Removes the users from the team.
 	 *
-	 * @param  teamId the primary key of the team
-	 * @param  userIds the primary keys of the users
-	 * @throws PortalException if the current user did not have permission to
-	 *         modify team assignments
+	 * @param teamId the primary key of the team
+	 * @param userIds the primary keys of the users
 	 */
 	@Override
 	public void unsetTeamUsers(long teamId, long[] userIds)
@@ -1390,11 +1296,8 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 	/**
 	 * Removes the users from the user group.
 	 *
-	 * @param  userGroupId the primary key of the user group
-	 * @param  userIds the primary keys of the users
-	 * @throws PortalException if the current user did not have permission to
-	 *         modify user group assignments or if the operation was not allowed
-	 *         by the membership policy
+	 * @param userGroupId the primary key of the user group
+	 * @param userIds the primary keys of the users
 	 */
 	@Override
 	public void unsetUserGroupUsers(long userGroupId, long[] userIds)
@@ -1422,8 +1325,6 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 	 * @param  userId the primary key of the user
 	 * @param  agreedToTermsOfUse whether the user has agree to the terms of use
 	 * @return the user
-	 * @throws PortalException if the current user did not have permission to
-	 *         update the user's agreement to terms-of-use
 	 */
 	@Override
 	public User updateAgreedToTermsOfUse(
@@ -1448,8 +1349,6 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 	 *         portal URL, main path, primary key of the layout, remote address,
 	 *         remote host, and agent for the user.
 	 * @return the user
-	 * @throws PortalException if a user with the primary key could not be found
-	 *         or if the current user did not have permission to update the user
 	 */
 	@Override
 	public User updateEmailAddress(
@@ -1503,8 +1402,6 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 	 *         <code>null</code>). Can set the expando bridge attributes for the
 	 *         user.
 	 * @return the user
-	 * @throws PortalException if the user's information was invalid or if the
-	 *         email address was reserved
 	 */
 	@Override
 	public User updateIncompleteUser(
@@ -1546,8 +1443,6 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 	 * @param  userId the primary key of the user
 	 * @param  lockout whether the user is locked out
 	 * @return the user
-	 * @throws PortalException if the user did not have permission to lock out
-	 *         the user
 	 */
 	@Override
 	public User updateLockoutById(long userId, boolean lockout)
@@ -1565,8 +1460,6 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 	 * @param  userId the primary key of the user
 	 * @param  openId the new OpenID
 	 * @return the user
-	 * @throws PortalException if a user with the primary key could not be found
-	 *         or if the current user did not have permission to update the user
 	 */
 	@Override
 	public User updateOpenId(long userId, String openId)
@@ -1582,12 +1475,10 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 	 * Sets the organizations that the user is in, removing and adding
 	 * organizations as necessary.
 	 *
-	 * @param  userId the primary key of the user
-	 * @param  organizationIds the primary keys of the organizations
-	 * @param  serviceContext the service context to be applied. Must set
-	 *         whether user indexing is enabled.
-	 * @throws PortalException if a user with the primary key could not be found
-	 *         or if the current user did not have permission to update the user
+	 * @param userId the primary key of the user
+	 * @param organizationIds the primary keys of the organizations
+	 * @param serviceContext the service context to be applied. Must set whether
+	 *        user indexing is enabled.
 	 */
 	@Override
 	public void updateOrganizations(
@@ -1612,8 +1503,6 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 	 * @param  passwordReset whether the user should be asked to reset their
 	 *         password the next time they log in
 	 * @return the user
-	 * @throws PortalException if a user with the primary key could not be found
-	 *         or if the current user did not have permission to update the user
 	 */
 	@Override
 	public User updatePassword(
@@ -1634,9 +1523,6 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 	 * @param  userId the primary key of the user
 	 * @param  bytes the new portrait image data
 	 * @return the user
-	 * @throws PortalException if a user with the primary key could not be
-	 *         found, if the new portrait was invalid, or if the current user
-	 *         did not have permission to update the user
 	 */
 	@Override
 	public User updatePortrait(long userId, byte[] bytes)
@@ -1655,9 +1541,6 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 	 * @param  question the user's new password reset question
 	 * @param  answer the user's new password reset answer
 	 * @return the user
-	 * @throws PortalException if a user with the primary key could not be
-	 *         found, if the new question or answer were invalid, or if the
-	 *         current user did not have permission to update the user
 	 */
 	@Override
 	public User updateReminderQuery(long userId, String question, String answer)
@@ -1675,9 +1558,6 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 	 * @param  userId the primary key of the user
 	 * @param  screenName the user's new screen name
 	 * @return the user
-	 * @throws PortalException if a user with the primary key could not be
-	 *         found, if the new screen name was invalid, or if the current user
-	 *         did not have permission to update the user
 	 */
 	@Override
 	public User updateScreenName(long userId, String screenName)
@@ -1695,11 +1575,6 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 	 * @param      userId the primary key of the user
 	 * @param      status the user's new workflow status
 	 * @return     the user
-	 * @throws     PortalException if a user with the primary key could not be
-	 *             found, if the current user was updating her own status to
-	 *             anything but {@link WorkflowConstants#STATUS_APPROVED}, or if
-	 *             the current user did not have permission to update the user's
-	 *             workflow status.
 	 * @deprecated As of 7.0.0, replaced by {@link #updateStatus(long, int,
 	 *             ServiceContext)}
 	 */
@@ -1718,11 +1593,6 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 	 *         an unencrypted custom password (used by an LDAP listener) for the
 	 *         user via attribute <code>passwordUnencrypted</code>.
 	 * @return the user
-	 * @throws PortalException if a user with the primary key could not be
-	 *         found, if the current user was updating her own status to
-	 *         anything but {@link WorkflowConstants#STATUS_APPROVED}, or if the
-	 *         current user did not have permission to update the user's
-	 *         workflow status.
 	 */
 	@Override
 	public User updateStatus(
@@ -1775,15 +1645,10 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 	 * @param  birthdayDay the user's new birthday day
 	 * @param  birthdayYear the user's birthday year
 	 * @param  smsSn the user's new SMS screen name
-	 * @param  aimSn the user's new AIM screen name
 	 * @param  facebookSn the user's new Facebook screen name
-	 * @param  icqSn the user's new ICQ screen name
 	 * @param  jabberSn the user's new Jabber screen name
-	 * @param  msnSn the user's new MSN screen name
-	 * @param  mySpaceSn the user's new MySpace screen name
 	 * @param  skypeSn the user's new Skype screen name
 	 * @param  twitterSn the user's new Twitter screen name
-	 * @param  ymSn the user's new Yahoo! Messenger screen name
 	 * @param  jobTitle the user's new job title
 	 * @param  groupIds the primary keys of the user's groups
 	 * @param  organizationIds the primary keys of the user's organizations
@@ -1800,10 +1665,6 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 	 *         attribute), asset category IDs, asset tag names, and expando
 	 *         bridge attributes for the user.
 	 * @return the user
-	 * @throws PortalException if a user with the primary key could not be
-	 *         found, if the new information was invalid, if the current user
-	 *         did not have permission to update the user, or if the operation
-	 *         was not allowed by the membership policy
 	 */
 	@Override
 	public User updateUser(
@@ -1816,9 +1677,8 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 			String comments, String firstName, String middleName,
 			String lastName, long prefixId, long suffixId, boolean male,
 			int birthdayMonth, int birthdayDay, int birthdayYear, String smsSn,
-			String aimSn, String facebookSn, String icqSn, String jabberSn,
-			String msnSn, String mySpaceSn, String skypeSn, String twitterSn,
-			String ymSn, String jobTitle, long[] groupIds,
+			String facebookSn, String jabberSn, String skypeSn,
+			String twitterSn, String jobTitle, long[] groupIds,
 			long[] organizationIds, long[] roleIds,
 			List<UserGroupRole> userGroupRoles, long[] userGroupIds,
 			List<Address> addresses, List<EmailAddress> emailAddresses,
@@ -1879,9 +1739,11 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 		long[] oldGroupIds = user.getGroupIds();
 
 		List<Long> addGroupIds = new ArrayList<>();
-		List<Long> removeGroupIds = ListUtil.toList(oldGroupIds);
+		List<Long> removeGroupIds = Collections.emptyList();
 
 		if (groupIds != null) {
+			removeGroupIds = ListUtil.toList(oldGroupIds);
+
 			groupIds = checkGroups(userId, groupIds);
 
 			for (long groupId : groupIds) {
@@ -1905,9 +1767,11 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 		long[] oldOrganizationIds = user.getOrganizationIds();
 
 		List<Long> addOrganizationIds = new ArrayList<>();
-		List<Long> removeOrganizationIds = ListUtil.toList(oldOrganizationIds);
+		List<Long> removeOrganizationIds = Collections.emptyList();
 
 		if (organizationIds != null) {
+			removeOrganizationIds = ListUtil.toList(oldOrganizationIds);
+
 			organizationIds = checkOrganizations(userId, organizationIds);
 
 			for (long organizationId : organizationIds) {
@@ -1934,9 +1798,11 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 		long[] oldRoleIds = user.getRoleIds();
 
 		List<Long> addRoleIds = new ArrayList<>();
-		List<Long> removeRoleIds = ListUtil.toList(oldRoleIds);
+		List<Long> removeRoleIds = Collections.emptyList();
 
 		if (roleIds != null) {
+			removeRoleIds = ListUtil.toList(oldRoleIds);
+
 			roleIds = checkRoles(userId, roleIds);
 
 			for (long roleId : roleIds) {
@@ -1973,14 +1839,17 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 		}
 
 		List<UserGroupRole> addOrganizationUserGroupRoles = new ArrayList<>();
-		List<UserGroupRole> removeOrganizationUserGroupRoles = ListUtil.copy(
-			oldOrganizationUserGroupRoles);
+		List<UserGroupRole> removeOrganizationUserGroupRoles =
+			Collections.emptyList();
 		List<UserGroupRole> addSiteUserGroupRoles = new ArrayList<>();
-		List<UserGroupRole> removeSiteUserGroupRoles = ListUtil.copy(
-			oldSiteUserGroupRoles);
+		List<UserGroupRole> removeSiteUserGroupRoles = Collections.emptyList();
 
 		if (userGroupRoles != null) {
 			userGroupRoles = checkUserGroupRoles(userId, userGroupRoles);
+
+			removeOrganizationUserGroupRoles = ListUtil.copy(
+				oldOrganizationUserGroupRoles);
+			removeSiteUserGroupRoles = ListUtil.copy(oldSiteUserGroupRoles);
 
 			for (UserGroupRole userGroupRole : userGroupRoles) {
 				Role role = userGroupRole.getRole();
@@ -2024,9 +1893,11 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 		long[] oldUserGroupIds = user.getUserGroupIds();
 
 		List<Long> addUserGroupIds = new ArrayList<>();
-		List<Long> removeUserGroupIds = ListUtil.toList(oldUserGroupIds);
+		List<Long> removeUserGroupIds = Collections.emptyList();
 
 		if (userGroupIds != null) {
+			removeUserGroupIds = ListUtil.toList(oldUserGroupIds);
+
 			userGroupIds = checkUserGroupIds(userId, userGroupIds);
 
 			for (long userGroupId : userGroupIds) {
@@ -2051,10 +1922,9 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 			emailAddress, facebookId, openId, portrait, portraitBytes,
 			languageId, timeZoneId, greeting, comments, firstName, middleName,
 			lastName, prefixId, suffixId, male, birthdayMonth, birthdayDay,
-			birthdayYear, smsSn, aimSn, facebookSn, icqSn, jabberSn, msnSn,
-			mySpaceSn, skypeSn, twitterSn, ymSn, jobTitle, groupIds,
-			organizationIds, roleIds, userGroupRoles, userGroupIds,
-			serviceContext);
+			birthdayYear, smsSn, facebookSn, jabberSn, skypeSn, twitterSn,
+			jobTitle, groupIds, organizationIds, roleIds, userGroupRoles,
+			userGroupIds, serviceContext);
 
 		if (!addGroupIds.isEmpty() || !removeGroupIds.isEmpty()) {
 			SiteMembershipPolicyUtil.propagateMembership(
@@ -2092,7 +1962,7 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 				removeOrganizationUserGroupRoles);
 		}
 
-		if (!addUserGroupIds.isEmpty() || !removeGroupIds.isEmpty()) {
+		if (!addUserGroupIds.isEmpty() || !removeUserGroupIds.isEmpty()) {
 			UserGroupMembershipPolicyUtil.propagateMembership(
 				new long[] {user.getUserId()},
 				ArrayUtil.toLongArray(addUserGroupIds),
@@ -2134,15 +2004,10 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 	 * @param      birthdayDay the user's new birthday day
 	 * @param      birthdayYear the user's birthday year
 	 * @param      smsSn the user's new SMS screen name
-	 * @param      aimSn the user's new AIM screen name
 	 * @param      facebookSn the user's new Facebook screen name
-	 * @param      icqSn the user's new ICQ screen name
 	 * @param      jabberSn the user's new Jabber screen name
-	 * @param      msnSn the user's new MSN screen name
-	 * @param      mySpaceSn the user's new MySpace screen name
 	 * @param      skypeSn the user's new Skype screen name
 	 * @param      twitterSn the user's new Twitter screen name
-	 * @param      ymSn the user's new Yahoo! Messenger screen name
 	 * @param      jobTitle the user's new job title
 	 * @param      groupIds the primary keys of the user's groups
 	 * @param      organizationIds the primary keys of the user's organizations
@@ -2159,10 +2024,6 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 	 *             <code>uuid</code> attribute), asset category IDs, asset tag
 	 *             names, and expando bridge attributes for the user.
 	 * @return     the user
-	 * @throws     PortalException if a user with the primary key could not be
-	 *             found, if the new information was invalid, if the current
-	 *             user did not have permission to update the user, or if the
-	 *             operation was not allowed by the membership policy
 	 * @deprecated As of 7.0.0, replaced by {@link #updateUser(long, String,
 	 *             String, String, boolean, String, String, String, String,
 	 *             long, String, boolean, byte[], String, String, String,
@@ -2182,9 +2043,8 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 			String greeting, String comments, String firstName,
 			String middleName, String lastName, long prefixId, long suffixId,
 			boolean male, int birthdayMonth, int birthdayDay, int birthdayYear,
-			String smsSn, String aimSn, String facebookSn, String icqSn,
-			String jabberSn, String msnSn, String mySpaceSn, String skypeSn,
-			String twitterSn, String ymSn, String jobTitle, long[] groupIds,
+			String smsSn, String facebookSn, String jabberSn, String skypeSn,
+			String twitterSn, String jobTitle, long[] groupIds,
 			long[] organizationIds, long[] roleIds,
 			List<UserGroupRole> userGroupRoles, long[] userGroupIds,
 			List<Address> addresses, List<EmailAddress> emailAddresses,
@@ -2199,10 +2059,10 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 			emailAddress, facebookId, openId, true, null, languageId,
 			timeZoneId, greeting, comments, firstName, middleName, lastName,
 			prefixId, suffixId, male, birthdayMonth, birthdayDay, birthdayYear,
-			smsSn, aimSn, facebookSn, icqSn, jabberSn, msnSn, mySpaceSn,
-			skypeSn, twitterSn, ymSn, jobTitle, groupIds, organizationIds,
-			roleIds, userGroupRoles, userGroupIds, addresses, emailAddresses,
-			phones, websites, announcementsDelivers, serviceContext);
+			smsSn, facebookSn, jabberSn, skypeSn, twitterSn, jobTitle, groupIds,
+			organizationIds, roleIds, userGroupRoles, userGroupIds, addresses,
+			emailAddresses, phones, websites, announcementsDelivers,
+			serviceContext);
 	}
 
 	/**
@@ -2237,15 +2097,10 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 	 * @param  birthdayDay the user's new birthday day
 	 * @param  birthdayYear the user's birthday year
 	 * @param  smsSn the user's new SMS screen name
-	 * @param  aimSn the user's new AIM screen name
 	 * @param  facebookSn the user's new Facebook screen name
-	 * @param  icqSn the user's new ICQ screen name
 	 * @param  jabberSn the user's new Jabber screen name
-	 * @param  msnSn the user's new MSN screen name
-	 * @param  mySpaceSn the user's new MySpace screen name
 	 * @param  skypeSn the user's new Skype screen name
 	 * @param  twitterSn the user's new Twitter screen name
-	 * @param  ymSn the user's new Yahoo! Messenger screen name
 	 * @param  jobTitle the user's new job title
 	 * @param  groupIds the primary keys of the user's groups
 	 * @param  organizationIds the primary keys of the user's organizations
@@ -2257,10 +2112,6 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 	 *         attribute), asset category IDs, asset tag names, and expando
 	 *         bridge attributes for the user.
 	 * @return the user
-	 * @throws PortalException if a user with the primary key could not be
-	 *         found, if the new information was invalid, if the current user
-	 *         did not have permission to update the user, or if the operation
-	 *         was not allowed by the membership policy
 	 */
 	@Override
 	public User updateUser(
@@ -2272,9 +2123,8 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 			String greeting, String comments, String firstName,
 			String middleName, String lastName, long prefixId, long suffixId,
 			boolean male, int birthdayMonth, int birthdayDay, int birthdayYear,
-			String smsSn, String aimSn, String facebookSn, String icqSn,
-			String jabberSn, String msnSn, String mySpaceSn, String skypeSn,
-			String twitterSn, String ymSn, String jobTitle, long[] groupIds,
+			String smsSn, String facebookSn, String jabberSn, String skypeSn,
+			String twitterSn, String jobTitle, long[] groupIds,
 			long[] organizationIds, long[] roleIds,
 			List<UserGroupRole> userGroupRoles, long[] userGroupIds,
 			ServiceContext serviceContext)
@@ -2286,10 +2136,9 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 			emailAddress, facebookId, openId, true, null, languageId,
 			timeZoneId, greeting, comments, firstName, middleName, lastName,
 			prefixId, suffixId, male, birthdayMonth, birthdayDay, birthdayYear,
-			smsSn, aimSn, facebookSn, icqSn, jabberSn, msnSn, mySpaceSn,
-			skypeSn, twitterSn, ymSn, jobTitle, groupIds, organizationIds,
-			roleIds, userGroupRoles, userGroupIds, null, null, null, null, null,
-			serviceContext);
+			smsSn, facebookSn, jabberSn, skypeSn, twitterSn, jobTitle, groupIds,
+			organizationIds, roleIds, userGroupRoles, userGroupIds, null, null,
+			null, null, null, serviceContext);
 	}
 
 	protected void checkAddUserPermission(

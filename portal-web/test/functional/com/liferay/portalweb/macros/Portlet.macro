@@ -79,6 +79,8 @@
 			<then>
 				<var method="MathUtil#sum('${i}', '1')" name="i" />
 
+				<execute function="Pause" locator1="30000" />
+
 				<echo message="The PORTLET could not be found. Refreshing the page. Attempt number ${i}..." />
 
 				<execute function="Refresh" />
@@ -138,6 +140,20 @@
 		</if>
 	</command>
 
+	<command name="changeDisplayStyle">
+		<var method="StringUtil#upperCase('${displayStyle}')" name="displayStyle" />
+
+		<if>
+			<and>
+				<condition function="IsElementPresent" locator1="Icon#DISPLAY_STYLE_${displayStyle}" />
+				<condition function="IsVisible" locator1="Icon#DISPLAY_STYLE_${displayStyle}" />
+			</and>
+			<then>
+				<execute function="Click" locator1="Icon#DISPLAY_STYLE_${displayStyle}" />
+			</then>
+		</if>
+	</command>
+
 	<command name="configureCustomTitleViaLookandfeelPG">
 		<execute function="Check" locator1="BasePortlet#PORTLET_CONFIGURATION_USE_CUSTOM_TITLE_CHECKBOX" />
 		<execute function="Type" locator1="BasePortlet#PORTLET_CONFIGURATION_CUSTOM_TITLE_FIELD" value1="${portletName} Custom" />
@@ -146,10 +162,12 @@
 	</command>
 
 	<command name="deletePG">
-		<var name="portletLocator" value="//h1[@class='portlet-title']/span[contains(.,'${portletName}')]/../../menu//a[@title='Options']" />
+		<var name="key_portletName" value="${portletName}" />
 
-		<execute function="AssertClick" locator1="${portletLocator}" value1="Options" />
+		<execute function="Click#makeVisibleClickAt" locator1="BasePortlet#SPECIFIC_PORTLET_OPTIONS_ICON" />
+
 		<execute function="AssertClickNoError" locator1="BasePortlet#REMOVE" value1="Remove" />
+
 		<execute function="Confirm" value1="Are you sure you want to remove this component?" />
 	</command>
 
@@ -168,12 +186,12 @@
 			<var name="portletOption" value="Configuration" />
 		</execute>
 
-		<execute function="SelectFrame" locator1="PGADTConfiguration#CONFIGURATION_IFRAME" />
+		<execute function="SelectFrame" locator1="IFrame#DIALOG" />
 
 		<if>
-			<condition function="IsElementPresent" locator1="PGADTConfiguration#NAVIGATION_DISPLAY_SETTINGS" />
+			<condition function="IsElementPresent" locator1="Configuration#SETUP_DISPLAY_SETTINGS" />
 			<then>
-				<execute function="AssertClick" locator1="PGADTConfiguration#NAVIGATION_DISPLAY_SETTINGS" value1="Display Settings" />
+				<execute function="AssertClick" locator1="Configuration#SETUP_DISPLAY_SETTINGS" value1="Display Settings" />
 			</then>
 		</if>
 
@@ -195,7 +213,7 @@
 			<then>
 				<var name="key_portletName" value="${portletName}" />
 
-				<execute function="Click#makeVisibleClickAt" locator1="BasePortlet#SPECIFIC_PORTLET_OPTIONS_ICON" />
+				<execute function="Click#makeVisibleClickAt" locator1="BasePortlet#SPECIFIC_PORTLET_BORDERLESS_ELLIPSIS_ICON" />
 			</then>
 			<elseif>
 				<isset var="portletNameBorderless" />
@@ -203,11 +221,11 @@
 					<var name="key_portletName" value="${portletNameBorderless}" />
 
 					<execute function="MakeVisible" locator1="BasePortlet#SPECIFIC_PORTLET_BORDERLESS_BAR" />
-					<execute function="Click" locator1="BasePortlet#SPECIFIC_PORTLET_BORDERLESS_OPTIONS_ICON" />
+					<execute function="Click" locator1="BasePortlet#SPECIFIC_PORTLET_BORDERLESS_ELLIPSIS_ICON" />
 				</then>
 			</elseif>
 			<else>
-				<execute function="Click" locator1="BasePortlet#OPTIONS_ICON" />
+				<execute function="Click#makeVisibleClickAt" locator1="BasePortlet#OPTIONS_ICON" />
 			</else>
 		</if>
 
@@ -333,7 +351,7 @@
 
 		<var name="portletLocator" value="//span[@data-title=&quot;${portletName}&quot; and contains(@class,'add-content-item')]" />
 
-		<execute function="AssertElementNotPresent#assertNotVisible" locator1="${portletLocator}" />
+		<execute function="AssertElementNotPresent" locator1="${portletLocator}" />
 	</command>
 
 	<command name="viewDuplicatePG">
@@ -346,7 +364,7 @@
 			<then>
 				<var method="MathUtil#sum('${i}', '1')" name="i" />
 
-				<execute function="AssertElementPresent" locator1="xpath=(//section[header/h1[contains(.,'${portletName}')]])[${i}]" />
+				<execute function="AssertElementPresent" locator1="xpath=(//h2[contains(.,'${portletName}')])[${i}]" />
 			</then>
 		</while>
 	</command>
@@ -379,6 +397,17 @@
 		<var method="StringUtil#upperCase('${portletName}')" name="portletNameUppercase" />
 
 		<execute function="AssertTextEquals" locator1="BasePortlet#TITLE" value1="${portletNameUppercase}" />
+	</command>
+
+	<command name="viewPortletOptionsMenulist">
+		<execute function="Click#mouseOverClick" locator1="BasePortlet#OPTIONS_ICON" />
+
+		<execute function="AssertTextEquals" locator1="BasePortlet#OPTIONS_MENULIST_LOOK_AND_FEEL" value1="Look and Feel" />
+		<execute function="AssertTextEquals" locator1="BasePortlet#OPTIONS_MENULIST_CONFIGURATION" value1="Configuration" />
+		<execute function="AssertTextEquals" locator1="BasePortlet#OPTIONS_MENULIST_EXPORT_IMPORT" value1="Export / Import" />
+		<execute function="AssertTextEquals" locator1="BasePortlet#MAXIMIZE" value1="Maximize" />
+		<execute function="AssertTextEquals" locator1="BasePortlet#MINIMIZE" value1="Minimize" />
+		<execute function="AssertTextEquals" locator1="BasePortlet#OPTION_MENULIST_REMOVE" value1="Remove" />
 	</command>
 
 	<command name="viewSpecificPG">

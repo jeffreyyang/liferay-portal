@@ -41,6 +41,7 @@ import com.liferay.portal.test.rule.PersistenceTestRule;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -57,8 +58,9 @@ import java.util.Set;
  * @generated
  */
 public class UserIdMapperPersistenceTest {
+	@ClassRule
 	@Rule
-	public final AggregateTestRule aggregateTestRule = new AggregateTestRule(new LiferayIntegrationTestRule(),
+	public static final AggregateTestRule aggregateTestRule = new AggregateTestRule(new LiferayIntegrationTestRule(),
 			PersistenceTestRule.INSTANCE,
 			new TransactionalTestRule(Propagation.REQUIRED));
 
@@ -117,6 +119,8 @@ public class UserIdMapperPersistenceTest {
 
 		newUserIdMapper.setMvccVersion(RandomTestUtil.nextLong());
 
+		newUserIdMapper.setCompanyId(RandomTestUtil.nextLong());
+
 		newUserIdMapper.setUserId(RandomTestUtil.nextLong());
 
 		newUserIdMapper.setType(RandomTestUtil.randomString());
@@ -133,6 +137,8 @@ public class UserIdMapperPersistenceTest {
 			newUserIdMapper.getMvccVersion());
 		Assert.assertEquals(existingUserIdMapper.getUserIdMapperId(),
 			newUserIdMapper.getUserIdMapperId());
+		Assert.assertEquals(existingUserIdMapper.getCompanyId(),
+			newUserIdMapper.getCompanyId());
 		Assert.assertEquals(existingUserIdMapper.getUserId(),
 			newUserIdMapper.getUserId());
 		Assert.assertEquals(existingUserIdMapper.getType(),
@@ -192,8 +198,9 @@ public class UserIdMapperPersistenceTest {
 
 	protected OrderByComparator<UserIdMapper> getOrderByComparator() {
 		return OrderByComparatorFactoryUtil.create("UserIdMapper",
-			"mvccVersion", true, "userIdMapperId", true, "userId", true,
-			"type", true, "description", true, "externalUserId", true);
+			"mvccVersion", true, "userIdMapperId", true, "companyId", true,
+			"userId", true, "type", true, "description", true,
+			"externalUserId", true);
 	}
 
 	@Test
@@ -302,11 +309,9 @@ public class UserIdMapperPersistenceTest {
 
 		ActionableDynamicQuery actionableDynamicQuery = UserIdMapperLocalServiceUtil.getActionableDynamicQuery();
 
-		actionableDynamicQuery.setPerformActionMethod(new ActionableDynamicQuery.PerformActionMethod() {
+		actionableDynamicQuery.setPerformActionMethod(new ActionableDynamicQuery.PerformActionMethod<UserIdMapper>() {
 				@Override
-				public void performAction(Object object) {
-					UserIdMapper userIdMapper = (UserIdMapper)object;
-
+				public void performAction(UserIdMapper userIdMapper) {
 					Assert.assertNotNull(userIdMapper);
 
 					count.increment();
@@ -422,6 +427,8 @@ public class UserIdMapperPersistenceTest {
 		UserIdMapper userIdMapper = _persistence.create(pk);
 
 		userIdMapper.setMvccVersion(RandomTestUtil.nextLong());
+
+		userIdMapper.setCompanyId(RandomTestUtil.nextLong());
 
 		userIdMapper.setUserId(RandomTestUtil.nextLong());
 

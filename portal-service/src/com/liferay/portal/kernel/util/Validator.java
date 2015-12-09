@@ -642,6 +642,10 @@ public class Validator {
 	 *         <code>false</code> otherwise
 	 */
 	public static boolean isEmailAddress(String emailAddress) {
+		if (Validator.isNull(emailAddress)) {
+			return false;
+		}
+
 		Matcher matcher = _emailAddressPattern.matcher(emailAddress);
 
 		return matcher.matches();
@@ -1232,7 +1236,7 @@ public class Validator {
 
 	/**
 	 * Returns <code>true</code> if the string is a valid URL based on the rules
-	 * in {@link java.net.URL}.
+	 * in {@link URL}.
 	 *
 	 * @param  url the string to check
 	 * @return <code>true</code> if the string is a valid URL;

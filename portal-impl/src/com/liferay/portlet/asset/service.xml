@@ -357,6 +357,10 @@
 
 		<column name="tagStatsId" type="long" primary="true" />
 
+		<!-- Audit fields -->
+
+		<column name="companyId" type="long" />
+
 		<!-- Other fields -->
 
 		<column name="tagId" type="long" />
@@ -452,6 +456,7 @@
 		<exception>CategoryPropertyKey</exception>
 		<exception>CategoryPropertyValue</exception>
 		<exception>DuplicateCategory</exception>
+		<exception>DuplicateCategoryProperty</exception>
 		<exception>DuplicateQueryRule</exception>
 		<exception>DuplicateTag</exception>
 		<exception>DuplicateVocabulary</exception>

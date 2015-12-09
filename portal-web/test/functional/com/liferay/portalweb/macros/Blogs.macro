@@ -54,6 +54,46 @@
 		<execute macro="BlogsEntry#publish" />
 	</command>
 
+	<command name="addEntryWithHTML">
+		<execute macro="BlogsNavigator#gotoAddEntry" />
+
+		<execute macro="BlogsEntry#addTitle">
+			<var name="entryTitle" value="${entryTitle}" />
+		</execute>
+
+		<execute macro="BlogsEntry#addSubtitle">
+			<var name="entrySubtitle" value="${entrySubtitle}" />
+		</execute>
+
+		<execute function="Click" locator1="AlloyEditor#CONTENT_FIELD" />
+
+		<execute function="Click" locator1="Button#EDITOR_SWITCH" />
+
+		<execute function="Type#sendKeysAceEditor" locator1="TextArea#ACE_EDITOR" value1="${entryContent}" />
+
+		<execute function="AssertClick" locator1="Button#PUBLISH" value1="Publish" />
+
+		<execute function="AssertTextEquals" locator1="Message#SUCCESS" value1="Your request completed successfully." />
+	</command>
+
+	<command name="addEntryWithPermissions">
+		<execute macro="BlogsNavigator#gotoAddEntry" />
+
+		<execute macro="BlogsEntry#addEntryContent">
+			<var name="entryContent" value="${entryContent}" />
+			<var name="entrySubtitle" value="${entrySubtitle}" />
+			<var name="entryTitle" value="${entryTitle}" />
+		</execute>
+
+		<execute macro="BlogsNavigator#gotoSettings" />
+
+		<execute macro="BlogsEntry#entryAddPermissions">
+			<var name="viewableBy" value="${viewableBy}" />
+		</execute>
+
+		<execute macro="BlogsEntry#publish" />
+	</command>
+
 	<command name="addEntryWithTag">
 		<execute macro="BlogsNavigator#gotoAddEntry" />
 
@@ -72,7 +112,7 @@
 		<execute macro="BlogsEntry#publish" />
 	</command>
 
-	<command name="addScheduled">
+	<command name="addEntryWithTags">
 		<execute macro="BlogsNavigator#gotoAddEntry" />
 
 		<execute macro="BlogsEntry#addEntryContent">
@@ -83,9 +123,32 @@
 
 		<execute macro="BlogsNavigator#gotoSettings" />
 
-		<execute macro="BlogsEntry#scheduleBlogEntry" />
+		<for list="${tagNameList}" param="tagName">
+			<execute macro="AssetCategorization#addTag">
+				<var name="tagName" value="${tagName}" />
+			</execute>
+		</for>
 
 		<execute macro="BlogsEntry#publish" />
+	</command>
+
+	<command name="addEntryWithUploadedCoverImage">
+		<execute macro="BlogsNavigator#gotoAddEntry" />
+
+		<execute macro="BlogsEntry#addEntryContent">
+			<var name="entryContent" value="${entryContent}" />
+			<var name="entrySubtitle" value="${entrySubtitle}" />
+			<var name="entryTitle" value="${entryTitle}" />
+		</execute>
+
+		<execute macro="BlogsEntry#addCoverImage" />
+
+		<execute macro="ItemSelector#uploadFile">
+			<var name="navTab" value="${navTab}" />
+			<var name="uploadFileName" value="${uploadFileName}" />
+		</execute>
+
+		<execute function="Pause" locator1="3000" />
 	</command>
 
 	<command name="addViaAP">
@@ -95,19 +158,13 @@
 				<var name="key_siteScope" value="${siteScope}" />
 
 				<execute function="AssertClick" locator1="AP#ADD_NEW_DROPDOWN_IN_SCOPED_SITE" value1="Add New in ${siteScope}" />
+
+				<execute function="AssertClick" locator1="AP#ADD_BLOGS_ENTRY_MENU_ITEM" value1="Blogs Entry" />
 			</then>
 			<else>
 				<execute function="AssertClick" locator1="AP#ADD_NEW_DROPDOWN" value1="Add New" />
-			</else>
-		</if>
 
-		<if>
-			<condition function="IsVisible" locator1="MenuItem#BLOGS_ENTRY" />
-			<then>
 				<execute function="AssertClick" locator1="MenuItem#BLOGS_ENTRY" value1="Blogs Entry" />
-			</then>
-			<else>
-				<execute function="AssertClick" locator1="AP#ADD_BLOGS_ENTRY_BUTTON" value1="Add Blogs Entry" />
 			</else>
 		</if>
 
@@ -231,60 +288,6 @@
 		<execute macro="BlogsEntry#publishWithInvalidTitleLength" />
 	</command>
 
-	<command name="addWithNullCustomAbstract">
-		<execute macro="BlogsNavigator#gotoAddEntry" />
-
-		<execute macro="BlogsEntry#addEntryContent">
-			<var name="entryContent" value="${entryContent}" />
-			<var name="entrySubtitle" value="${entrySubtitle}" />
-			<var name="entryTitle" value="${entryTitle}" />
-		</execute>
-
-		<execute function="Click" locator1="Button#COG" />
-
-		<execute function="Click" locator1="Radio#CUSTOM_ABSTRACT" />
-
-		<execute function="Type#typeAlloyEditor" locator1="AlloyEditor#DESCRIPTION_FIELD" value1="${entryAbstractDescription}" />
-
-		<execute function="AssertClick" locator1="Button#PUBLISH" value1="Publish" />
-
-		<execute function="AssertTextEquals#assertPartialText" locator1="Message#ERROR" value1="Your request failed to complete." />
-		<execute function="AssertTextEquals#assertPartialText" locator1="Message#ERROR_1" value1="Please enter a valid abstract." />
-	</command>
-
-	<command name="addWithTag">
-		<execute macro="BlogsNavigator#gotoAddEntry" />
-
-		<execute macro="BlogsEntry#addEntryContent">
-			<var name="entryContent" value="${entryContent}" />
-			<var name="entrySubtitle" value="${entrySubtitle}" />
-			<var name="entryTitle" value="${entryTitle}" />
-		</execute>
-
-		<execute macro="BlogsNavigator#gotoSettings" />
-
-		<if>
-			<isset var="tagName" />
-			<then>
-				<execute macro="BlogsEntry#addTag">
-					<var name="tagName" value="${tagName}" />
-				</execute>
-			</then>
-		</if>
-
-		<if>
-			<isset var="tagNameList" />
-			<then>
-				<execute macro="BlogsEntry#addTagList">
-					<var name="tagName" value="${tagName}" />
-					<var name="tagNameList" value="${tagNameList}" />
-				</execute>
-			</then>
-		</if>
-
-		<execute macro="BlogsEntry#publish" />
-	</command>
-
 	<command name="addWithWorkflow">
 		<execute macro="BlogsNavigator#gotoAddEntry" />
 
@@ -319,47 +322,18 @@
 			<var name="defaultURL" value="${defaultURL}" />
 			<var name="nodePort" value="${nodePort}" />
 			<var name="pageName" value="Blogs Page" />
-			<var name="soDashboard" value="${soDashboard}" />
-			<var name="soPage" value="${soPage}" />
 		</execute>
 
-		<execute macro="BlogsNavigator#gotoConfigurationSetupPG">
-			<var name="portletNameBorderless" value="Blogs" />
-			<var name="soPage" value="${soPage}" />
+		<execute macro="Portlet#gotoPortletOptions">
+			<var name="portletName" value="Blogs" />
+			<var name="portletOption" value="Configuration" />
 		</execute>
 
-		<execute macro="BlogsConfiguration#checkSocialBookmarks" />
+		<execute macro="BlogsConfiguration#selectConfigurationIFrame" />
 
-		<for list="${socialBookmarkSites}" param="socialBookmarkSite">
-			<execute macro="BlogsConfiguration#disableSocialBookmarkSites">
-				<var name="socialBookmarkSite" value="${socialBookmarkSite}" />
-				<var name="socialBookmarkSites" value="${socialBookmarkSite}" />
-			</execute>
-		</for>
+		<execute macro="BlogsConfiguration#uncheckSocialBookmarks" />
 
 		<execute macro="IFrame#saveConfiguration" />
-	</command>
-
-	<command name="editEntryAndSaveDraftPG">
-		<execute macro="BlogsNavigator#gotoEntryPG">
-			<var name="entryContent" value="${entryContent}" />
-			<var name="entryTitle" value="${entryTitle}" />
-		</execute>
-
-		<execute macro="BlogsNavigator#gotoEditPG">
-			<var name="entryTitle" value="${entryTitle}" />
-		</execute>
-
-		<execute macro="BlogsEntry#editEntryContent">
-			<var name="entryContent" value="${entryContent}" />
-			<var name="entryContentEdit" value="${entryContentEdit}" />
-			<var name="entrySubtitle" value="${entrySubtitle}" />
-			<var name="entrySubtitleEdit" value="${entrySubtitleEdit}" />
-			<var name="entryTitle" value="${entryTitle}" />
-			<var name="entryTitleEdit" value="${entryTitleEdit}" />
-		</execute>
-
-		<execute macro="BlogsEntry#saveAsDraft" />
 	</command>
 
 	<command name="editEntryContentCP">
@@ -380,11 +354,6 @@
 	</command>
 
 	<command name="editEntryPG">
-		<execute macro="BlogsNavigator#gotoEntryPG">
-			<var name="entryContent" value="${entryContent}" />
-			<var name="entryTitle" value="${entryTitle}" />
-		</execute>
-
 		<execute macro="BlogsNavigator#gotoEditPG">
 			<var name="entryTitle" value="${entryTitle}" />
 		</execute>
@@ -406,14 +375,14 @@
 			<var name="defaultURL" value="${defaultURL}" />
 			<var name="nodePort" value="${nodePort}" />
 			<var name="pageName" value="Blogs Page" />
-			<var name="soDashboard" value="${soDashboard}" />
-			<var name="soPage" value="${soPage}" />
 		</execute>
 
-		<execute macro="BlogsNavigator#gotoConfigurationSetupPG">
-			<var name="portletNameBorderless" value="Blogs" />
-			<var name="soPage" value="${soPage}" />
+		<execute macro="Portlet#gotoPortletOptions">
+			<var name="portletName" value="Blogs" />
+			<var name="portletOption" value="Configuration" />
 		</execute>
+
+		<execute macro="BlogsConfiguration#selectConfigurationIFrame" />
 
 		<execute macro="BlogsConfiguration#checkSocialBookmarks" />
 
@@ -442,7 +411,7 @@
 	</command>
 
 	<command name="subscribePG">
-		<execute function="AssertClick" locator1="Link#SUBSCRIBE" value1="Subscribe" />
+		<execute function="AssertClick" locator1="Blogs#SUBSCRIBE_LINK" value1="Subscribe" />
 
 		<execute function="AssertTextEquals" locator1="Message#SUCCESS" value1="Your request completed successfully." />
 	</command>
@@ -452,13 +421,9 @@
 			<var name="defaultURL" value="${defaultURL}" />
 			<var name="nodePort" value="${nodePort}" />
 			<var name="pageName" value="${pageName}" />
-			<var name="soDashboard" value="${soDashboard}" />
-			<var name="soPage" value="${soPage}" />
 		</execute>
 
-		<execute macro="BlogsNavigator#gotoConfigurationSetupPG">
-			<var name="soPage" value="${soPage}" />
-		</execute>
+		<execute macro="BlogsNavigator#gotoConfigurationSetupPG" />
 
 		<execute macro="BlogsConfiguration#selectDisplayTemplate">
 			<var name="displayTemplate" value="Abstract" />
@@ -472,14 +437,9 @@
 			<var name="defaultURL" value="${defaultURL}" />
 			<var name="nodePort" value="${nodePort}" />
 			<var name="pageName" value="${pageName}" />
-			<var name="soDashboard" value="${soDashboard}" />
-			<var name="soPage" value="${soPage}" />
 		</execute>
 
-		<execute macro="BlogsNavigator#gotoConfigurationSetupPG">
-			<var name="portletNameBorderless" value="Blogs" />
-			<var name="soPage" value="${soPage}" />
-		</execute>
+		<execute macro="BlogsNavigator#gotoConfigurationSetupPG" />
 
 		<execute macro="BlogsNavigator#gotoConfigurationScopePG" />
 
@@ -489,8 +449,10 @@
 	</command>
 
 	<command name="tearDownCP">
-		<execute macro="Page#gotoContentCP">
-			<var name="portletName" value="Blogs" />
+		<execute macro="Navigator#openURL" />
+
+		<execute macro="ProductMenu#gotoSitesContent">
+			<var name="portlet" value="Blogs" />
 		</execute>
 
 		<if>
@@ -504,8 +466,10 @@
 			</then>
 		</if>
 
-		<execute macro="Page#gotoContentCP">
-			<var name="portletName" value="Recycle Bin" />
+		<execute macro="Navigator#openURL" />
+
+		<execute macro="ProductMenu#gotoSitesContent">
+			<var name="portlet" value="Recycle Bin" />
 		</execute>
 
 		<execute macro="RecycleBin#emptyCP" />
@@ -516,8 +480,6 @@
 			<var name="defaultURL" value="${defaultURL}" />
 			<var name="nodePort" value="${nodePort}" />
 			<var name="pageName" value="${pageName}" />
-			<var name="soDashboard" value="${soDashboard}" />
-			<var name="soPage" value="${soPage}" />
 		</execute>
 
 		<execute function="AssertClick" locator1="PGBlogs#UNSUBSCRIBE_LINK" value1="Unsubscribe" />
@@ -543,26 +505,11 @@
 		<execute function="AssertTextEquals" locator1="Link#RSS" value1="RSS" />
 	</command>
 
-	<command name="viewDetailsPG">
+	<command name="viewDraftStatusViaAdmin">
 		<var name="key_entryTitle" value="${entryTitle}" />
 
-		<execute macro="BlogsEntry#gotoPG">
-			<var name="entryContent" value="${entryContent}" />
-			<var name="entrySubtitle" value="${entrySubtitle}" />
-			<var name="entryTitle" value="${entryTitle}" />
-			<var name="entryTitleSpecialCharacter" value="${entryTitleSpecialCharacter}" />
-			<var name="viewSpecificEntry" value="${viewSpecificEntry}" />
-		</execute>
-
-		<execute macro="BlogsEntry#viewEntryAuthorPG">
-			<var name="entryAuthorFullName" value="${entryAuthorFullName}" />
-		</execute>
-
-		<execute macro="BlogsEntry#viewEntry">
-			<var name="entryContent" value="${entryContent}" />
-			<var name="entrySubtitle" value="${entrySubtitle}" />
-			<var name="entryTitle" value="${entryTitle}" />
-		</execute>
+		<execute function="AssertTextEquals" locator1="Blogs#ICON_VIEW_ENTRY_TITLE" value1="${entryTitle}" />
+		<execute function="AssertTextEquals" locator1="Blogs#ICON_VIEW_ENTRY_STATUS" value1="Draft" />
 	</command>
 
 	<command name="viewNoEntryCP">

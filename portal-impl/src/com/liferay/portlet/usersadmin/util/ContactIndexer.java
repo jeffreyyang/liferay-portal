@@ -15,6 +15,7 @@
 package com.liferay.portlet.usersadmin.util;
 
 import com.liferay.portal.kernel.dao.orm.ActionableDynamicQuery;
+import com.liferay.portal.kernel.dao.orm.IndexableActionableDynamicQuery;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
@@ -178,22 +179,21 @@ public class ContactIndexer extends BaseIndexer<Contact> {
 	}
 
 	protected void reindexContacts(long companyId) throws PortalException {
-		final ActionableDynamicQuery actionableDynamicQuery =
-			ContactLocalServiceUtil.getActionableDynamicQuery();
+		final IndexableActionableDynamicQuery indexableActionableDynamicQuery =
+			ContactLocalServiceUtil.getIndexableActionableDynamicQuery();
 
-		actionableDynamicQuery.setCompanyId(companyId);
-		actionableDynamicQuery.setPerformActionMethod(
-			new ActionableDynamicQuery.PerformActionMethod() {
+		indexableActionableDynamicQuery.setCompanyId(companyId);
+		indexableActionableDynamicQuery.setPerformActionMethod(
+			new ActionableDynamicQuery.PerformActionMethod<Contact>() {
 
 				@Override
-				public void performAction(Object object) {
-					Contact contact = (Contact)object;
-
+				public void performAction(Contact contact) {
 					try {
 						Document document = getDocument(contact);
 
 						if (document != null) {
-							actionableDynamicQuery.addDocument(document);
+							indexableActionableDynamicQuery.addDocuments(
+								document);
 						}
 					}
 					catch (PortalException pe) {
@@ -207,9 +207,9 @@ public class ContactIndexer extends BaseIndexer<Contact> {
 				}
 
 			});
-		actionableDynamicQuery.setSearchEngineId(getSearchEngineId());
+		indexableActionableDynamicQuery.setSearchEngineId(getSearchEngineId());
 
-		actionableDynamicQuery.performActions();
+		indexableActionableDynamicQuery.performActions();
 	}
 
 	private static final Log _log = LogFactoryUtil.getLog(ContactIndexer.class);

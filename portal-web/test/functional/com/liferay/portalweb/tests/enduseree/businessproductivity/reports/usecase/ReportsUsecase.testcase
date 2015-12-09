@@ -4,16 +4,35 @@
 	<property name="web.plugins.includes" value="jasperreports-web" />
 
 	<set-up>
+		<var method="TestPropsUtil#get('test.portal.instance')" name="testPortalInstance" />
+
+		<if>
+			<equals arg1="${testPortalInstance}" arg2="true" />
+			<then>
+				<execute macro="SignIn#signInPortalInstanceSetUp" />
+			</then>
+		</if>
+
 		<execute macro="User#firstLoginPG" />
 	</set-up>
 
 	<tear-down>
-		<execute macro="ReportsAdmin#tearDownReports" />
-		<execute macro="ReportsAdmin#tearDownDefinitions" />
+		<var method="TestPropsUtil#get('test.portal.instance')" name="testPortalInstance" />
 
-		<execute macro="ServerAdministration#tearDownMailServerSettings" />
+		<if>
+			<equals arg1="${testPortalInstance}" arg2="true" />
+			<then>
+				<execute macro="PortalInstances#tearDownCP" />
+			</then>
+			<else>
+				<execute macro="ReportsAdmin#tearDownReports" />
+				<execute macro="ReportsAdmin#tearDownDefinitions" />
 
-		<execute macro="Page#tearDownPG" />
+				<execute macro="ServerAdministration#tearDownMailServerSettings" />
+
+				<execute macro="Page#tearDownPG" />
+			</else>
+		</if>
 	</tear-down>
 
 	<command name="AddDefinitionNoTemplate" priority="4">
@@ -112,15 +131,15 @@
 	<command name="ViewReportEmailNewConfiguration" priority="4">
 		<description message="This is a use case for LPS-51009." />
 
-		<var name="emailAddress1" property-value="email.address.1" />
-		<var name="emailAddress2" property-value="email.address.2" />
-		<var name="emailAddress4" property-value="email.address.4" />
-		<var name="emailPassword1" property-value="email.password.1" />
-		<var name="emailPassword2" property-value="email.password.2" />
-		<var name="emailPassword4" property-value="email.password.4" />
+		<var method="TestPropsUtil#get('email.address.1')" name="emailAddress1" />
+		<var method="TestPropsUtil#get('email.address.2')" name="emailAddress2" />
+		<var method="TestPropsUtil#get('email.address.4')" name="emailAddress4" />
+		<var method="TestPropsUtil#get('email.password.1')" name="emailPassword1" />
+		<var method="TestPropsUtil#get('email.password.2')" name="emailPassword2" />
+		<var method="TestPropsUtil#get('email.password.4')" name="emailPassword4" />
 
-		<execute macro="Page#gotoCP">
-			<var name="portletName" value="Server Administration" />
+		<execute macro="ProductMenu#gotoControlPanelSystem">
+			<var name="portlet" value="Server Administration" />
 		</execute>
 
 		<execute macro="ServerAdministration#configureMailServerSettings">

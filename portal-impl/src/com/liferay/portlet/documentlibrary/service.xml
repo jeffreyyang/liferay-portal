@@ -24,6 +24,7 @@
 
 		<!-- References -->
 
+		<reference package-path="com.liferay.portal" entity="ClassName" />
 		<reference package-path="com.liferay.portal" entity="Group" />
 		<reference package-path="com.liferay.portal" entity="Image" />
 		<reference package-path="com.liferay.portal" entity="Layout" />
@@ -243,6 +244,10 @@
 		<!-- PK fields -->
 
 		<column name="fileEntryMetadataId" type="long" primary="true" />
+
+		<!-- Audit fields -->
+
+		<column name="companyId" type="long" />
 
 		<!-- Other fields -->
 
@@ -680,6 +685,7 @@
 
 		<!-- Audit fields -->
 
+		<column name="companyId" type="long" />
 		<column name="modifiedTime" type="long" />
 
 		<!-- Other fields -->
@@ -707,6 +713,7 @@
 		<exception>DirectoryName</exception>
 		<exception>DuplicateDirectory</exception>
 		<exception>DuplicateFile</exception>
+		<exception>DuplicateFileEntry</exception>
 		<exception>DuplicateFileEntryType</exception>
 		<exception>DuplicateFolderName</exception>
 		<exception>DuplicateRepositoryName</exception>

@@ -33,6 +33,7 @@ import com.liferay.portal.kernel.zip.ZipWriter;
 import com.liferay.portal.kernel.zip.ZipWriterFactoryUtil;
 import com.liferay.portal.model.Company;
 import com.liferay.portal.model.Group;
+import com.liferay.portal.model.StagedGroupedModel;
 import com.liferay.portal.model.StagedModel;
 import com.liferay.portal.model.User;
 import com.liferay.portal.service.CompanyLocalServiceUtil;
@@ -40,6 +41,7 @@ import com.liferay.portal.service.GroupLocalServiceUtil;
 import com.liferay.portal.service.IdentityServiceContextFunction;
 import com.liferay.portal.service.ServiceContext;
 import com.liferay.portal.service.ServiceContextThreadLocal;
+import com.liferay.portal.service.test.ServiceTestUtil;
 import com.liferay.portlet.asset.model.AssetCategory;
 import com.liferay.portlet.asset.model.AssetEntry;
 import com.liferay.portlet.asset.model.AssetTag;
@@ -51,6 +53,7 @@ import com.liferay.portlet.asset.service.AssetVocabularyLocalServiceUtil;
 import com.liferay.portlet.asset.util.test.AssetTestUtil;
 import com.liferay.portlet.exportimport.lar.ExportImportClassedModelUtil;
 import com.liferay.portlet.exportimport.lar.ExportImportPathUtil;
+import com.liferay.portlet.exportimport.lar.ExportImportThreadLocal;
 import com.liferay.portlet.exportimport.lar.PortletDataContext;
 import com.liferay.portlet.exportimport.lar.PortletDataContextFactoryUtil;
 import com.liferay.portlet.exportimport.lar.PortletDataHandlerKeys;
@@ -77,7 +80,6 @@ import java.util.Map;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -91,6 +93,8 @@ public abstract class BaseStagedModelDataHandlerTestCase {
 		liveGroup = GroupTestUtil.addGroup();
 		stagingGroup = GroupTestUtil.addGroup();
 
+		ServiceTestUtil.setUser(TestPropsValues.getUser());
+
 		ServiceContext serviceContext =
 			ServiceContextTestUtil.getServiceContext(stagingGroup.getGroupId());
 
@@ -102,7 +106,6 @@ public abstract class BaseStagedModelDataHandlerTestCase {
 		ServiceContextThreadLocal.popServiceContext();
 	}
 
-	@Ignore
 	@Test
 	public void testCleanStagedModelDataHandler() throws Exception {
 
@@ -144,6 +147,67 @@ public abstract class BaseStagedModelDataHandlerTestCase {
 
 		StagedModelDataHandlerUtil.importStagedModel(
 			portletDataContext, exportedStagedModel);
+	}
+
+	public void testLastPublishDate() throws Exception {
+		if (!supportLastPublishDateUpdate()) {
+			return;
+		}
+
+		Map<String, List<StagedModel>> dependentStagedModelsMap =
+			new HashMap<>();
+
+		StagedGroupedModel stagedGroupedModel =
+			(StagedGroupedModel)addStagedModel(
+				stagingGroup, dependentStagedModelsMap);
+
+		Assert.assertNull(stagedGroupedModel.getLastPublishDate());
+
+		initExport();
+
+		// Update last publish date
+
+		Map<String, String[]> parameterMap =
+			portletDataContext.getParameterMap();
+
+		parameterMap.put(
+			PortletDataHandlerKeys.UPDATE_LAST_PUBLISH_DATE,
+			new String[] {Boolean.TRUE.toString()});
+
+		try {
+			ExportImportThreadLocal.setPortletStagingInProcess(true);
+
+			StagedModelDataHandlerUtil.exportStagedModel(
+				portletDataContext, stagedGroupedModel);
+		}
+		finally {
+			ExportImportThreadLocal.setPortletStagingInProcess(false);
+		}
+
+		Assert.assertEquals(
+			portletDataContext.getEndDate(),
+			stagedGroupedModel.getLastPublishDate());
+
+		// Do not update last publish date
+
+		Date originalLastPublishDate = stagedGroupedModel.getLastPublishDate();
+
+		parameterMap.put(
+			PortletDataHandlerKeys.UPDATE_LAST_PUBLISH_DATE,
+			new String[] {Boolean.TRUE.toString()});
+
+		try {
+			ExportImportThreadLocal.setPortletStagingInProcess(true);
+
+			StagedModelDataHandlerUtil.exportStagedModel(
+				portletDataContext, stagedGroupedModel);
+		}
+		finally {
+			ExportImportThreadLocal.setPortletStagingInProcess(false);
+		}
+
+		Assert.assertEquals(
+			originalLastPublishDate, stagedGroupedModel.getLastPublishDate());
 	}
 
 	@Test
@@ -453,8 +517,7 @@ public abstract class BaseStagedModelDataHandlerTestCase {
 
 		portletDataContext.setExportDataRootElement(rootElement);
 
-		missingReferencesElement = SAXReaderUtil.createElement(
-			"missing-references");
+		missingReferencesElement = rootElement.addElement("missing-references");
 
 		portletDataContext.setMissingReferencesElement(
 			missingReferencesElement);
@@ -486,6 +549,17 @@ public abstract class BaseStagedModelDataHandlerTestCase {
 
 		portletDataContext.setImportDataRootElement(rootElement);
 
+		Element missingReferencesElement = rootElement.element(
+			"missing-references");
+
+		if (missingReferencesElement == null) {
+			missingReferencesElement = rootElement.addElement(
+				"missing-references");
+		}
+
+		portletDataContext.setMissingReferencesElement(
+			missingReferencesElement);
+
 		Group sourceCompanyGroup = GroupLocalServiceUtil.getCompanyGroup(
 			stagingGroup.getCompanyId());
 
@@ -512,6 +586,10 @@ public abstract class BaseStagedModelDataHandlerTestCase {
 				stagedModelPath);
 
 		return exportedStagedModel;
+	}
+
+	protected boolean supportLastPublishDateUpdate() {
+		return false;
 	}
 
 	protected StagedModelAssets updateAssetEntry(
@@ -683,6 +761,10 @@ public abstract class BaseStagedModelDataHandlerTestCase {
 		for (Element stagedModelGroupElement : stagedModelGroupElements) {
 			String className = stagedModelGroupElement.getName();
 
+			if (className.equals("missing-references")) {
+				continue;
+			}
+
 			List<StagedModel> dependentStagedModels =
 				dependentStagedModelsMap.get(className);
 
@@ -760,13 +842,13 @@ public abstract class BaseStagedModelDataHandlerTestCase {
 				importedStagedModel.getCreateDate(),
 			DateUtil.equals(
 				stagedModel.getCreateDate(),
-				importedStagedModel.getCreateDate(), true));
+				importedStagedModel.getCreateDate()));
 		Assert.assertTrue(
 			stagedModel.getModifiedDate() + " " +
 				importedStagedModel.getModifiedDate(),
 			DateUtil.equals(
 				stagedModel.getModifiedDate(),
-				importedStagedModel.getModifiedDate(), true));
+				importedStagedModel.getModifiedDate()));
 		Assert.assertEquals(
 			stagedModel.getUuid(), importedStagedModel.getUuid());
 	}

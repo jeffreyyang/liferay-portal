@@ -6,7 +6,7 @@
 		<execute function="AssertClick" locator1="Categories#VOCABULARY_ENTRY_LINK" value1="${vocabularyName}" />
 		<execute function="Pause" locator1="1000" />
 
-		<var name="key_assetEntry" value="${categoryName}" />
+		<var name="key_listEntry" value="${categoryName}" />
 
 		<execute function="Click" locator1="Icon#LIST_VERTICAL_ELLIPSIS" />
 		<execute function="AssertClick" locator1="MenuItem#ADD_SUBCATEGORY" value1="Add Subcategory" />
@@ -18,7 +18,7 @@
 		<if>
 			<isset var="subcategoryDescription" />
 			<then>
-				<execute function="Type" locator1="CPCategoriesAddSubcategory#DESCRIPTION_FIELD" value1="${subcategoryDescription}" />
+				<execute function="Type" locator1="TextArea#DESCRIPTION" value1="${subcategoryDescription}" />
 			</then>
 		</if>
 
@@ -33,7 +33,7 @@
 
 		<execute function="AssertClick" locator1="Categories#VOCABULARY_ENTRY_LINK" value1="${vocabularyName}" />
 
-		<var name="key_assetEntry" value="${categoryName}" />
+		<var name="key_listEntry" value="${categoryName}" />
 
 		<execute function="Click" locator1="Icon#LIST_VERTICAL_ELLIPSIS" />
 		<execute function="AssertClick" locator1="MenuItem#ADD_SUBCATEGORY" value1="Add Subcategory" />
@@ -49,7 +49,7 @@
 
 		<execute function="AssertClick" locator1="Categories#VOCABULARY_ENTRY_LINK" value1="${vocabularyName}" />
 
-		<var name="key_assetEntry" value="${categoryName}" />
+		<var name="key_listEntry" value="${categoryName}" />
 
 		<execute function="Click" locator1="Icon#LIST_VERTICAL_ELLIPSIS" />
 		<execute function="AssertClick" locator1="MenuItem#ADD_SUBCATEGORY" value1="Add Subcategory" />
@@ -100,7 +100,7 @@
 
 		<execute function="AssertClick" locator1="Categories#CATEGORY_ENTRY_LINK" value1="${categoryName}" />
 
-		<var name="key_assetEntry" value="${subcategoryName}" />
+		<var name="key_listEntry" value="${subcategoryName}" />
 
 		<execute function="Click" locator1="Icon#LIST_VERTICAL_ELLIPSIS" />
 		<execute function="AssertClickNoError" locator1="MenuItem#DELETE" value1="Delete" />
@@ -118,12 +118,12 @@
 
 		<execute function="AssertClick" locator1="Categories#CATEGORY_ENTRY_LINK" value1="${categoryName}" />
 
-		<var name="key_assetEntry" value="${subcategoryName}" />
+		<var name="key_listEntry" value="${subcategoryName}" />
 
 		<execute function="Click" locator1="Icon#LIST_VERTICAL_ELLIPSIS" />
 		<execute function="AssertClick" locator1="MenuItem#EDIT" value1="Edit" />
 
-		<execute function="Type" locator1="CPCategoriesEditSubcategory#NAME_FIELD" value1="${subcategoryNameEdit}" />
+		<execute function="Type" locator1="TextInput#TITLE" value1="${subcategoryNameEdit}" />
 		<execute function="AssertClick" locator1="Button#SAVE" value1="Save" />
 		<execute function="AssertTextEquals" locator1="Message#SUCCESS" value1="Your request completed successfully." />
 	</command>
@@ -137,7 +137,7 @@
 
 		<execute function="AssertClick" locator1="Categories#CATEGORY_ENTRY_LINK" value1="${categoryName}" />
 
-		<var name="key_assetEntry" value="${subcategoryName}" />
+		<var name="key_listEntry" value="${subcategoryName}" />
 
 		<execute function="Click" locator1="Icon#LIST_VERTICAL_ELLIPSIS" />
 
@@ -180,13 +180,13 @@
 
 		<execute function="Click" locator1="Categories#CATEGORY_ENTRY_LINK" />
 
-		<var name="key_assetEntry" value="${subcategoryName}" />
+		<var name="key_listEntry" value="${subcategoryName}" />
 
 		<execute function="Click" locator1="Icon#LIST_VERTICAL_ELLIPSIS" />
 		<execute function="AssertClick" locator1="MenuItem#EDIT" value1="Edit" />
 
-		<execute function="AssertTextEquals" locator1="CPCategoriesEditSubcategory#PROPERTIES_KEY_FIELD_DEFAULT" value1="${propertiesKeyField}" />
-		<execute function="AssertTextEquals" locator1="CPCategoriesEditSubcategory#PROPERTIES_VALUE_FIELD_DEFAULT" value1="${propertiesValueField}" />
+		<execute function="AssertTextEquals" locator1="CategoriesEditSubcategory#PROPERTIES_KEY_FIELD_DEFAULT" value1="${propertiesKeyField}" />
+		<execute function="AssertTextEquals" locator1="CategoriesEditSubcategory#PROPERTIES_VALUE_FIELD_DEFAULT" value1="${propertiesValueField}" />
 	</command>
 
 	<command name="viewCP">
@@ -227,7 +227,7 @@
 		<if>
 			<equals arg1="${nullResult}" arg2="true" />
 			<then>
-				<execute function="AssertTextEquals" locator1="Message#EMPTY_INFO" value1="There are no categories." />
+				<execute function="AssertTextEquals" locator1="Message#EMPTY_INFO" value1="There are no categories. You can add a category by clicking the plus button on the bottom right corner." />
 			</then>
 		</if>
 	</command>

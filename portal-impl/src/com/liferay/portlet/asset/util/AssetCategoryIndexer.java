@@ -15,6 +15,7 @@
 package com.liferay.portlet.asset.util;
 
 import com.liferay.portal.kernel.dao.orm.ActionableDynamicQuery;
+import com.liferay.portal.kernel.dao.orm.IndexableActionableDynamicQuery;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
@@ -56,7 +57,6 @@ public class AssetCategoryIndexer extends BaseIndexer<AssetCategory> {
 	public static final String CLASS_NAME = AssetCategory.class.getName();
 
 	public AssetCategoryIndexer() {
-		setCommitImmediately(true);
 		setDefaultSelectedFieldNames(
 			Field.ASSET_CATEGORY_ID, Field.COMPANY_ID, Field.GROUP_ID,
 			Field.UID);
@@ -224,22 +224,22 @@ public class AssetCategoryIndexer extends BaseIndexer<AssetCategory> {
 	protected void reindexCategories(final long companyId)
 		throws PortalException {
 
-		final ActionableDynamicQuery actionableDynamicQuery =
-			AssetCategoryLocalServiceUtil.getActionableDynamicQuery();
+		final IndexableActionableDynamicQuery indexableActionableDynamicQuery =
+			AssetCategoryLocalServiceUtil.getIndexableActionableDynamicQuery();
 
-		actionableDynamicQuery.setCompanyId(companyId);
-		actionableDynamicQuery.setPerformActionMethod(
-			new ActionableDynamicQuery.PerformActionMethod() {
+		indexableActionableDynamicQuery.setCompanyId(companyId);
+		indexableActionableDynamicQuery.setPerformActionMethod(
+			new ActionableDynamicQuery.PerformActionMethod<AssetCategory>() {
 
 				@Override
-				public void performAction(Object object) {
-					AssetCategory category = (AssetCategory)object;
+				public void performAction(AssetCategory category) {
 
 					try {
 						Document document = getDocument(category);
 
 						if (document != null) {
-							actionableDynamicQuery.addDocument(document);
+							indexableActionableDynamicQuery.addDocuments(
+								document);
 						}
 					}
 					catch (PortalException pe) {
@@ -253,9 +253,9 @@ public class AssetCategoryIndexer extends BaseIndexer<AssetCategory> {
 				}
 
 			});
-		actionableDynamicQuery.setSearchEngineId(getSearchEngineId());
+		indexableActionableDynamicQuery.setSearchEngineId(getSearchEngineId());
 
-		actionableDynamicQuery.performActions();
+		indexableActionableDynamicQuery.performActions();
 	}
 
 	private static final Log _log = LogFactoryUtil.getLog(

@@ -101,6 +101,8 @@ public interface UserGroupGroupRoleLocalService extends BaseLocalService,
 		com.liferay.portal.service.persistence.UserGroupGroupRolePK userGroupGroupRolePK)
 		throws PortalException;
 
+	public void deleteUserGroupGroupRoles(long groupId, int roleType);
+
 	public void deleteUserGroupGroupRoles(long userGroupId, long groupId,
 		long[] roleIds);
 
@@ -189,12 +191,15 @@ public interface UserGroupGroupRoleLocalService extends BaseLocalService,
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 	public com.liferay.portal.kernel.dao.orm.ActionableDynamicQuery getActionableDynamicQuery();
 
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+	public com.liferay.portal.kernel.dao.orm.IndexableActionableDynamicQuery getIndexableActionableDynamicQuery();
+
 	/**
-	* Returns the Spring bean ID for this bean.
+	* Returns the OSGi service identifier.
 	*
-	* @return the Spring bean ID for this bean
+	* @return the OSGi service identifier
 	*/
-	public java.lang.String getBeanIdentifier();
+	public java.lang.String getOSGiServiceIdentifier();
 
 	@Override
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
@@ -259,13 +264,6 @@ public interface UserGroupGroupRoleLocalService extends BaseLocalService,
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 	public boolean hasUserGroupGroupRole(long userGroupId, long groupId,
 		java.lang.String roleName) throws PortalException;
-
-	/**
-	* Sets the Spring bean ID for this bean.
-	*
-	* @param beanIdentifier the Spring bean ID for this bean
-	*/
-	public void setBeanIdentifier(java.lang.String beanIdentifier);
 
 	/**
 	* Updates the user group group role in the database or adds it if it does not yet exist. Also notifies the appropriate model listeners.

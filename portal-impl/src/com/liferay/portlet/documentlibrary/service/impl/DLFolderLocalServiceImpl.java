@@ -24,6 +24,8 @@ import com.liferay.portal.kernel.lock.InvalidLockException;
 import com.liferay.portal.kernel.lock.Lock;
 import com.liferay.portal.kernel.lock.LockManagerUtil;
 import com.liferay.portal.kernel.lock.NoSuchLockException;
+import com.liferay.portal.kernel.log.Log;
+import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.repository.event.RepositoryEventTrigger;
 import com.liferay.portal.kernel.repository.event.RepositoryEventType;
 import com.liferay.portal.kernel.repository.model.Folder;
@@ -51,7 +53,7 @@ import com.liferay.portal.repository.liferayrepository.model.LiferayFolder;
 import com.liferay.portal.service.ServiceContext;
 import com.liferay.portal.service.permission.ModelPermissions;
 import com.liferay.portal.util.RepositoryUtil;
-import com.liferay.portlet.documentlibrary.DuplicateFileException;
+import com.liferay.portlet.documentlibrary.DuplicateFileEntryException;
 import com.liferay.portlet.documentlibrary.DuplicateFolderNameException;
 import com.liferay.portlet.documentlibrary.FolderNameException;
 import com.liferay.portlet.documentlibrary.InvalidFolderException;
@@ -598,7 +600,11 @@ public class DLFolderLocalServiceImpl extends DLFolderLocalServiceBaseImpl {
 		long groupId, long parentFolderId, int status,
 		boolean includeMountfolders) {
 
-		if (includeMountfolders) {
+		if (status == WorkflowConstants.STATUS_ANY) {
+			return getFoldersCount(
+				groupId, parentFolderId, includeMountfolders);
+		}
+		else if (includeMountfolders) {
 			return dlFolderPersistence.countByG_P_H_S(
 				groupId, parentFolderId, false, status);
 		}
@@ -715,6 +721,30 @@ public class DLFolderLocalServiceImpl extends DLFolderLocalServiceBaseImpl {
 	public boolean hasFolderLock(long userId, long folderId) {
 		return LockManagerUtil.hasLock(
 			userId, DLFolder.class.getName(), folderId);
+	}
+
+	@Override
+	public boolean hasInheritableLock(long folderId) throws PortalException {
+		boolean inheritable = false;
+
+		try {
+			Lock lock = LockManagerUtil.getLock(
+				DLFolder.class.getName(), folderId);
+
+			inheritable = lock.isInheritable();
+		}
+		catch (ExpiredLockException ele) {
+			if (_log.isDebugEnabled()) {
+				_log.debug(ele, ele);
+			}
+		}
+		catch (NoSuchLockException nsle) {
+			if (_log.isDebugEnabled()) {
+				_log.debug(nsle, nsle);
+			}
+		}
+
+		return inheritable;
 	}
 
 	@Override
@@ -879,13 +909,7 @@ public class DLFolderLocalServiceImpl extends DLFolderLocalServiceBaseImpl {
 					throw new InvalidLockException("UUIDs do not match");
 				}
 			}
-			catch (PortalException pe) {
-				if (pe instanceof ExpiredLockException ||
-					pe instanceof NoSuchLockException) {
-				}
-				else {
-					throw pe;
-				}
+			catch (ExpiredLockException | NoSuchLockException e) {
 			}
 		}
 
@@ -1121,7 +1145,8 @@ public class DLFolderLocalServiceImpl extends DLFolderLocalServiceBaseImpl {
 					RESTRICTION_TYPE_FILE_ENTRY_TYPES_AND_WORKFLOW) &&
 			fileEntryTypeIds.isEmpty()) {
 
-			throw new RequiredFileEntryTypeException();
+			throw new RequiredFileEntryTypeException(
+				"File entry type IDs is empty");
 		}
 
 		boolean hasLock = hasFolderLock(userId, folderId);
@@ -1267,6 +1292,31 @@ public class DLFolderLocalServiceImpl extends DLFolderLocalServiceBaseImpl {
 		}
 
 		return dlFolder;
+	}
+
+	@Override
+	public boolean verifyInheritableLock(long folderId, String lockUuid)
+		throws PortalException {
+
+		boolean verified = false;
+
+		try {
+			Lock lock = LockManagerUtil.getLock(
+				DLFolder.class.getName(), folderId);
+
+			if (!lock.isInheritable()) {
+				throw new NoSuchLockException("{folderId=" + folderId + "}");
+			}
+
+			if (lock.getUuid().equals(lockUuid)) {
+				verified = true;
+			}
+		}
+		catch (ExpiredLockException ele) {
+			throw new NoSuchLockException(ele);
+		}
+
+		return verified;
 	}
 
 	protected void addFolderResources(
@@ -1505,7 +1555,7 @@ public class DLFolderLocalServiceImpl extends DLFolderLocalServiceBaseImpl {
 			groupId, parentFolderId, name);
 
 		if (dlFileEntry != null) {
-			throw new DuplicateFileException(name);
+			throw new DuplicateFileEntryException(name);
 		}
 
 		DLFolder dlFolder = dlFolderPersistence.fetchByG_P_N(
@@ -1532,5 +1582,8 @@ public class DLFolderLocalServiceImpl extends DLFolderLocalServiceBaseImpl {
 			throw new FolderNameException(folderName);
 		}
 	}
+
+	private static final Log _log = LogFactoryUtil.getLog(
+		DLFolderLocalServiceImpl.class);
 
 }

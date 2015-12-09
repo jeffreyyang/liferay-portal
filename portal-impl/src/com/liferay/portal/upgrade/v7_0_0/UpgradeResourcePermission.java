@@ -14,12 +14,10 @@
 
 package com.liferay.portal.upgrade.v7_0_0;
 
-import com.liferay.portal.kernel.dao.jdbc.DataAccess;
 import com.liferay.portal.kernel.upgrade.UpgradeProcess;
 import com.liferay.portal.kernel.util.GetterUtil;
-import com.liferay.portal.kernel.util.StringBundler;
+import com.liferay.portal.upgrade.AutoBatchPreparedStatementUtil;
 
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
@@ -30,18 +28,17 @@ public class UpgradeResourcePermission extends UpgradeProcess {
 
 	@Override
 	protected void doUpgrade() throws Exception {
-		Connection con = null;
-		PreparedStatement ps = null;
-		ResultSet rs = null;
+		String selectSQL =
+			"select resourcePermissionId, primKey, primKeyId, actionIds, " +
+				"viewActionId from ResourcePermission";
+		String updateSQL =
+			"update ResourcePermission set primKeyId = ?, viewActionId = ? " +
+				"where resourcePermissionId = ?";
 
-		try {
-			con = DataAccess.getUpgradeOptimizedConnection();
-
-			ps = con.prepareStatement(
-				"select resourcePermissionId, primKey, primKeyId, actionIds, " +
-					"viewActionId from ResourcePermission");
-
-			rs = ps.executeQuery();
+		try (PreparedStatement ps1 = connection.prepareStatement(selectSQL);
+			ResultSet rs = ps1.executeQuery();
+			PreparedStatement ps2 = AutoBatchPreparedStatementUtil.autoBatch(
+				connection.prepareStatement(updateSQL))) {
 
 			while (rs.next()) {
 				long resourcePermissionId = rs.getLong("resourcePermissionId");
@@ -58,27 +55,21 @@ public class UpgradeResourcePermission extends UpgradeProcess {
 					continue;
 				}
 
-				StringBundler sb = new StringBundler(6);
-
-				sb.append("update ResourcePermission set primKeyId = ");
-				sb.append(newPrimKeyId);
-				sb.append(", viewActionId = ");
+				ps2.setLong(1, newPrimKeyId);
 
 				if (newViewActionId) {
-					sb.append("[$TRUE$]");
+					ps2.setBoolean(2, true);
 				}
 				else {
-					sb.append("[$FALSE$]");
+					ps2.setBoolean(2, false);
 				}
 
-				sb.append(" where resourcePermissionId = ");
-				sb.append(resourcePermissionId);
+				ps2.setLong(3, resourcePermissionId);
 
-				runSQL(sb.toString());
+				ps2.addBatch();
 			}
-		}
-		finally {
-			DataAccess.cleanUp(con, ps, rs);
+
+			ps2.executeBatch();
 		}
 	}
 

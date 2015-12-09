@@ -49,64 +49,78 @@ import org.junit.runner.Description;
  * @author Shuyang Zhou
  */
 public class SynchronousDestinationTestCallback
-	extends BaseTestCallback<SyncHandler, SyncHandler> {
+	implements TestCallback<SyncHandler, SyncHandler> {
 
 	public static final SynchronousDestinationTestCallback INSTANCE =
 		new SynchronousDestinationTestCallback();
 
 	@Override
-	public void doAfterMethod(
+	public void afterClass(Description description, SyncHandler syncHandler)
+		throws Exception {
+
+		if (syncHandler != null) {
+			syncHandler.restorePreviousSync();
+		}
+	}
+
+	@Override
+	public void afterMethod(
 		Description description, SyncHandler syncHandler, Object target) {
 
-		syncHandler.restorePreviousSync();
+		if (syncHandler != null) {
+			syncHandler.restorePreviousSync();
+		}
 	}
 
 	@Override
-	public SyncHandler doBeforeClass(Description description) throws Throwable {
+	public SyncHandler beforeClass(Description description) throws Throwable {
 		Class<?> testClass = description.getTestClass();
 
-		if (testClass.getAnnotation(Sync.class) == null) {
-			boolean hasSyncedMethod = false;
+		Sync sync = testClass.getAnnotation(Sync.class);
 
-			for (Method method : testClass.getMethods()) {
-				if ((method.getAnnotation(Sync.class) != null) &&
-					(method.getAnnotation(Test.class) != null)) {
+		if (sync != null) {
+			return _createSyncHandler(sync);
+		}
 
-					hasSyncedMethod = true;
+		boolean hasSyncedMethod = false;
 
-					break;
-				}
-			}
+		for (Method method : testClass.getMethods()) {
+			if ((method.getAnnotation(Sync.class) != null) &&
+				(method.getAnnotation(Test.class) != null)) {
 
-			if (!hasSyncedMethod) {
-				throw new AssertionError(
-					testClass + " uses " +
-						SynchronousDestinationTestRule.class +
-							" without any usage of " + Sync.class);
+				hasSyncedMethod = true;
+
+				break;
 			}
 		}
 
-		return super.doBeforeClass(description);
+		if (!hasSyncedMethod) {
+			throw new AssertionError(
+				testClass.getName() + " uses " +
+					SynchronousDestinationTestRule.class.getName() +
+						" without any usage of " + Sync.class.getName());
+		}
+
+		return null;
 	}
 
 	@Override
-	public SyncHandler doBeforeMethod(Description description, Object target) {
-		Sync sync = description.getAnnotation(Sync.class);
+	public SyncHandler beforeMethod(Description description, Object target) {
+		Class<?> testClass = description.getTestClass();
 
-		if (sync == null) {
-			Class<?> testClass = description.getTestClass();
+		Sync sync = testClass.getAnnotation(Sync.class);
 
-			sync = testClass.getAnnotation(Sync.class);
+		if (sync != null) {
+			return null;
 		}
 
-		SyncHandler syncHandler = new SyncHandler();
+		sync = description.getAnnotation(Sync.class);
 
-		syncHandler.setForceSync(ProxyModeThreadLocal.isForceSync());
-		syncHandler.setSync(sync);
+		if (sync == null) {
+			return null;
+		}
 
-		syncHandler.enableSync();
-
-		return syncHandler;
+		return _createSyncHandler(sync);
 	}
 
 	public static class SyncHandler {
@@ -242,6 +256,17 @@ public class SynchronousDestinationTestCallback
 	}
 
 	protected SynchronousDestinationTestCallback() {
+	}
+
+	private SyncHandler _createSyncHandler(Sync sync) {
+		SyncHandler syncHandler = new SyncHandler();
+
+		syncHandler.setForceSync(ProxyModeThreadLocal.isForceSync());
+		syncHandler.setSync(sync);
+
+		syncHandler.enableSync();
+
+		return syncHandler;
 	}
 
 	private static final TransactionAttribute _transactionAttribute;

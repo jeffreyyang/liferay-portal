@@ -1,13 +1,12 @@
 dependencies {
-	compile group: "org.osgi", name: "org.osgi.compendium", version: "5.0.0"
-	compile group: "org.osgi", name: "org.osgi.core", version: "5.0.0"
 	compile project(":apps:application-list:application-list-api")
 	compile project(":apps:application-list:application-list-taglib")
+	compile project(":apps:product-navigation:product-navigation-product-menu-web")
 }
 
 deploy {
 	from("lib") {
-		include "com.liferay.osgi.service.tracker.map.jar"
+		include "com.liferay.osgi.service.tracker.collections.jar"
 	}
 }
 

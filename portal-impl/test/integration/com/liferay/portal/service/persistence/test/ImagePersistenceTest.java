@@ -39,6 +39,7 @@ import com.liferay.portal.test.rule.PersistenceTestRule;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -55,8 +56,9 @@ import java.util.Set;
  * @generated
  */
 public class ImagePersistenceTest {
+	@ClassRule
 	@Rule
-	public final AggregateTestRule aggregateTestRule = new AggregateTestRule(new LiferayIntegrationTestRule(),
+	public static final AggregateTestRule aggregateTestRule = new AggregateTestRule(new LiferayIntegrationTestRule(),
 			PersistenceTestRule.INSTANCE,
 			new TransactionalTestRule(Propagation.REQUIRED));
 
@@ -115,6 +117,8 @@ public class ImagePersistenceTest {
 
 		newImage.setMvccVersion(RandomTestUtil.nextLong());
 
+		newImage.setCompanyId(RandomTestUtil.nextLong());
+
 		newImage.setModifiedDate(RandomTestUtil.nextDate());
 
 		newImage.setType(RandomTestUtil.randomString());
@@ -132,6 +136,8 @@ public class ImagePersistenceTest {
 		Assert.assertEquals(existingImage.getMvccVersion(),
 			newImage.getMvccVersion());
 		Assert.assertEquals(existingImage.getImageId(), newImage.getImageId());
+		Assert.assertEquals(existingImage.getCompanyId(),
+			newImage.getCompanyId());
 		Assert.assertEquals(Time.getShortTimestamp(
 				existingImage.getModifiedDate()),
 			Time.getShortTimestamp(newImage.getModifiedDate()));
@@ -172,8 +178,8 @@ public class ImagePersistenceTest {
 
 	protected OrderByComparator<Image> getOrderByComparator() {
 		return OrderByComparatorFactoryUtil.create("Image", "mvccVersion",
-			true, "imageId", true, "modifiedDate", true, "type", true,
-			"height", true, "width", true, "size", true);
+			true, "imageId", true, "companyId", true, "modifiedDate", true,
+			"type", true, "height", true, "width", true, "size", true);
 	}
 
 	@Test
@@ -278,11 +284,9 @@ public class ImagePersistenceTest {
 
 		ActionableDynamicQuery actionableDynamicQuery = ImageLocalServiceUtil.getActionableDynamicQuery();
 
-		actionableDynamicQuery.setPerformActionMethod(new ActionableDynamicQuery.PerformActionMethod() {
+		actionableDynamicQuery.setPerformActionMethod(new ActionableDynamicQuery.PerformActionMethod<Image>() {
 				@Override
-				public void performAction(Object object) {
-					Image image = (Image)object;
-
+				public void performAction(Image image) {
 					Assert.assertNotNull(image);
 
 					count.increment();
@@ -372,6 +376,8 @@ public class ImagePersistenceTest {
 		Image image = _persistence.create(pk);
 
 		image.setMvccVersion(RandomTestUtil.nextLong());
+
+		image.setCompanyId(RandomTestUtil.nextLong());
 
 		image.setModifiedDate(RandomTestUtil.nextDate());
 

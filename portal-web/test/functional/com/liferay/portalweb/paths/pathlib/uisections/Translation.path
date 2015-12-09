@@ -10,7 +10,7 @@
 <tbody>
 <tr>
 	<td>ADD</td>
-	<td>//div[contains(@class,'translation-manager')]/a[@title='Add Translation']</td>
+	<td>//div[contains(@class,'translation-manager')]//a[contains(@class,'dropdown-toggle')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -20,7 +20,7 @@
 </tr>
 <tr>
 	<td>AVAILABLE_TRANSLATION</td>
-	<td>//div[contains(@class,'available-translations')]/span[contains(.,'${key_localizedLanguage}')]/span</td>
+	<td>//div[contains(@class,'available-translations')]/span/span[contains(.,'${key_localizedLanguage}')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -31,6 +31,16 @@
 <tr>
 	<td>AVAILABLE_TRANSLATIONS_LINK</td>
 	<td>//span[contains(@class,'translation-editing') and contains(.,'${key_localizedLanguage}')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>CHANGE_DEFAULT_LANGUAGE</td>
+	<td>//a[contains(@class,'change') and contains(@class,'locale')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>DEFAULT_LANGUAGE_SELECT</td>
+	<td>//select[contains(@class,'default-locale')]</td>
 	<td></td>
 </tr>
 <tr>

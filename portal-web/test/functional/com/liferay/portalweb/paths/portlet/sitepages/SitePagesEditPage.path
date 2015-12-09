@@ -10,11 +10,6 @@
 <tbody>
 <!--DETAILS-->
 <tr>
-	<td>DETAILS_PANEL_TOGGLE</td>
-	<td>//input[contains(@id,'GroupPagesPortlet')]</td>
-	<td></td>
-</tr>
-<tr>
 	<td>LOCALIZED_FLAG_ICON</td>
 	<td>//li[@role='menuitem' and @data-value='${key_localizationName}']/a</td>
 	<td></td>
@@ -51,7 +46,7 @@
 </tr>
 <tr>
 	<td>LAYOUT_RADIO</td>
-	<td>//input[@value='${columnName}']</td>
+	<td>//input[@value='${key_columnName}']</td>
 	<td></td>
 </tr>
 <tr>
@@ -121,17 +116,17 @@
 </tr>
 <tr>
 	<td>PAGE_TYPE_EMBEDDED_DESCRIPTION_FIELD</td>
-	<td>//textarea[contains(@id,'_descriptionEmbedded')]</td>
+	<td>//li[@data-search='Embedded']//div[contains(@class,'page-template-description')]</td>
 	<td></td>
 </tr>
 <tr>
 	<td>PAGE_TYPE_LINK_TO_URL_URL_FIELD</td>
-	<td>//input[contains(@id,'url')]</td>
+	<td>//input[contains(@id,'GroupPagesPortlet_url')]</td>
 	<td></td>
 </tr>
 <tr>
 	<td>PAGE_TYPE_LINK_TO_URL_DESCRIPTION_FIELD</td>
-	<td>//textarea[contains(@id,'descriptionUrl')]</td>
+	<td>//li[@data-search='Link to URL']//div[contains(@class,'page-template-description')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -152,7 +147,7 @@
 <!--CATEGORIZATION-->
 <tr>
 	<td>CATEGORIZATION_PANEL_TOGGLE</td>
-	<td>//a[contains(@id,'categorization')]</td>
+	<td>//li/a[contains(@id,'categorization')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -194,7 +189,7 @@
 <!--LOOK_AND_FEEL-->
 <tr>
 	<td>LOOK_AND_FEEL_PANEL_TOGGLE</td>
-	<td>//div[contains(@id,'LookAndFeel')]/div</td>
+	<td>//li/a[contains(@id,'lookAndFeel')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -205,7 +200,7 @@
 <!--JAVASCRIPT-->
 <tr>
 	<td>JAVASCRIPT_PANEL_TOGGLE</td>
-	<td>//div[contains(@id,'javascript')]//textarea</td>
+	<td>//li/a[contains(@id,'javascript')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -216,7 +211,7 @@
 <!--CUSTOM_FIELDS-->
 <tr>
 	<td>CUSTOM_FIELDS_PANEL_TOGGLE</td>
-	<td>//div[contains(@id,'customFields')]/div</td>
+	<td>//li/a[contains(@id,'customFields')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -227,7 +222,7 @@
 <!--ADVANCED_PANEL-->
 <tr>
 	<td>ADVANCED_PANEL_TOGGLE</td>
-	<td>//div[contains(@id,'advanced')]/div</td>
+	<td>//li/a[contains(@id,'advanced')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -238,7 +233,7 @@
 <!--MOBILE_DEVICE_RULES-->
 <tr>
 	<td>MOBILE_DEVICE_RULES_PANEL_TOGGLE</td>
-	<td>//div[contains(@id,'mobileDeviceRules')]/div</td>
+	<td>//li/a[contains(@id,'mobileDeviceRules')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -249,17 +244,17 @@
 <!--EMBEDDED_PORTLETS-->
 <tr>
 	<td>EMBEDDED_PORTLETS_PANEL_TOGGLE</td>
-	<td>//div[contains(@id,'embeddedPortlets')]/div</td>
+	<td>//li/a[contains(@id,'embeddedPortlets')]</td>
 	<td></td>
 </tr>
 <tr>
 	<td>EMBEDDED_PORTLETS_CHECKBOX_1</td>
-	<td>//div[contains(@id,'embeddedPortlets')]//tbody/tr[1]/td[1]/input</td>
+	<td>//div[contains(@id,'embeddedPortlets')]//tbody/tr[1]/td[1]//input</td>
 	<td></td>
 </tr>
 <tr>
 	<td>EMBEDDED_PORTLETS_CHECKBOX_2</td>
-	<td>//div[contains(@id,'embeddedPortlets')]//tbody/tr[2]/td[1]/input</td>
+	<td>//div[contains(@id,'embeddedPortlets')]//tbody/tr[2]/td[1]//input</td>
 	<td></td>
 </tr>
 <tr>
@@ -300,7 +295,7 @@
 <!--CUSTOMIZATION_SETTINGS-->
 <tr>
 	<td>CUSTOMIZATION_SETTINGS_PANEL_TOGGLE</td>
-	<td>//a[contains(@id,'customizationSettings')]</td>
+	<td>//li/a[contains(@id,'customizationSettings')]</td>
 	<td></td>
 </tr>
 <tr>

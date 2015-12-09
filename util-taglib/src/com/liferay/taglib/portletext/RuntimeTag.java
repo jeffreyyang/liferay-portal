@@ -35,7 +35,6 @@ import com.liferay.portal.model.Layout;
 import com.liferay.portal.model.LayoutTypePortlet;
 import com.liferay.portal.model.Portlet;
 import com.liferay.portal.model.PortletInstance;
-import com.liferay.portal.model.PortletPreferencesIds;
 import com.liferay.portal.security.permission.ActionKeys;
 import com.liferay.portal.service.PortletLocalServiceUtil;
 import com.liferay.portal.service.PortletPreferencesLocalServiceUtil;
@@ -49,8 +48,6 @@ import com.liferay.taglib.servlet.PipingServletResponse;
 import com.liferay.taglib.util.PortalIncludeUtil;
 
 import java.util.Map;
-
-import javax.portlet.PortletPreferences;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -205,30 +202,34 @@ public class RuntimeTag extends TagSupport {
 
 			Layout layout = themeDisplay.getLayout();
 
-			request.setAttribute(WebKeys.PORTLET_DECORATE, false);
-
 			Portlet portlet = getPortlet(
 				themeDisplay.getCompanyId(),
 				portletInstance.getPortletInstanceKey());
-
-			PortletPreferences renderPortletPreferences =
-				getRenderPortletPreferences(
-					themeDisplay, settingsScope, portlet, defaultPreferences);
-
-			if (renderPortletPreferences != null) {
-				request.setAttribute(
-					WebKeys.RENDER_PORTLET_PREFERENCES,
-					renderPortletPreferences);
-			}
 
 			request.setAttribute(WebKeys.SETTINGS_SCOPE, settingsScope);
 
 			JSONObject jsonObject = null;
 
-			if ((PortletPreferencesLocalServiceUtil.getPortletPreferencesCount(
+			boolean writeJSONObject = false;
+
+			if (PortletPreferencesLocalServiceUtil.getPortletPreferencesCount(
+					themeDisplay.getScopeGroupId(),
+					PortletKeys.PREFS_OWNER_TYPE_LAYOUT,
+					PortletKeys.PREFS_PLID_SHARED, portlet, false) < 1) {
+
+				PortletPreferencesFactoryUtil.getLayoutPortletSetup(
+					themeDisplay.getCompanyId(), themeDisplay.getScopeGroupId(),
+					PortletKeys.PREFS_OWNER_TYPE_LAYOUT,
+					PortletKeys.PREFS_PLID_SHARED,
+					portletInstance.getPortletInstanceKey(),
+					defaultPreferences);
+
+				writeJSONObject = true;
+			}
+
+			if (PortletPreferencesLocalServiceUtil.getPortletPreferencesCount(
 					PortletKeys.PREFS_OWNER_TYPE_LAYOUT, themeDisplay.getPlid(),
-					portletInstance.getPortletInstanceKey()) < 1) ||
-				layout.isTypeControlPanel() || layout.isTypePanel()) {
+					portletInstance.getPortletInstanceKey()) < 1) {
 
 				PortletPreferencesFactoryUtil.getLayoutPortletSetup(
 					layout, portletInstance.getPortletInstanceKey(),
@@ -246,6 +247,10 @@ public class RuntimeTag extends TagSupport {
 						themeDisplay.getPlid());
 				}
 
+				writeJSONObject = true;
+			}
+
+			if (writeJSONObject) {
 				jsonObject = JSONFactoryUtil.createJSONObject();
 
 				PortletJSONUtil.populatePortletJSONObject(
@@ -354,34 +359,6 @@ public class RuntimeTag extends TagSupport {
 		portlet.setStatic(true);
 
 		return portlet;
-	}
-
-	protected static PortletPreferences getRenderPortletPreferences(
-		ThemeDisplay themeDisplay, String settingsScope, Portlet portlet,
-		String defaultPreferences) {
-
-		PortletPreferencesIds portletPreferencesIds =
-			PortletPreferencesFactoryUtil.getPortletPreferencesIds(
-				themeDisplay.getCompanyId(), themeDisplay.getSiteGroupId(),
-				themeDisplay.getPlid(), portlet.getPortletId(), settingsScope);
-
-		if (PortletPreferencesLocalServiceUtil.getPortletPreferencesCount(
-				portletPreferencesIds.getOwnerId(),
-				portletPreferencesIds.getOwnerType(),
-				portletPreferencesIds.getPlid(), portlet, true) > 0) {
-
-			return PortletPreferencesLocalServiceUtil.getPreferences(
-				themeDisplay.getCompanyId(), portletPreferencesIds.getOwnerId(),
-				portletPreferencesIds.getOwnerType(),
-				portletPreferencesIds.getPlid(), portlet.getPortletId());
-		}
-
-		if (Validator.isNotNull(defaultPreferences)) {
-			return PortletPreferencesFactoryUtil.fromDefaultXML(
-				defaultPreferences);
-		}
-
-		return null;
 	}
 
 	private static final String _ERROR_PAGE =

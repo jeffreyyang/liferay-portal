@@ -41,6 +41,7 @@ import com.liferay.portlet.announcements.service.persistence.AnnouncementsFlagUt
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -57,8 +58,9 @@ import java.util.Set;
  * @generated
  */
 public class AnnouncementsFlagPersistenceTest {
+	@ClassRule
 	@Rule
-	public final AggregateTestRule aggregateTestRule = new AggregateTestRule(new LiferayIntegrationTestRule(),
+	public static final AggregateTestRule aggregateTestRule = new AggregateTestRule(new LiferayIntegrationTestRule(),
 			PersistenceTestRule.INSTANCE,
 			new TransactionalTestRule(Propagation.REQUIRED));
 
@@ -115,6 +117,8 @@ public class AnnouncementsFlagPersistenceTest {
 
 		AnnouncementsFlag newAnnouncementsFlag = _persistence.create(pk);
 
+		newAnnouncementsFlag.setCompanyId(RandomTestUtil.nextLong());
+
 		newAnnouncementsFlag.setUserId(RandomTestUtil.nextLong());
 
 		newAnnouncementsFlag.setCreateDate(RandomTestUtil.nextDate());
@@ -129,6 +133,8 @@ public class AnnouncementsFlagPersistenceTest {
 
 		Assert.assertEquals(existingAnnouncementsFlag.getFlagId(),
 			newAnnouncementsFlag.getFlagId());
+		Assert.assertEquals(existingAnnouncementsFlag.getCompanyId(),
+			newAnnouncementsFlag.getCompanyId());
 		Assert.assertEquals(existingAnnouncementsFlag.getUserId(),
 			newAnnouncementsFlag.getUserId());
 		Assert.assertEquals(Time.getShortTimestamp(
@@ -179,8 +185,8 @@ public class AnnouncementsFlagPersistenceTest {
 
 	protected OrderByComparator<AnnouncementsFlag> getOrderByComparator() {
 		return OrderByComparatorFactoryUtil.create("AnnouncementsFlag",
-			"flagId", true, "userId", true, "createDate", true, "entryId",
-			true, "value", true);
+			"flagId", true, "companyId", true, "userId", true, "createDate",
+			true, "entryId", true, "value", true);
 	}
 
 	@Test
@@ -289,11 +295,9 @@ public class AnnouncementsFlagPersistenceTest {
 
 		ActionableDynamicQuery actionableDynamicQuery = AnnouncementsFlagLocalServiceUtil.getActionableDynamicQuery();
 
-		actionableDynamicQuery.setPerformActionMethod(new ActionableDynamicQuery.PerformActionMethod() {
+		actionableDynamicQuery.setPerformActionMethod(new ActionableDynamicQuery.PerformActionMethod<AnnouncementsFlag>() {
 				@Override
-				public void performAction(Object object) {
-					AnnouncementsFlag announcementsFlag = (AnnouncementsFlag)object;
-
+				public void performAction(AnnouncementsFlag announcementsFlag) {
 					Assert.assertNotNull(announcementsFlag);
 
 					count.increment();
@@ -402,6 +406,8 @@ public class AnnouncementsFlagPersistenceTest {
 		long pk = RandomTestUtil.nextLong();
 
 		AnnouncementsFlag announcementsFlag = _persistence.create(pk);
+
+		announcementsFlag.setCompanyId(RandomTestUtil.nextLong());
 
 		announcementsFlag.setUserId(RandomTestUtil.nextLong());
 

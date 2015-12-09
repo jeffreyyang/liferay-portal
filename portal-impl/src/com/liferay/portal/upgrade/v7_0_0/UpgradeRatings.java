@@ -21,12 +21,11 @@ import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.PropsKeys;
 import com.liferay.portal.kernel.util.StringBundler;
+import com.liferay.portal.upgrade.AutoBatchPreparedStatementUtil;
 import com.liferay.portal.util.PortalUtil;
 import com.liferay.portal.util.PropsUtil;
 import com.liferay.portal.util.PropsValues;
 
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
@@ -42,14 +41,11 @@ public class UpgradeRatings extends UpgradeProcess {
 	}
 
 	protected void upgradeRatingsEntry() throws Exception {
-		Connection con = null;
 		PreparedStatement ps = null;
 		ResultSet rs = null;
 
 		try {
-			con = DataAccess.getUpgradeOptimizedConnection();
-
-			ps = con.prepareStatement(
+			ps = connection.prepareStatement(
 				"select distinct classNameId from RatingsEntry");
 
 			rs = ps.executeQuery();
@@ -59,7 +55,7 @@ public class UpgradeRatings extends UpgradeProcess {
 			}
 		}
 		finally {
-			DataAccess.cleanUp(con, ps, rs);
+			DataAccess.cleanUp(ps, rs);
 		}
 	}
 
@@ -93,13 +89,10 @@ public class UpgradeRatings extends UpgradeProcess {
 			long classNameId, int normalizationFactor)
 		throws Exception {
 
-		Connection con = null;
 		PreparedStatement ps = null;
 
 		try {
-			con = DataAccess.getUpgradeOptimizedConnection();
-
-			ps = con.prepareStatement(
+			ps = connection.prepareStatement(
 				"update RatingsEntry set score = score / ? where classNameId " +
 					"= ?");
 
@@ -109,20 +102,17 @@ public class UpgradeRatings extends UpgradeProcess {
 			ps.executeUpdate();
 		}
 		finally {
-			DataAccess.cleanUp(con, ps);
+			DataAccess.cleanUp(ps);
 		}
 	}
 
 	protected void upgradeRatingsEntryThumbs(long classNameId)
 		throws Exception {
 
-		Connection con = null;
 		PreparedStatement ps = null;
 
 		try {
-			con = DataAccess.getUpgradeOptimizedConnection();
-
-			ps = con.prepareStatement(
+			ps = connection.prepareStatement(
 				"update RatingsEntry set score = ? where score = ? and " +
 					"classNameId = ?");
 
@@ -133,70 +123,40 @@ public class UpgradeRatings extends UpgradeProcess {
 			ps.executeUpdate();
 		}
 		finally {
-			DataAccess.cleanUp(con, ps);
+			DataAccess.cleanUp(ps);
 		}
 	}
 
 	protected void upgradeRatingsStats() throws Exception {
-		Connection con = null;
-		PreparedStatement ps = null;
-		ResultSet rs = null;
+		StringBundler sb = new StringBundler(4);
 
-		try {
-			con = DataAccess.getUpgradeOptimizedConnection();
+		sb.append("select classNameId, classPK, count(1) as totalEntries, ");
+		sb.append("sum(RatingsEntry.score) as totalScore, ");
+		sb.append("sum(RatingsEntry.score) / count(1) as averageScore from ");
+		sb.append("RatingsEntry group by classNameId, classPK");
 
-			DatabaseMetaData databaseMetaData = con.getMetaData();
+		String selectSQL = sb.toString();
 
-			boolean supportsBatchUpdates =
-				databaseMetaData.supportsBatchUpdates();
+		String updateSQL =
+			"update RatingsStats set totalEntries = ?, totalScore = ?, " +
+				"averageScore = ? where classNameId = ? and classPK = ?";
 
-			StringBundler sb = new StringBundler(4);
-
-			sb.append("select classNameId, classPK, count(1) as ");
-			sb.append("totalEntries, sum(RatingsEntry.score) as totalScore, ");
-			sb.append("sum(RatingsEntry.score) / count(1) as averageScore ");
-			sb.append("from RatingsEntry group by classNameId, classPK");
-
-			ps = con.prepareStatement(sb.toString());
-
-			rs = ps.executeQuery();
-
-			ps = con.prepareStatement(
-				"update RatingsStats set totalEntries = ?, totalScore = ?, " +
-					"averageScore = ? where classNameId = ? and classPK = ?");
-
-			int count = 0;
+		try (PreparedStatement ps1 = connection.prepareStatement(selectSQL);
+			ResultSet rs = ps1.executeQuery();
+			PreparedStatement ps2 = AutoBatchPreparedStatementUtil.autoBatch(
+				connection.prepareStatement(updateSQL))) {
 
 			while (rs.next()) {
-				ps.setInt(1, rs.getInt("totalEntries"));
-				ps.setDouble(2, rs.getDouble("totalScore"));
-				ps.setDouble(3, rs.getDouble("averageScore"));
-				ps.setLong(4, rs.getLong("classNameId"));
-				ps.setLong(5, rs.getLong("classPK"));
+				ps2.setInt(1, rs.getInt("totalEntries"));
+				ps2.setDouble(2, rs.getDouble("totalScore"));
+				ps2.setDouble(3, rs.getDouble("averageScore"));
+				ps2.setLong(4, rs.getLong("classNameId"));
+				ps2.setLong(5, rs.getLong("classPK"));
 
-				if (supportsBatchUpdates) {
-					ps.addBatch();
-
-					if (count == PropsValues.HIBERNATE_JDBC_BATCH_SIZE) {
-						ps.executeBatch();
-
-						count = 0;
-					}
-					else {
-						count++;
-					}
-				}
-				else {
-					ps.executeUpdate();
-				}
+				ps2.addBatch();
 			}
 
-			if (supportsBatchUpdates && (count > 0)) {
-				ps.executeBatch();
-			}
-		}
-		finally {
-			DataAccess.cleanUp(con, ps, rs);
+			ps2.executeBatch();
 		}
 	}
 

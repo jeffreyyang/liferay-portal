@@ -25,11 +25,16 @@
 </tr>
 <tr>
 	<td>SCRIPT_FIELD</td>
-	<td>//div[@class='palette-section' and contains(.,'Fields')]/ul/li/span[contains(.,'${key_fieldName}')]</td>
+	<td>//div[contains(@class,'palette-section') and contains(@id,'fields')]//ul/li/span[contains(.,'${key_fieldName}')]</td>
 	<td></td>
 </tr>
 <tr>
 	<td>SCRIPT_CONTENT_FIELD</td>
+	<td>//div[contains(@class,'ace_text-layer')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>SCRIPT_CONTENT_FIELD_TEXT_AREA</td>
 	<td>//div[contains(@id,'richEditor')]/textarea</td>
 	<td></td>
 </tr>
@@ -61,7 +66,7 @@
 </tr>
 <tr>
 	<td>DETAILS_STRUCTURE</td>
-	<td>//input[contains(@id,'structure')]</td>
+	<td>//input[contains(@id,'structure') and contains(@type,'text')]</td>
 	<td></td>
 </tr>
 <tr>

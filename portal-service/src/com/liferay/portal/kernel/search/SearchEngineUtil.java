@@ -87,9 +87,10 @@ public class SearchEngineUtil {
 
 		SearchContext searchContext = new SearchContext();
 
-		searchContext.setCommitImmediately(commitImmediately);
 		searchContext.setCompanyId(companyId);
 		searchContext.setSearchEngineId(searchEngineId);
+
+		setCommitImmediately(searchContext, commitImmediately);
 
 		indexWriter.addDocument(searchContext, document);
 	}
@@ -130,9 +131,10 @@ public class SearchEngineUtil {
 
 		SearchContext searchContext = new SearchContext();
 
-		searchContext.setCommitImmediately(commitImmediately);
 		searchContext.setCompanyId(companyId);
 		searchContext.setSearchEngineId(searchEngineId);
+
+		setCommitImmediately(searchContext, commitImmediately);
 
 		indexWriter.addDocuments(searchContext, documents);
 	}
@@ -164,6 +166,21 @@ public class SearchEngineUtil {
 		}
 	}
 
+	public static void commit(String searchEngineId, long companyId)
+		throws SearchException {
+
+		SearchEngine searchEngine = getSearchEngine(searchEngineId);
+
+		IndexWriter indexWriter = searchEngine.getIndexWriter();
+
+		SearchContext searchContext = new SearchContext();
+
+		searchContext.setCompanyId(companyId);
+		searchContext.setSearchEngineId(searchEngineId);
+
+		indexWriter.commit(searchContext);
+	}
+
 	/**
 	 * @deprecated As of 7.0.0, replaced by {@link #deleteDocument(String, long,
 	 *             String, boolean)}
@@ -191,9 +208,10 @@ public class SearchEngineUtil {
 
 		SearchContext searchContext = new SearchContext();
 
-		searchContext.setCommitImmediately(commitImmediately);
 		searchContext.setCompanyId(companyId);
 		searchContext.setSearchEngineId(searchEngineId);
+
+		setCommitImmediately(searchContext, commitImmediately);
 
 		indexWriter.deleteDocument(searchContext, uid);
 	}
@@ -225,9 +243,10 @@ public class SearchEngineUtil {
 
 		SearchContext searchContext = new SearchContext();
 
-		searchContext.setCommitImmediately(commitImmediately);
 		searchContext.setCompanyId(companyId);
 		searchContext.setSearchEngineId(searchEngineId);
+
+		setCommitImmediately(searchContext, commitImmediately);
 
 		indexWriter.deleteDocuments(searchContext, uids);
 	}
@@ -251,9 +270,10 @@ public class SearchEngineUtil {
 
 		SearchContext searchContext = new SearchContext();
 
-		searchContext.setCommitImmediately(commitImmediately);
 		searchContext.setCompanyId(companyId);
 		searchContext.setSearchEngineId(searchEngineId);
+
+		setCommitImmediately(searchContext, commitImmediately);
 
 		indexWriter.deleteEntityDocuments(searchContext, className);
 	}
@@ -593,9 +613,10 @@ public class SearchEngineUtil {
 
 		SearchContext searchContext = new SearchContext();
 
-		searchContext.setCommitImmediately(commitImmediately);
 		searchContext.setCompanyId(companyId);
 		searchContext.setSearchEngineId(searchEngineId);
+
+		setCommitImmediately(searchContext, commitImmediately);
 
 		indexWriter.partiallyUpdateDocument(searchContext, document);
 	}
@@ -623,9 +644,10 @@ public class SearchEngineUtil {
 
 		SearchContext searchContext = new SearchContext();
 
-		searchContext.setCommitImmediately(commitImmediately);
 		searchContext.setCompanyId(companyId);
 		searchContext.setSearchEngineId(searchEngineId);
+
+		setCommitImmediately(searchContext, commitImmediately);
 
 		indexWriter.partiallyUpdateDocuments(searchContext, documents);
 	}
@@ -892,10 +914,12 @@ public class SearchEngineUtil {
 
 		SearchContext searchContext = new SearchContext();
 
-		searchContext.setCommitImmediately(
-			commitImmediately || ProxyModeThreadLocal.isForceSync());
 		searchContext.setCompanyId(companyId);
 		searchContext.setSearchEngineId(searchEngineId);
+
+		setCommitImmediately(
+			searchContext,
+			commitImmediately || ProxyModeThreadLocal.isForceSync());
 
 		indexWriter.updateDocument(searchContext, document);
 	}
@@ -936,9 +960,10 @@ public class SearchEngineUtil {
 
 		SearchContext searchContext = new SearchContext();
 
-		searchContext.setCommitImmediately(commitImmediately);
 		searchContext.setCompanyId(companyId);
 		searchContext.setSearchEngineId(searchEngineId);
+
+		setCommitImmediately(searchContext, commitImmediately);
 
 		indexWriter.updateDocuments(searchContext, documents);
 	}
@@ -968,6 +993,17 @@ public class SearchEngineUtil {
 		_queueCapacity = queueCapacity;
 	}
 
+	protected static void setCommitImmediately(
+		SearchContext searchContext, boolean commitImmediately) {
+
+		if (!commitImmediately) {
+			searchContext.setCommitImmediately(_INDEX_COMMIT_IMMEDIATELY);
+		}
+		else {
+			searchContext.setCommitImmediately(true);
+		}
+	}
+
 	private SearchEngineUtil() {
 		Registry registry = RegistryUtil.getRegistry();
 
@@ -977,6 +1013,10 @@ public class SearchEngineUtil {
 
 		_serviceTracker.open();
 	}
+
+	private static final boolean _INDEX_COMMIT_IMMEDIATELY =
+		GetterUtil.getBoolean(
+			PropsUtil.get(PropsKeys.INDEX_COMMIT_IMMEDIATELY));
 
 	private static final Log _log = LogFactoryUtil.getLog(
 		SearchEngineUtil.class);

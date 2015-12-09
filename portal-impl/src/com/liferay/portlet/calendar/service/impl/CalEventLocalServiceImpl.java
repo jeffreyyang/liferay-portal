@@ -14,10 +14,8 @@
 
 package com.liferay.portlet.calendar.service.impl;
 
-import com.liferay.portal.im.AIMConnector;
-import com.liferay.portal.im.ICQConnector;
-import com.liferay.portal.im.MSNConnector;
-import com.liferay.portal.im.YMConnector;
+import com.liferay.mail.service.MailService;
+import com.liferay.portal.kernel.bean.BeanReference;
 import com.liferay.portal.kernel.cal.DayAndPosition;
 import com.liferay.portal.kernel.cal.Recurrence;
 import com.liferay.portal.kernel.cal.TZSRecurrence;
@@ -1283,26 +1281,6 @@ public class CalEventLocalServiceImpl extends CalEventLocalServiceBaseImpl {
 
 				mailService.sendEmail(message);
 			}
-			else if ((remindBy == CalEventConstants.REMIND_BY_AIM) &&
-					 Validator.isNotNull(contact.getAimSn())) {
-
-				AIMConnector.send(contact.getAimSn(), body);
-			}
-			else if ((remindBy == CalEventConstants.REMIND_BY_ICQ) &&
-					 Validator.isNotNull(contact.getIcqSn())) {
-
-				ICQConnector.send(contact.getIcqSn(), body);
-			}
-			else if ((remindBy == CalEventConstants.REMIND_BY_MSN) &&
-					 Validator.isNotNull(contact.getMsnSn())) {
-
-				MSNConnector.send(contact.getMsnSn(), body);
-			}
-			else if ((remindBy == CalEventConstants.REMIND_BY_YM) &&
-					 Validator.isNotNull(contact.getYmSn())) {
-
-				YMConnector.send(contact.getYmSn(), body);
-			}
 		}
 		catch (Exception e) {
 			_log.error(e, e);
@@ -1794,6 +1772,9 @@ public class CalEventLocalServiceImpl extends CalEventLocalServiceBaseImpl {
 			}
 		}
 	}
+
+	@BeanReference(type = MailService.class)
+	protected MailService mailService;
 
 	private static final long _CALENDAR_EVENT_CHECK_INTERVAL =
 		PropsValues.CALENDAR_EVENT_CHECK_INTERVAL * Time.MINUTE;

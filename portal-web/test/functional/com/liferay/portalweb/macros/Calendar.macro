@@ -1,4 +1,6 @@
 <definition>
+	<var name="siteName" value="Liferay" />
+
 	<command name="_deleteCalendar">
 		<var name="key_menuListOption" value="Delete" />
 
@@ -35,11 +37,12 @@
 	</command>
 
 	<command name="_gotoSiteCalendarMenulist">
-		<var name="key_calendarName" value="${calendarName}" />
+		<var name="key_siteCalendarName" value="${siteCalendarName}" />
+		<var name="key_siteName" value="${siteName}" />
 
-		<execute function="AssertTextEquals" locator1="PGCalendar#CURRENT_SITE_CALENDARS_CALENDAR" value1="${calendarName}" />
+		<execute function="AssertTextEquals" locator1="Calendar#CURRENT_SITE_CALENDARS_CALENDAR" value1="${siteCalendarName}" />
 
-		<execute function="Click" locator1="PGCalendar#CURRENT_SITE_CALENDARS_CALENDAR_MENULIST_ARROW" value1="${calendarName}" />
+		<execute function="Click" locator1="Calendar#CURRENT_SITE_CALENDARS_CALENDAR_MENULIST_ARROW" value1="${siteCalendarName}" />
 	</command>
 
 	<command name="_viewCalendarHidden">
@@ -54,6 +57,18 @@
 		<execute function="AssertTextEquals" locator1="CalendarEditCalendar#HEADER_TITLE" value1="${calendarName}" />
 
 		<execute function="SelectFrameTop" value1="relative=top" />
+	</command>
+
+	<command name="_viewEmailHeader">
+		<execute function="SelectFrame" locator1="CalendarEditCalendar#EDIT_CALENDAR_IFRAME" />
+
+		<execute function="AssertTextEquals" locator1="CalendarEditCalendar#HEADER_TITLE" value1="${header}" />
+
+		<execute function="AssertClick" locator1="CalendarEditCalendar#NAVIGATION_NOTIFICATION_TEMPLATES_TAB" value1="Notification Templates" />
+
+		<var name="key_calendarName" value="${header}" />
+
+		<execute function="AssertTextEquals" locator1="CalendarEditCalendar#NOTIFICATION_TEMPLATES_HEADER_TITLE" value1="${header}" />
 	</command>
 
 	<command name="_viewPermissionsIframe">
@@ -151,7 +166,7 @@
 
 	<command name="chooseSiteCalendarMenulistOption">
 		<execute macro="Calendar#_gotoSiteCalendarMenulist">
-			<var name="calendarName" value="${calendarName}" />
+			<var name="siteCalendarName" value="${siteCalendarName}" />
 		</execute>
 
 		<execute macro="Calendar#_gotoMenulistOption">
@@ -271,6 +286,10 @@
 				<execute macro="Calendar#_gotoMenulistOption">
 					<var name="menuListOption" value="Calendar Settings" />
 				</execute>
+
+				<execute macro="Calendar#_viewEmailHeader">
+					<var name="header" value="${user} - ${calendarName}" />
+				</execute>
 			</then>
 			<elseif>
 				<equals arg1="${calendarType}" arg2="Current Site Calendars" />
@@ -284,6 +303,10 @@
 					<execute macro="Calendar#_gotoMenulistOption">
 						<var name="menuListOption" value="Calendar Settings" />
 					</execute>
+
+					<execute macro="Calendar#_viewEmailHeader">
+						<var name="header" value="${site} - ${calendarName}" />
+					</execute>
 				</then>
 			</elseif>
 			<elseif>
@@ -293,16 +316,18 @@
 						<var name="calendarName" value="${calendarName}" />
 						<var name="menuListOption" value="Calendar Settings" />
 					</execute>
+
+					<execute macro="Calendar#_viewEmailHeader">
+						<var name="header" value="${calendarName}" />
+					</execute>
 				</then>
 			</elseif>
+			<else>
+				<execute macro="Calendar#_viewEmailHeader">
+					<var name="header" value="${calendarName}" />
+				</execute>
+			</else>
 		</if>
-
-		<var name="key_calendarName" value="${calendarName}" />
-
-		<execute function="SelectFrame" locator1="CalendarEditCalendar#EDIT_CALENDAR_IFRAME" />
-		<execute function="AssertTextEquals" locator1="CalendarEditCalendar#HEADER_TITLE" value1="${calendarName}" />
-		<execute function="AssertClick" locator1="CalendarEditCalendar#NAVIGATION_NOTIFICATION_TEMPLATES_TAB" value1="Notification Templates" />
-		<execute function="AssertTextEquals" locator1="CalendarEditCalendar#NOTIFICATION_TEMPLATES_HEADER_TITLE" value1="${calendarName}" />
 
 		<execute function="Pause" locator1="5000" />
 
@@ -555,6 +580,8 @@
 	</command>
 
 	<command name="gotoCurrentSiteCalendarsManage">
+		<var name="key_siteName" value="${siteName}" />
+
 		<execute function="Click" locator1="Calendar#CURRENT_SITE_CALENDARS_MENULIST_ARROW" />
 		<execute function="AssertClick" locator1="Calendar#CURRENT_SITE_CALENDARS_MENULIST_MANAGE_CALENDAR" value1="Manage Calendars" />
 	</command>
@@ -565,7 +592,7 @@
 		<execute function="AssertTextEquals" locator1="CalendarManageCalendars#CALENDAR_TABLE_NAME" value1="${calendarName}" />
 		<execute function="Click" locator1="CalendarManageCalendars#CALENDAR_TABLE_ACTIONS" />
 
-		<execute function="AssertClick" locator1="CalendarManageCalendars#ACTIONS_MENULIST_IMPORT" value1="Import" />
+		<execute function="AssertClick" locator1="MenuItem#IMPORT" value1="Import" />
 
 		<execute function="UploadCommonFile" locator1="CalendarImport#FILE_FIELD" value1="${calendarFile}" />
 
@@ -828,7 +855,7 @@
 	<command name="viewNoRSS">
 		<execute function="Open" locator1="${rssURL}" />
 
-		<execute function="AssertTextEquals" locator1="CalendarConfiguration#ERROR_HEADER"  value1="Not Found" />
+		<execute function="AssertElementPresent" locator1="CalendarConfiguration#ERROR_HEADER" />
 	</command>
 
 	<command name="viewOtherCalendarMenulist">
@@ -845,11 +872,11 @@
 
 		<execute macro="Page#gotoPG">
 			<var name="defaultURL" value="${defaultURL}" />
-		<var name="nodePort" value="${nodePort}" />
-		<var name="pageName" value="${pageName}" />
-		<var name="soDashboard" value="${soDashboard}" />
-		<var name="soPage" value="${soPage}" />
-</execute>
+			<var name="nodePort" value="${nodePort}" />
+			<var name="pageName" value="${pageName}" />
+			<var name="soDashboard" value="${soDashboard}" />
+			<var name="soPage" value="${soPage}" />
+		</execute>
 
 		<execute macro="Calendar#chooseOtherCalendarMenulistOption">
 			<var name="calendarName" value="${calendarName}" />
@@ -864,11 +891,11 @@
 
 		<execute macro="Page#gotoPG">
 			<var name="defaultURL" value="${defaultURL}" />
-		<var name="nodePort" value="${nodePort}" />
-		<var name="pageName" value="${pageName}" />
-		<var name="soDashboard" value="${soDashboard}" />
-		<var name="soPage" value="${soPage}" />
-</execute>
+			<var name="nodePort" value="${nodePort}" />
+			<var name="pageName" value="${pageName}" />
+			<var name="soDashboard" value="${soDashboard}" />
+			<var name="soPage" value="${soPage}" />
+		</execute>
 
 		<execute macro="Calendar#chooseOtherCalendarMenulistOption">
 			<var name="calendarName" value="${calendarName}" />
@@ -883,11 +910,11 @@
 
 		<execute macro="Page#gotoPG">
 			<var name="defaultURL" value="${defaultURL}" />
-		<var name="nodePort" value="${nodePort}" />
-		<var name="pageName" value="${pageName}" />
-		<var name="soDashboard" value="${soDashboard}" />
-		<var name="soPage" value="${soPage}" />
-</execute>
+			<var name="nodePort" value="${nodePort}" />
+			<var name="pageName" value="${pageName}" />
+			<var name="soDashboard" value="${soDashboard}" />
+			<var name="soPage" value="${soPage}" />
+		</execute>
 
 		<execute macro="Calendar#chooseOtherCalendarMenulistOption">
 			<var name="calendarName" value="${calendarName}" />
@@ -896,11 +923,11 @@
 
 		<execute macro="Page#gotoPG">
 			<var name="defaultURL" value="${defaultURL}" />
-		<var name="nodePort" value="${nodePort}" />
-		<var name="pageName" value="${pageName}" />
-		<var name="soDashboard" value="${soDashboard}" />
-		<var name="soPage" value="${soPage}" />
-</execute>
+			<var name="nodePort" value="${nodePort}" />
+			<var name="pageName" value="${pageName}" />
+			<var name="soDashboard" value="${soDashboard}" />
+			<var name="soPage" value="${soPage}" />
+		</execute>
 
 		<execute macro="Calendar#viewCalendarColorPicker">
 			<var name="calendarName" value="${calendarName}" />
@@ -909,11 +936,11 @@
 
 		<execute macro="Page#gotoPG">
 			<var name="defaultURL" value="${defaultURL}" />
-		<var name="nodePort" value="${nodePort}" />
-		<var name="pageName" value="${pageName}" />
-		<var name="soDashboard" value="${soDashboard}" />
-		<var name="soPage" value="${soPage}" />
-</execute>
+			<var name="nodePort" value="${nodePort}" />
+			<var name="pageName" value="${pageName}" />
+			<var name="soDashboard" value="${soDashboard}" />
+			<var name="soPage" value="${soPage}" />
+		</execute>
 
 		<execute macro="Calendar#chooseOtherCalendarMenulistOption">
 			<var name="calendarName" value="${calendarName}" />
@@ -978,7 +1005,7 @@
 
 	<command name="viewSiteCalendarNoMenulistOption">
 		<execute macro="Calendar#_gotoSiteCalendarMenulist">
-			<var name="calendarName" value="${calendarName}" />
+			<var name="siteCalendarName" value="${siteCalendarName}" />
 		</execute>
 
 		<var name="key_menuListOption" value="${menuListOption}" />

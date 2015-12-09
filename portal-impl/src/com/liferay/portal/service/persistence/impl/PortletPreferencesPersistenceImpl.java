@@ -17,7 +17,10 @@ package com.liferay.portal.service.persistence.impl;
 import aQute.bnd.annotation.ProviderType;
 
 import com.liferay.portal.NoSuchPortletPreferencesException;
+import com.liferay.portal.kernel.bean.BeanReference;
+import com.liferay.portal.kernel.dao.orm.EntityCache;
 import com.liferay.portal.kernel.dao.orm.EntityCacheUtil;
+import com.liferay.portal.kernel.dao.orm.FinderCache;
 import com.liferay.portal.kernel.dao.orm.FinderCacheUtil;
 import com.liferay.portal.kernel.dao.orm.FinderPath;
 import com.liferay.portal.kernel.dao.orm.Query;
@@ -35,6 +38,7 @@ import com.liferay.portal.model.MVCCModel;
 import com.liferay.portal.model.PortletPreferences;
 import com.liferay.portal.model.impl.PortletPreferencesImpl;
 import com.liferay.portal.model.impl.PortletPreferencesModelImpl;
+import com.liferay.portal.service.persistence.CompanyProvider;
 import com.liferay.portal.service.persistence.PortletPreferencesPersistence;
 
 import java.io.Serializable;
@@ -148,6 +152,27 @@ public class PortletPreferencesPersistenceImpl extends BasePersistenceImpl<Portl
 	@Override
 	public List<PortletPreferences> findByPlid(long plid, int start, int end,
 		OrderByComparator<PortletPreferences> orderByComparator) {
+		return findByPlid(plid, start, end, orderByComparator, true);
+	}
+
+	/**
+	 * Returns an ordered range of all the portlet preferenceses where plid = &#63;.
+	 *
+	 * <p>
+	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link PortletPreferencesModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
+	 * </p>
+	 *
+	 * @param plid the plid
+	 * @param start the lower bound of the range of portlet preferenceses
+	 * @param end the upper bound of the range of portlet preferenceses (not inclusive)
+	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
+	 * @param retrieveFromCache whether to retrieve from the finder cache
+	 * @return the ordered range of matching portlet preferenceses
+	 */
+	@Override
+	public List<PortletPreferences> findByPlid(long plid, int start, int end,
+		OrderByComparator<PortletPreferences> orderByComparator,
+		boolean retrieveFromCache) {
 		boolean pagination = true;
 		FinderPath finderPath = null;
 		Object[] finderArgs = null;
@@ -163,15 +188,19 @@ public class PortletPreferencesPersistenceImpl extends BasePersistenceImpl<Portl
 			finderArgs = new Object[] { plid, start, end, orderByComparator };
 		}
 
-		List<PortletPreferences> list = (List<PortletPreferences>)FinderCacheUtil.getResult(finderPath,
-				finderArgs, this);
+		List<PortletPreferences> list = null;
 
-		if ((list != null) && !list.isEmpty()) {
-			for (PortletPreferences portletPreferences : list) {
-				if ((plid != portletPreferences.getPlid())) {
-					list = null;
+		if (retrieveFromCache) {
+			list = (List<PortletPreferences>)finderCache.getResult(finderPath,
+					finderArgs, this);
 
-					break;
+			if ((list != null) && !list.isEmpty()) {
+				for (PortletPreferences portletPreferences : list) {
+					if ((plid != portletPreferences.getPlid())) {
+						list = null;
+
+						break;
+					}
 				}
 			}
 		}
@@ -228,10 +257,10 @@ public class PortletPreferencesPersistenceImpl extends BasePersistenceImpl<Portl
 
 				cacheResult(list);
 
-				FinderCacheUtil.putResult(finderPath, finderArgs, list);
+				finderCache.putResult(finderPath, finderArgs, list);
 			}
 			catch (Exception e) {
-				FinderCacheUtil.removeResult(finderPath, finderArgs);
+				finderCache.removeResult(finderPath, finderArgs);
 
 				throw processException(e);
 			}
@@ -522,8 +551,7 @@ public class PortletPreferencesPersistenceImpl extends BasePersistenceImpl<Portl
 
 		Object[] finderArgs = new Object[] { plid };
 
-		Long count = (Long)FinderCacheUtil.getResult(finderPath, finderArgs,
-				this);
+		Long count = (Long)finderCache.getResult(finderPath, finderArgs, this);
 
 		if (count == null) {
 			StringBundler query = new StringBundler(2);
@@ -547,10 +575,10 @@ public class PortletPreferencesPersistenceImpl extends BasePersistenceImpl<Portl
 
 				count = (Long)q.uniqueResult();
 
-				FinderCacheUtil.putResult(finderPath, finderArgs, count);
+				finderCache.putResult(finderPath, finderArgs, count);
 			}
 			catch (Exception e) {
-				FinderCacheUtil.removeResult(finderPath, finderArgs);
+				finderCache.removeResult(finderPath, finderArgs);
 
 				throw processException(e);
 			}
@@ -633,6 +661,28 @@ public class PortletPreferencesPersistenceImpl extends BasePersistenceImpl<Portl
 	public List<PortletPreferences> findByPortletId(String portletId,
 		int start, int end,
 		OrderByComparator<PortletPreferences> orderByComparator) {
+		return findByPortletId(portletId, start, end, orderByComparator, true);
+	}
+
+	/**
+	 * Returns an ordered range of all the portlet preferenceses where portletId = &#63;.
+	 *
+	 * <p>
+	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link PortletPreferencesModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
+	 * </p>
+	 *
+	 * @param portletId the portlet ID
+	 * @param start the lower bound of the range of portlet preferenceses
+	 * @param end the upper bound of the range of portlet preferenceses (not inclusive)
+	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
+	 * @param retrieveFromCache whether to retrieve from the finder cache
+	 * @return the ordered range of matching portlet preferenceses
+	 */
+	@Override
+	public List<PortletPreferences> findByPortletId(String portletId,
+		int start, int end,
+		OrderByComparator<PortletPreferences> orderByComparator,
+		boolean retrieveFromCache) {
 		boolean pagination = true;
 		FinderPath finderPath = null;
 		Object[] finderArgs = null;
@@ -648,16 +698,20 @@ public class PortletPreferencesPersistenceImpl extends BasePersistenceImpl<Portl
 			finderArgs = new Object[] { portletId, start, end, orderByComparator };
 		}
 
-		List<PortletPreferences> list = (List<PortletPreferences>)FinderCacheUtil.getResult(finderPath,
-				finderArgs, this);
+		List<PortletPreferences> list = null;
 
-		if ((list != null) && !list.isEmpty()) {
-			for (PortletPreferences portletPreferences : list) {
-				if (!Validator.equals(portletId,
-							portletPreferences.getPortletId())) {
-					list = null;
+		if (retrieveFromCache) {
+			list = (List<PortletPreferences>)finderCache.getResult(finderPath,
+					finderArgs, this);
 
-					break;
+			if ((list != null) && !list.isEmpty()) {
+				for (PortletPreferences portletPreferences : list) {
+					if (!Validator.equals(portletId,
+								portletPreferences.getPortletId())) {
+						list = null;
+
+						break;
+					}
 				}
 			}
 		}
@@ -728,10 +782,10 @@ public class PortletPreferencesPersistenceImpl extends BasePersistenceImpl<Portl
 
 				cacheResult(list);
 
-				FinderCacheUtil.putResult(finderPath, finderArgs, list);
+				finderCache.putResult(finderPath, finderArgs, list);
 			}
 			catch (Exception e) {
-				FinderCacheUtil.removeResult(finderPath, finderArgs);
+				finderCache.removeResult(finderPath, finderArgs);
 
 				throw processException(e);
 			}
@@ -1037,8 +1091,7 @@ public class PortletPreferencesPersistenceImpl extends BasePersistenceImpl<Portl
 
 		Object[] finderArgs = new Object[] { portletId };
 
-		Long count = (Long)FinderCacheUtil.getResult(finderPath, finderArgs,
-				this);
+		Long count = (Long)finderCache.getResult(finderPath, finderArgs, this);
 
 		if (count == null) {
 			StringBundler query = new StringBundler(2);
@@ -1076,10 +1129,10 @@ public class PortletPreferencesPersistenceImpl extends BasePersistenceImpl<Portl
 
 				count = (Long)q.uniqueResult();
 
-				FinderCacheUtil.putResult(finderPath, finderArgs, count);
+				finderCache.putResult(finderPath, finderArgs, count);
 			}
 			catch (Exception e) {
-				FinderCacheUtil.removeResult(finderPath, finderArgs);
+				finderCache.removeResult(finderPath, finderArgs);
 
 				throw processException(e);
 			}
@@ -1166,6 +1219,30 @@ public class PortletPreferencesPersistenceImpl extends BasePersistenceImpl<Portl
 	public List<PortletPreferences> findByO_P(int ownerType, String portletId,
 		int start, int end,
 		OrderByComparator<PortletPreferences> orderByComparator) {
+		return findByO_P(ownerType, portletId, start, end, orderByComparator,
+			true);
+	}
+
+	/**
+	 * Returns an ordered range of all the portlet preferenceses where ownerType = &#63; and portletId = &#63;.
+	 *
+	 * <p>
+	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link PortletPreferencesModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
+	 * </p>
+	 *
+	 * @param ownerType the owner type
+	 * @param portletId the portlet ID
+	 * @param start the lower bound of the range of portlet preferenceses
+	 * @param end the upper bound of the range of portlet preferenceses (not inclusive)
+	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
+	 * @param retrieveFromCache whether to retrieve from the finder cache
+	 * @return the ordered range of matching portlet preferenceses
+	 */
+	@Override
+	public List<PortletPreferences> findByO_P(int ownerType, String portletId,
+		int start, int end,
+		OrderByComparator<PortletPreferences> orderByComparator,
+		boolean retrieveFromCache) {
 		boolean pagination = true;
 		FinderPath finderPath = null;
 		Object[] finderArgs = null;
@@ -1185,17 +1262,21 @@ public class PortletPreferencesPersistenceImpl extends BasePersistenceImpl<Portl
 				};
 		}
 
-		List<PortletPreferences> list = (List<PortletPreferences>)FinderCacheUtil.getResult(finderPath,
-				finderArgs, this);
+		List<PortletPreferences> list = null;
 
-		if ((list != null) && !list.isEmpty()) {
-			for (PortletPreferences portletPreferences : list) {
-				if ((ownerType != portletPreferences.getOwnerType()) ||
-						!Validator.equals(portletId,
-							portletPreferences.getPortletId())) {
-					list = null;
+		if (retrieveFromCache) {
+			list = (List<PortletPreferences>)finderCache.getResult(finderPath,
+					finderArgs, this);
 
-					break;
+			if ((list != null) && !list.isEmpty()) {
+				for (PortletPreferences portletPreferences : list) {
+					if ((ownerType != portletPreferences.getOwnerType()) ||
+							!Validator.equals(portletId,
+								portletPreferences.getPortletId())) {
+						list = null;
+
+						break;
+					}
 				}
 			}
 		}
@@ -1270,10 +1351,10 @@ public class PortletPreferencesPersistenceImpl extends BasePersistenceImpl<Portl
 
 				cacheResult(list);
 
-				FinderCacheUtil.putResult(finderPath, finderArgs, list);
+				finderCache.putResult(finderPath, finderArgs, list);
 			}
 			catch (Exception e) {
-				FinderCacheUtil.removeResult(finderPath, finderArgs);
+				finderCache.removeResult(finderPath, finderArgs);
 
 				throw processException(e);
 			}
@@ -1596,8 +1677,7 @@ public class PortletPreferencesPersistenceImpl extends BasePersistenceImpl<Portl
 
 		Object[] finderArgs = new Object[] { ownerType, portletId };
 
-		Long count = (Long)FinderCacheUtil.getResult(finderPath, finderArgs,
-				this);
+		Long count = (Long)finderCache.getResult(finderPath, finderArgs, this);
 
 		if (count == null) {
 			StringBundler query = new StringBundler(3);
@@ -1639,10 +1719,10 @@ public class PortletPreferencesPersistenceImpl extends BasePersistenceImpl<Portl
 
 				count = (Long)q.uniqueResult();
 
-				FinderCacheUtil.putResult(finderPath, finderArgs, count);
+				finderCache.putResult(finderPath, finderArgs, count);
 			}
 			catch (Exception e) {
-				FinderCacheUtil.removeResult(finderPath, finderArgs);
+				finderCache.removeResult(finderPath, finderArgs);
 
 				throw processException(e);
 			}
@@ -1730,6 +1810,29 @@ public class PortletPreferencesPersistenceImpl extends BasePersistenceImpl<Portl
 	public List<PortletPreferences> findByP_P(long plid, String portletId,
 		int start, int end,
 		OrderByComparator<PortletPreferences> orderByComparator) {
+		return findByP_P(plid, portletId, start, end, orderByComparator, true);
+	}
+
+	/**
+	 * Returns an ordered range of all the portlet preferenceses where plid = &#63; and portletId = &#63;.
+	 *
+	 * <p>
+	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link PortletPreferencesModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
+	 * </p>
+	 *
+	 * @param plid the plid
+	 * @param portletId the portlet ID
+	 * @param start the lower bound of the range of portlet preferenceses
+	 * @param end the upper bound of the range of portlet preferenceses (not inclusive)
+	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
+	 * @param retrieveFromCache whether to retrieve from the finder cache
+	 * @return the ordered range of matching portlet preferenceses
+	 */
+	@Override
+	public List<PortletPreferences> findByP_P(long plid, String portletId,
+		int start, int end,
+		OrderByComparator<PortletPreferences> orderByComparator,
+		boolean retrieveFromCache) {
 		boolean pagination = true;
 		FinderPath finderPath = null;
 		Object[] finderArgs = null;
@@ -1749,17 +1852,21 @@ public class PortletPreferencesPersistenceImpl extends BasePersistenceImpl<Portl
 				};
 		}
 
-		List<PortletPreferences> list = (List<PortletPreferences>)FinderCacheUtil.getResult(finderPath,
-				finderArgs, this);
+		List<PortletPreferences> list = null;
 
-		if ((list != null) && !list.isEmpty()) {
-			for (PortletPreferences portletPreferences : list) {
-				if ((plid != portletPreferences.getPlid()) ||
-						!Validator.equals(portletId,
-							portletPreferences.getPortletId())) {
-					list = null;
+		if (retrieveFromCache) {
+			list = (List<PortletPreferences>)finderCache.getResult(finderPath,
+					finderArgs, this);
 
-					break;
+			if ((list != null) && !list.isEmpty()) {
+				for (PortletPreferences portletPreferences : list) {
+					if ((plid != portletPreferences.getPlid()) ||
+							!Validator.equals(portletId,
+								portletPreferences.getPortletId())) {
+						list = null;
+
+						break;
+					}
 				}
 			}
 		}
@@ -1834,10 +1941,10 @@ public class PortletPreferencesPersistenceImpl extends BasePersistenceImpl<Portl
 
 				cacheResult(list);
 
-				FinderCacheUtil.putResult(finderPath, finderArgs, list);
+				finderCache.putResult(finderPath, finderArgs, list);
 			}
 			catch (Exception e) {
-				FinderCacheUtil.removeResult(finderPath, finderArgs);
+				finderCache.removeResult(finderPath, finderArgs);
 
 				throw processException(e);
 			}
@@ -2160,8 +2267,7 @@ public class PortletPreferencesPersistenceImpl extends BasePersistenceImpl<Portl
 
 		Object[] finderArgs = new Object[] { plid, portletId };
 
-		Long count = (Long)FinderCacheUtil.getResult(finderPath, finderArgs,
-				this);
+		Long count = (Long)finderCache.getResult(finderPath, finderArgs, this);
 
 		if (count == null) {
 			StringBundler query = new StringBundler(3);
@@ -2203,10 +2309,10 @@ public class PortletPreferencesPersistenceImpl extends BasePersistenceImpl<Portl
 
 				count = (Long)q.uniqueResult();
 
-				FinderCacheUtil.putResult(finderPath, finderArgs, count);
+				finderCache.putResult(finderPath, finderArgs, count);
 			}
 			catch (Exception e) {
-				FinderCacheUtil.removeResult(finderPath, finderArgs);
+				finderCache.removeResult(finderPath, finderArgs);
 
 				throw processException(e);
 			}
@@ -2306,6 +2412,31 @@ public class PortletPreferencesPersistenceImpl extends BasePersistenceImpl<Portl
 	public List<PortletPreferences> findByO_O_P(long ownerId, int ownerType,
 		long plid, int start, int end,
 		OrderByComparator<PortletPreferences> orderByComparator) {
+		return findByO_O_P(ownerId, ownerType, plid, start, end,
+			orderByComparator, true);
+	}
+
+	/**
+	 * Returns an ordered range of all the portlet preferenceses where ownerId = &#63; and ownerType = &#63; and plid = &#63;.
+	 *
+	 * <p>
+	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link PortletPreferencesModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
+	 * </p>
+	 *
+	 * @param ownerId the owner ID
+	 * @param ownerType the owner type
+	 * @param plid the plid
+	 * @param start the lower bound of the range of portlet preferenceses
+	 * @param end the upper bound of the range of portlet preferenceses (not inclusive)
+	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
+	 * @param retrieveFromCache whether to retrieve from the finder cache
+	 * @return the ordered range of matching portlet preferenceses
+	 */
+	@Override
+	public List<PortletPreferences> findByO_O_P(long ownerId, int ownerType,
+		long plid, int start, int end,
+		OrderByComparator<PortletPreferences> orderByComparator,
+		boolean retrieveFromCache) {
 		boolean pagination = true;
 		FinderPath finderPath = null;
 		Object[] finderArgs = null;
@@ -2325,17 +2456,21 @@ public class PortletPreferencesPersistenceImpl extends BasePersistenceImpl<Portl
 				};
 		}
 
-		List<PortletPreferences> list = (List<PortletPreferences>)FinderCacheUtil.getResult(finderPath,
-				finderArgs, this);
+		List<PortletPreferences> list = null;
 
-		if ((list != null) && !list.isEmpty()) {
-			for (PortletPreferences portletPreferences : list) {
-				if ((ownerId != portletPreferences.getOwnerId()) ||
-						(ownerType != portletPreferences.getOwnerType()) ||
-						(plid != portletPreferences.getPlid())) {
-					list = null;
+		if (retrieveFromCache) {
+			list = (List<PortletPreferences>)finderCache.getResult(finderPath,
+					finderArgs, this);
 
-					break;
+			if ((list != null) && !list.isEmpty()) {
+				for (PortletPreferences portletPreferences : list) {
+					if ((ownerId != portletPreferences.getOwnerId()) ||
+							(ownerType != portletPreferences.getOwnerType()) ||
+							(plid != portletPreferences.getPlid())) {
+						list = null;
+
+						break;
+					}
 				}
 			}
 		}
@@ -2400,10 +2535,10 @@ public class PortletPreferencesPersistenceImpl extends BasePersistenceImpl<Portl
 
 				cacheResult(list);
 
-				FinderCacheUtil.putResult(finderPath, finderArgs, list);
+				finderCache.putResult(finderPath, finderArgs, list);
 			}
 			catch (Exception e) {
-				FinderCacheUtil.removeResult(finderPath, finderArgs);
+				finderCache.removeResult(finderPath, finderArgs);
 
 				throw processException(e);
 			}
@@ -2729,8 +2864,7 @@ public class PortletPreferencesPersistenceImpl extends BasePersistenceImpl<Portl
 
 		Object[] finderArgs = new Object[] { ownerId, ownerType, plid };
 
-		Long count = (Long)FinderCacheUtil.getResult(finderPath, finderArgs,
-				this);
+		Long count = (Long)finderCache.getResult(finderPath, finderArgs, this);
 
 		if (count == null) {
 			StringBundler query = new StringBundler(4);
@@ -2762,10 +2896,10 @@ public class PortletPreferencesPersistenceImpl extends BasePersistenceImpl<Portl
 
 				count = (Long)q.uniqueResult();
 
-				FinderCacheUtil.putResult(finderPath, finderArgs, count);
+				finderCache.putResult(finderPath, finderArgs, count);
 			}
 			catch (Exception e) {
-				FinderCacheUtil.removeResult(finderPath, finderArgs);
+				finderCache.removeResult(finderPath, finderArgs);
 
 				throw processException(e);
 			}
@@ -2865,6 +2999,31 @@ public class PortletPreferencesPersistenceImpl extends BasePersistenceImpl<Portl
 	public List<PortletPreferences> findByO_O_PI(long ownerId, int ownerType,
 		String portletId, int start, int end,
 		OrderByComparator<PortletPreferences> orderByComparator) {
+		return findByO_O_PI(ownerId, ownerType, portletId, start, end,
+			orderByComparator, true);
+	}
+
+	/**
+	 * Returns an ordered range of all the portlet preferenceses where ownerId = &#63; and ownerType = &#63; and portletId = &#63;.
+	 *
+	 * <p>
+	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link PortletPreferencesModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
+	 * </p>
+	 *
+	 * @param ownerId the owner ID
+	 * @param ownerType the owner type
+	 * @param portletId the portlet ID
+	 * @param start the lower bound of the range of portlet preferenceses
+	 * @param end the upper bound of the range of portlet preferenceses (not inclusive)
+	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
+	 * @param retrieveFromCache whether to retrieve from the finder cache
+	 * @return the ordered range of matching portlet preferenceses
+	 */
+	@Override
+	public List<PortletPreferences> findByO_O_PI(long ownerId, int ownerType,
+		String portletId, int start, int end,
+		OrderByComparator<PortletPreferences> orderByComparator,
+		boolean retrieveFromCache) {
 		boolean pagination = true;
 		FinderPath finderPath = null;
 		Object[] finderArgs = null;
@@ -2884,18 +3043,22 @@ public class PortletPreferencesPersistenceImpl extends BasePersistenceImpl<Portl
 				};
 		}
 
-		List<PortletPreferences> list = (List<PortletPreferences>)FinderCacheUtil.getResult(finderPath,
-				finderArgs, this);
+		List<PortletPreferences> list = null;
 
-		if ((list != null) && !list.isEmpty()) {
-			for (PortletPreferences portletPreferences : list) {
-				if ((ownerId != portletPreferences.getOwnerId()) ||
-						(ownerType != portletPreferences.getOwnerType()) ||
-						!Validator.equals(portletId,
-							portletPreferences.getPortletId())) {
-					list = null;
+		if (retrieveFromCache) {
+			list = (List<PortletPreferences>)finderCache.getResult(finderPath,
+					finderArgs, this);
 
-					break;
+			if ((list != null) && !list.isEmpty()) {
+				for (PortletPreferences portletPreferences : list) {
+					if ((ownerId != portletPreferences.getOwnerId()) ||
+							(ownerType != portletPreferences.getOwnerType()) ||
+							!Validator.equals(portletId,
+								portletPreferences.getPortletId())) {
+						list = null;
+
+						break;
+					}
 				}
 			}
 		}
@@ -2974,10 +3137,10 @@ public class PortletPreferencesPersistenceImpl extends BasePersistenceImpl<Portl
 
 				cacheResult(list);
 
-				FinderCacheUtil.putResult(finderPath, finderArgs, list);
+				finderCache.putResult(finderPath, finderArgs, list);
 			}
 			catch (Exception e) {
-				FinderCacheUtil.removeResult(finderPath, finderArgs);
+				finderCache.removeResult(finderPath, finderArgs);
 
 				throw processException(e);
 			}
@@ -3323,8 +3486,7 @@ public class PortletPreferencesPersistenceImpl extends BasePersistenceImpl<Portl
 
 		Object[] finderArgs = new Object[] { ownerId, ownerType, portletId };
 
-		Long count = (Long)FinderCacheUtil.getResult(finderPath, finderArgs,
-				this);
+		Long count = (Long)finderCache.getResult(finderPath, finderArgs, this);
 
 		if (count == null) {
 			StringBundler query = new StringBundler(4);
@@ -3370,10 +3532,10 @@ public class PortletPreferencesPersistenceImpl extends BasePersistenceImpl<Portl
 
 				count = (Long)q.uniqueResult();
 
-				FinderCacheUtil.putResult(finderPath, finderArgs, count);
+				finderCache.putResult(finderPath, finderArgs, count);
 			}
 			catch (Exception e) {
-				FinderCacheUtil.removeResult(finderPath, finderArgs);
+				finderCache.removeResult(finderPath, finderArgs);
 
 				throw processException(e);
 			}
@@ -3474,6 +3636,31 @@ public class PortletPreferencesPersistenceImpl extends BasePersistenceImpl<Portl
 	public List<PortletPreferences> findByO_P_P(int ownerType, long plid,
 		String portletId, int start, int end,
 		OrderByComparator<PortletPreferences> orderByComparator) {
+		return findByO_P_P(ownerType, plid, portletId, start, end,
+			orderByComparator, true);
+	}
+
+	/**
+	 * Returns an ordered range of all the portlet preferenceses where ownerType = &#63; and plid = &#63; and portletId = &#63;.
+	 *
+	 * <p>
+	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link PortletPreferencesModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
+	 * </p>
+	 *
+	 * @param ownerType the owner type
+	 * @param plid the plid
+	 * @param portletId the portlet ID
+	 * @param start the lower bound of the range of portlet preferenceses
+	 * @param end the upper bound of the range of portlet preferenceses (not inclusive)
+	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
+	 * @param retrieveFromCache whether to retrieve from the finder cache
+	 * @return the ordered range of matching portlet preferenceses
+	 */
+	@Override
+	public List<PortletPreferences> findByO_P_P(int ownerType, long plid,
+		String portletId, int start, int end,
+		OrderByComparator<PortletPreferences> orderByComparator,
+		boolean retrieveFromCache) {
 		boolean pagination = true;
 		FinderPath finderPath = null;
 		Object[] finderArgs = null;
@@ -3493,18 +3680,22 @@ public class PortletPreferencesPersistenceImpl extends BasePersistenceImpl<Portl
 				};
 		}
 
-		List<PortletPreferences> list = (List<PortletPreferences>)FinderCacheUtil.getResult(finderPath,
-				finderArgs, this);
+		List<PortletPreferences> list = null;
 
-		if ((list != null) && !list.isEmpty()) {
-			for (PortletPreferences portletPreferences : list) {
-				if ((ownerType != portletPreferences.getOwnerType()) ||
-						(plid != portletPreferences.getPlid()) ||
-						!Validator.equals(portletId,
-							portletPreferences.getPortletId())) {
-					list = null;
+		if (retrieveFromCache) {
+			list = (List<PortletPreferences>)finderCache.getResult(finderPath,
+					finderArgs, this);
 
-					break;
+			if ((list != null) && !list.isEmpty()) {
+				for (PortletPreferences portletPreferences : list) {
+					if ((ownerType != portletPreferences.getOwnerType()) ||
+							(plid != portletPreferences.getPlid()) ||
+							!Validator.equals(portletId,
+								portletPreferences.getPortletId())) {
+						list = null;
+
+						break;
+					}
 				}
 			}
 		}
@@ -3583,10 +3774,10 @@ public class PortletPreferencesPersistenceImpl extends BasePersistenceImpl<Portl
 
 				cacheResult(list);
 
-				FinderCacheUtil.putResult(finderPath, finderArgs, list);
+				finderCache.putResult(finderPath, finderArgs, list);
 			}
 			catch (Exception e) {
-				FinderCacheUtil.removeResult(finderPath, finderArgs);
+				finderCache.removeResult(finderPath, finderArgs);
 
 				throw processException(e);
 			}
@@ -3931,8 +4122,7 @@ public class PortletPreferencesPersistenceImpl extends BasePersistenceImpl<Portl
 
 		Object[] finderArgs = new Object[] { ownerType, plid, portletId };
 
-		Long count = (Long)FinderCacheUtil.getResult(finderPath, finderArgs,
-				this);
+		Long count = (Long)finderCache.getResult(finderPath, finderArgs, this);
 
 		if (count == null) {
 			StringBundler query = new StringBundler(4);
@@ -3978,10 +4168,10 @@ public class PortletPreferencesPersistenceImpl extends BasePersistenceImpl<Portl
 
 				count = (Long)q.uniqueResult();
 
-				FinderCacheUtil.putResult(finderPath, finderArgs, count);
+				finderCache.putResult(finderPath, finderArgs, count);
 			}
 			catch (Exception e) {
-				FinderCacheUtil.removeResult(finderPath, finderArgs);
+				finderCache.removeResult(finderPath, finderArgs);
 
 				throw processException(e);
 			}
@@ -4085,7 +4275,7 @@ public class PortletPreferencesPersistenceImpl extends BasePersistenceImpl<Portl
 	 * @param ownerType the owner type
 	 * @param plid the plid
 	 * @param portletId the portlet ID
-	 * @param retrieveFromCache whether to use the finder cache
+	 * @param retrieveFromCache whether to retrieve from the finder cache
 	 * @return the matching portlet preferences, or <code>null</code> if a matching portlet preferences could not be found
 	 */
 	@Override
@@ -4096,7 +4286,7 @@ public class PortletPreferencesPersistenceImpl extends BasePersistenceImpl<Portl
 		Object result = null;
 
 		if (retrieveFromCache) {
-			result = FinderCacheUtil.getResult(FINDER_PATH_FETCH_BY_O_O_P_P,
+			result = finderCache.getResult(FINDER_PATH_FETCH_BY_O_O_P_P,
 					finderArgs, this);
 		}
 
@@ -4161,7 +4351,7 @@ public class PortletPreferencesPersistenceImpl extends BasePersistenceImpl<Portl
 				List<PortletPreferences> list = q.list();
 
 				if (list.isEmpty()) {
-					FinderCacheUtil.putResult(FINDER_PATH_FETCH_BY_O_O_P_P,
+					finderCache.putResult(FINDER_PATH_FETCH_BY_O_O_P_P,
 						finderArgs, list);
 				}
 				else {
@@ -4176,13 +4366,13 @@ public class PortletPreferencesPersistenceImpl extends BasePersistenceImpl<Portl
 							(portletPreferences.getPlid() != plid) ||
 							(portletPreferences.getPortletId() == null) ||
 							!portletPreferences.getPortletId().equals(portletId)) {
-						FinderCacheUtil.putResult(FINDER_PATH_FETCH_BY_O_O_P_P,
+						finderCache.putResult(FINDER_PATH_FETCH_BY_O_O_P_P,
 							finderArgs, portletPreferences);
 					}
 				}
 			}
 			catch (Exception e) {
-				FinderCacheUtil.removeResult(FINDER_PATH_FETCH_BY_O_O_P_P,
+				finderCache.removeResult(FINDER_PATH_FETCH_BY_O_O_P_P,
 					finderArgs);
 
 				throw processException(e);
@@ -4234,8 +4424,7 @@ public class PortletPreferencesPersistenceImpl extends BasePersistenceImpl<Portl
 
 		Object[] finderArgs = new Object[] { ownerId, ownerType, plid, portletId };
 
-		Long count = (Long)FinderCacheUtil.getResult(finderPath, finderArgs,
-				this);
+		Long count = (Long)finderCache.getResult(finderPath, finderArgs, this);
 
 		if (count == null) {
 			StringBundler query = new StringBundler(5);
@@ -4285,10 +4474,10 @@ public class PortletPreferencesPersistenceImpl extends BasePersistenceImpl<Portl
 
 				count = (Long)q.uniqueResult();
 
-				FinderCacheUtil.putResult(finderPath, finderArgs, count);
+				finderCache.putResult(finderPath, finderArgs, count);
 			}
 			catch (Exception e) {
-				FinderCacheUtil.removeResult(finderPath, finderArgs);
+				finderCache.removeResult(finderPath, finderArgs);
 
 				throw processException(e);
 			}
@@ -4318,11 +4507,11 @@ public class PortletPreferencesPersistenceImpl extends BasePersistenceImpl<Portl
 	 */
 	@Override
 	public void cacheResult(PortletPreferences portletPreferences) {
-		EntityCacheUtil.putResult(PortletPreferencesModelImpl.ENTITY_CACHE_ENABLED,
+		entityCache.putResult(PortletPreferencesModelImpl.ENTITY_CACHE_ENABLED,
 			PortletPreferencesImpl.class, portletPreferences.getPrimaryKey(),
 			portletPreferences);
 
-		FinderCacheUtil.putResult(FINDER_PATH_FETCH_BY_O_O_P_P,
+		finderCache.putResult(FINDER_PATH_FETCH_BY_O_O_P_P,
 			new Object[] {
 				portletPreferences.getOwnerId(),
 				portletPreferences.getOwnerType(), portletPreferences.getPlid(),
@@ -4340,7 +4529,7 @@ public class PortletPreferencesPersistenceImpl extends BasePersistenceImpl<Portl
 	@Override
 	public void cacheResult(List<PortletPreferences> portletPreferenceses) {
 		for (PortletPreferences portletPreferences : portletPreferenceses) {
-			if (EntityCacheUtil.getResult(
+			if (entityCache.getResult(
 						PortletPreferencesModelImpl.ENTITY_CACHE_ENABLED,
 						PortletPreferencesImpl.class,
 						portletPreferences.getPrimaryKey()) == null) {
@@ -4356,43 +4545,43 @@ public class PortletPreferencesPersistenceImpl extends BasePersistenceImpl<Portl
 	 * Clears the cache for all portlet preferenceses.
 	 *
 	 * <p>
-	 * The {@link com.liferay.portal.kernel.dao.orm.EntityCache} and {@link com.liferay.portal.kernel.dao.orm.FinderCache} are both cleared by this method.
+	 * The {@link EntityCache} and {@link FinderCache} are both cleared by this method.
 	 * </p>
 	 */
 	@Override
 	public void clearCache() {
-		EntityCacheUtil.clearCache(PortletPreferencesImpl.class);
+		entityCache.clearCache(PortletPreferencesImpl.class);
 
-		FinderCacheUtil.clearCache(FINDER_CLASS_NAME_ENTITY);
-		FinderCacheUtil.clearCache(FINDER_CLASS_NAME_LIST_WITH_PAGINATION);
-		FinderCacheUtil.clearCache(FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION);
+		finderCache.clearCache(FINDER_CLASS_NAME_ENTITY);
+		finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITH_PAGINATION);
+		finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION);
 	}
 
 	/**
 	 * Clears the cache for the portlet preferences.
 	 *
 	 * <p>
-	 * The {@link com.liferay.portal.kernel.dao.orm.EntityCache} and {@link com.liferay.portal.kernel.dao.orm.FinderCache} are both cleared by this method.
+	 * The {@link EntityCache} and {@link FinderCache} are both cleared by this method.
 	 * </p>
 	 */
 	@Override
 	public void clearCache(PortletPreferences portletPreferences) {
-		EntityCacheUtil.removeResult(PortletPreferencesModelImpl.ENTITY_CACHE_ENABLED,
+		entityCache.removeResult(PortletPreferencesModelImpl.ENTITY_CACHE_ENABLED,
 			PortletPreferencesImpl.class, portletPreferences.getPrimaryKey());
 
-		FinderCacheUtil.clearCache(FINDER_CLASS_NAME_LIST_WITH_PAGINATION);
-		FinderCacheUtil.clearCache(FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION);
+		finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITH_PAGINATION);
+		finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION);
 
 		clearUniqueFindersCache((PortletPreferencesModelImpl)portletPreferences);
 	}
 
 	@Override
 	public void clearCache(List<PortletPreferences> portletPreferenceses) {
-		FinderCacheUtil.clearCache(FINDER_CLASS_NAME_LIST_WITH_PAGINATION);
-		FinderCacheUtil.clearCache(FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION);
+		finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITH_PAGINATION);
+		finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION);
 
 		for (PortletPreferences portletPreferences : portletPreferenceses) {
-			EntityCacheUtil.removeResult(PortletPreferencesModelImpl.ENTITY_CACHE_ENABLED,
+			entityCache.removeResult(PortletPreferencesModelImpl.ENTITY_CACHE_ENABLED,
 				PortletPreferencesImpl.class, portletPreferences.getPrimaryKey());
 
 			clearUniqueFindersCache((PortletPreferencesModelImpl)portletPreferences);
@@ -4409,9 +4598,9 @@ public class PortletPreferencesPersistenceImpl extends BasePersistenceImpl<Portl
 					portletPreferencesModelImpl.getPortletId()
 				};
 
-			FinderCacheUtil.putResult(FINDER_PATH_COUNT_BY_O_O_P_P, args,
+			finderCache.putResult(FINDER_PATH_COUNT_BY_O_O_P_P, args,
 				Long.valueOf(1));
-			FinderCacheUtil.putResult(FINDER_PATH_FETCH_BY_O_O_P_P, args,
+			finderCache.putResult(FINDER_PATH_FETCH_BY_O_O_P_P, args,
 				portletPreferencesModelImpl);
 		}
 		else {
@@ -4424,9 +4613,9 @@ public class PortletPreferencesPersistenceImpl extends BasePersistenceImpl<Portl
 						portletPreferencesModelImpl.getPortletId()
 					};
 
-				FinderCacheUtil.putResult(FINDER_PATH_COUNT_BY_O_O_P_P, args,
+				finderCache.putResult(FINDER_PATH_COUNT_BY_O_O_P_P, args,
 					Long.valueOf(1));
-				FinderCacheUtil.putResult(FINDER_PATH_FETCH_BY_O_O_P_P, args,
+				finderCache.putResult(FINDER_PATH_FETCH_BY_O_O_P_P, args,
 					portletPreferencesModelImpl);
 			}
 		}
@@ -4441,8 +4630,8 @@ public class PortletPreferencesPersistenceImpl extends BasePersistenceImpl<Portl
 				portletPreferencesModelImpl.getPortletId()
 			};
 
-		FinderCacheUtil.removeResult(FINDER_PATH_COUNT_BY_O_O_P_P, args);
-		FinderCacheUtil.removeResult(FINDER_PATH_FETCH_BY_O_O_P_P, args);
+		finderCache.removeResult(FINDER_PATH_COUNT_BY_O_O_P_P, args);
+		finderCache.removeResult(FINDER_PATH_FETCH_BY_O_O_P_P, args);
 
 		if ((portletPreferencesModelImpl.getColumnBitmask() &
 				FINDER_PATH_FETCH_BY_O_O_P_P.getColumnBitmask()) != 0) {
@@ -4453,8 +4642,8 @@ public class PortletPreferencesPersistenceImpl extends BasePersistenceImpl<Portl
 					portletPreferencesModelImpl.getOriginalPortletId()
 				};
 
-			FinderCacheUtil.removeResult(FINDER_PATH_COUNT_BY_O_O_P_P, args);
-			FinderCacheUtil.removeResult(FINDER_PATH_FETCH_BY_O_O_P_P, args);
+			finderCache.removeResult(FINDER_PATH_COUNT_BY_O_O_P_P, args);
+			finderCache.removeResult(FINDER_PATH_FETCH_BY_O_O_P_P, args);
 		}
 	}
 
@@ -4589,10 +4778,10 @@ public class PortletPreferencesPersistenceImpl extends BasePersistenceImpl<Portl
 			closeSession(session);
 		}
 
-		FinderCacheUtil.clearCache(FINDER_CLASS_NAME_LIST_WITH_PAGINATION);
+		finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITH_PAGINATION);
 
 		if (isNew || !PortletPreferencesModelImpl.COLUMN_BITMASK_ENABLED) {
-			FinderCacheUtil.clearCache(FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION);
+			finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION);
 		}
 
 		else {
@@ -4602,14 +4791,14 @@ public class PortletPreferencesPersistenceImpl extends BasePersistenceImpl<Portl
 						portletPreferencesModelImpl.getOriginalPlid()
 					};
 
-				FinderCacheUtil.removeResult(FINDER_PATH_COUNT_BY_PLID, args);
-				FinderCacheUtil.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_PLID,
+				finderCache.removeResult(FINDER_PATH_COUNT_BY_PLID, args);
+				finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_PLID,
 					args);
 
 				args = new Object[] { portletPreferencesModelImpl.getPlid() };
 
-				FinderCacheUtil.removeResult(FINDER_PATH_COUNT_BY_PLID, args);
-				FinderCacheUtil.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_PLID,
+				finderCache.removeResult(FINDER_PATH_COUNT_BY_PLID, args);
+				finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_PLID,
 					args);
 			}
 
@@ -4619,16 +4808,14 @@ public class PortletPreferencesPersistenceImpl extends BasePersistenceImpl<Portl
 						portletPreferencesModelImpl.getOriginalPortletId()
 					};
 
-				FinderCacheUtil.removeResult(FINDER_PATH_COUNT_BY_PORTLETID,
-					args);
-				FinderCacheUtil.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_PORTLETID,
+				finderCache.removeResult(FINDER_PATH_COUNT_BY_PORTLETID, args);
+				finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_PORTLETID,
 					args);
 
 				args = new Object[] { portletPreferencesModelImpl.getPortletId() };
 
-				FinderCacheUtil.removeResult(FINDER_PATH_COUNT_BY_PORTLETID,
-					args);
-				FinderCacheUtil.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_PORTLETID,
+				finderCache.removeResult(FINDER_PATH_COUNT_BY_PORTLETID, args);
+				finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_PORTLETID,
 					args);
 			}
 
@@ -4639,8 +4826,8 @@ public class PortletPreferencesPersistenceImpl extends BasePersistenceImpl<Portl
 						portletPreferencesModelImpl.getOriginalPortletId()
 					};
 
-				FinderCacheUtil.removeResult(FINDER_PATH_COUNT_BY_O_P, args);
-				FinderCacheUtil.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_O_P,
+				finderCache.removeResult(FINDER_PATH_COUNT_BY_O_P, args);
+				finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_O_P,
 					args);
 
 				args = new Object[] {
@@ -4648,8 +4835,8 @@ public class PortletPreferencesPersistenceImpl extends BasePersistenceImpl<Portl
 						portletPreferencesModelImpl.getPortletId()
 					};
 
-				FinderCacheUtil.removeResult(FINDER_PATH_COUNT_BY_O_P, args);
-				FinderCacheUtil.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_O_P,
+				finderCache.removeResult(FINDER_PATH_COUNT_BY_O_P, args);
+				finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_O_P,
 					args);
 			}
 
@@ -4660,8 +4847,8 @@ public class PortletPreferencesPersistenceImpl extends BasePersistenceImpl<Portl
 						portletPreferencesModelImpl.getOriginalPortletId()
 					};
 
-				FinderCacheUtil.removeResult(FINDER_PATH_COUNT_BY_P_P, args);
-				FinderCacheUtil.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_P_P,
+				finderCache.removeResult(FINDER_PATH_COUNT_BY_P_P, args);
+				finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_P_P,
 					args);
 
 				args = new Object[] {
@@ -4669,8 +4856,8 @@ public class PortletPreferencesPersistenceImpl extends BasePersistenceImpl<Portl
 						portletPreferencesModelImpl.getPortletId()
 					};
 
-				FinderCacheUtil.removeResult(FINDER_PATH_COUNT_BY_P_P, args);
-				FinderCacheUtil.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_P_P,
+				finderCache.removeResult(FINDER_PATH_COUNT_BY_P_P, args);
+				finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_P_P,
 					args);
 			}
 
@@ -4682,8 +4869,8 @@ public class PortletPreferencesPersistenceImpl extends BasePersistenceImpl<Portl
 						portletPreferencesModelImpl.getOriginalPlid()
 					};
 
-				FinderCacheUtil.removeResult(FINDER_PATH_COUNT_BY_O_O_P, args);
-				FinderCacheUtil.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_O_O_P,
+				finderCache.removeResult(FINDER_PATH_COUNT_BY_O_O_P, args);
+				finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_O_O_P,
 					args);
 
 				args = new Object[] {
@@ -4692,8 +4879,8 @@ public class PortletPreferencesPersistenceImpl extends BasePersistenceImpl<Portl
 						portletPreferencesModelImpl.getPlid()
 					};
 
-				FinderCacheUtil.removeResult(FINDER_PATH_COUNT_BY_O_O_P, args);
-				FinderCacheUtil.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_O_O_P,
+				finderCache.removeResult(FINDER_PATH_COUNT_BY_O_O_P, args);
+				finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_O_O_P,
 					args);
 			}
 
@@ -4705,8 +4892,8 @@ public class PortletPreferencesPersistenceImpl extends BasePersistenceImpl<Portl
 						portletPreferencesModelImpl.getOriginalPortletId()
 					};
 
-				FinderCacheUtil.removeResult(FINDER_PATH_COUNT_BY_O_O_PI, args);
-				FinderCacheUtil.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_O_O_PI,
+				finderCache.removeResult(FINDER_PATH_COUNT_BY_O_O_PI, args);
+				finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_O_O_PI,
 					args);
 
 				args = new Object[] {
@@ -4715,8 +4902,8 @@ public class PortletPreferencesPersistenceImpl extends BasePersistenceImpl<Portl
 						portletPreferencesModelImpl.getPortletId()
 					};
 
-				FinderCacheUtil.removeResult(FINDER_PATH_COUNT_BY_O_O_PI, args);
-				FinderCacheUtil.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_O_O_PI,
+				finderCache.removeResult(FINDER_PATH_COUNT_BY_O_O_PI, args);
+				finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_O_O_PI,
 					args);
 			}
 
@@ -4728,8 +4915,8 @@ public class PortletPreferencesPersistenceImpl extends BasePersistenceImpl<Portl
 						portletPreferencesModelImpl.getOriginalPortletId()
 					};
 
-				FinderCacheUtil.removeResult(FINDER_PATH_COUNT_BY_O_P_P, args);
-				FinderCacheUtil.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_O_P_P,
+				finderCache.removeResult(FINDER_PATH_COUNT_BY_O_P_P, args);
+				finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_O_P_P,
 					args);
 
 				args = new Object[] {
@@ -4738,13 +4925,13 @@ public class PortletPreferencesPersistenceImpl extends BasePersistenceImpl<Portl
 						portletPreferencesModelImpl.getPortletId()
 					};
 
-				FinderCacheUtil.removeResult(FINDER_PATH_COUNT_BY_O_P_P, args);
-				FinderCacheUtil.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_O_P_P,
+				finderCache.removeResult(FINDER_PATH_COUNT_BY_O_P_P, args);
+				finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_O_P_P,
 					args);
 			}
 		}
 
-		EntityCacheUtil.putResult(PortletPreferencesModelImpl.ENTITY_CACHE_ENABLED,
+		entityCache.putResult(PortletPreferencesModelImpl.ENTITY_CACHE_ENABLED,
 			PortletPreferencesImpl.class, portletPreferences.getPrimaryKey(),
 			portletPreferences, false);
 
@@ -4769,6 +4956,7 @@ public class PortletPreferencesPersistenceImpl extends BasePersistenceImpl<Portl
 
 		portletPreferencesImpl.setMvccVersion(portletPreferences.getMvccVersion());
 		portletPreferencesImpl.setPortletPreferencesId(portletPreferences.getPortletPreferencesId());
+		portletPreferencesImpl.setCompanyId(portletPreferences.getCompanyId());
 		portletPreferencesImpl.setOwnerId(portletPreferences.getOwnerId());
 		portletPreferencesImpl.setOwnerType(portletPreferences.getOwnerType());
 		portletPreferencesImpl.setPlid(portletPreferences.getPlid());
@@ -4823,7 +5011,7 @@ public class PortletPreferencesPersistenceImpl extends BasePersistenceImpl<Portl
 	 */
 	@Override
 	public PortletPreferences fetchByPrimaryKey(Serializable primaryKey) {
-		PortletPreferences portletPreferences = (PortletPreferences)EntityCacheUtil.getResult(PortletPreferencesModelImpl.ENTITY_CACHE_ENABLED,
+		PortletPreferences portletPreferences = (PortletPreferences)entityCache.getResult(PortletPreferencesModelImpl.ENTITY_CACHE_ENABLED,
 				PortletPreferencesImpl.class, primaryKey);
 
 		if (portletPreferences == _nullPortletPreferences) {
@@ -4843,13 +5031,13 @@ public class PortletPreferencesPersistenceImpl extends BasePersistenceImpl<Portl
 					cacheResult(portletPreferences);
 				}
 				else {
-					EntityCacheUtil.putResult(PortletPreferencesModelImpl.ENTITY_CACHE_ENABLED,
+					entityCache.putResult(PortletPreferencesModelImpl.ENTITY_CACHE_ENABLED,
 						PortletPreferencesImpl.class, primaryKey,
 						_nullPortletPreferences);
 				}
 			}
 			catch (Exception e) {
-				EntityCacheUtil.removeResult(PortletPreferencesModelImpl.ENTITY_CACHE_ENABLED,
+				entityCache.removeResult(PortletPreferencesModelImpl.ENTITY_CACHE_ENABLED,
 					PortletPreferencesImpl.class, primaryKey);
 
 				throw processException(e);
@@ -4899,7 +5087,7 @@ public class PortletPreferencesPersistenceImpl extends BasePersistenceImpl<Portl
 		Set<Serializable> uncachedPrimaryKeys = null;
 
 		for (Serializable primaryKey : primaryKeys) {
-			PortletPreferences portletPreferences = (PortletPreferences)EntityCacheUtil.getResult(PortletPreferencesModelImpl.ENTITY_CACHE_ENABLED,
+			PortletPreferences portletPreferences = (PortletPreferences)entityCache.getResult(PortletPreferencesModelImpl.ENTITY_CACHE_ENABLED,
 					PortletPreferencesImpl.class, primaryKey);
 
 			if (portletPreferences == null) {
@@ -4952,7 +5140,7 @@ public class PortletPreferencesPersistenceImpl extends BasePersistenceImpl<Portl
 			}
 
 			for (Serializable primaryKey : uncachedPrimaryKeys) {
-				EntityCacheUtil.putResult(PortletPreferencesModelImpl.ENTITY_CACHE_ENABLED,
+				entityCache.putResult(PortletPreferencesModelImpl.ENTITY_CACHE_ENABLED,
 					PortletPreferencesImpl.class, primaryKey,
 					_nullPortletPreferences);
 			}
@@ -5008,6 +5196,26 @@ public class PortletPreferencesPersistenceImpl extends BasePersistenceImpl<Portl
 	@Override
 	public List<PortletPreferences> findAll(int start, int end,
 		OrderByComparator<PortletPreferences> orderByComparator) {
+		return findAll(start, end, orderByComparator, true);
+	}
+
+	/**
+	 * Returns an ordered range of all the portlet preferenceses.
+	 *
+	 * <p>
+	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link PortletPreferencesModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
+	 * </p>
+	 *
+	 * @param start the lower bound of the range of portlet preferenceses
+	 * @param end the upper bound of the range of portlet preferenceses (not inclusive)
+	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
+	 * @param retrieveFromCache whether to retrieve from the finder cache
+	 * @return the ordered range of portlet preferenceses
+	 */
+	@Override
+	public List<PortletPreferences> findAll(int start, int end,
+		OrderByComparator<PortletPreferences> orderByComparator,
+		boolean retrieveFromCache) {
 		boolean pagination = true;
 		FinderPath finderPath = null;
 		Object[] finderArgs = null;
@@ -5023,8 +5231,12 @@ public class PortletPreferencesPersistenceImpl extends BasePersistenceImpl<Portl
 			finderArgs = new Object[] { start, end, orderByComparator };
 		}
 
-		List<PortletPreferences> list = (List<PortletPreferences>)FinderCacheUtil.getResult(finderPath,
-				finderArgs, this);
+		List<PortletPreferences> list = null;
+
+		if (retrieveFromCache) {
+			list = (List<PortletPreferences>)finderCache.getResult(finderPath,
+					finderArgs, this);
+		}
 
 		if (list == null) {
 			StringBundler query = null;
@@ -5071,10 +5283,10 @@ public class PortletPreferencesPersistenceImpl extends BasePersistenceImpl<Portl
 
 				cacheResult(list);
 
-				FinderCacheUtil.putResult(finderPath, finderArgs, list);
+				finderCache.putResult(finderPath, finderArgs, list);
 			}
 			catch (Exception e) {
-				FinderCacheUtil.removeResult(finderPath, finderArgs);
+				finderCache.removeResult(finderPath, finderArgs);
 
 				throw processException(e);
 			}
@@ -5104,7 +5316,7 @@ public class PortletPreferencesPersistenceImpl extends BasePersistenceImpl<Portl
 	 */
 	@Override
 	public int countAll() {
-		Long count = (Long)FinderCacheUtil.getResult(FINDER_PATH_COUNT_ALL,
+		Long count = (Long)finderCache.getResult(FINDER_PATH_COUNT_ALL,
 				FINDER_ARGS_EMPTY, this);
 
 		if (count == null) {
@@ -5117,11 +5329,11 @@ public class PortletPreferencesPersistenceImpl extends BasePersistenceImpl<Portl
 
 				count = (Long)q.uniqueResult();
 
-				FinderCacheUtil.putResult(FINDER_PATH_COUNT_ALL,
-					FINDER_ARGS_EMPTY, count);
+				finderCache.putResult(FINDER_PATH_COUNT_ALL, FINDER_ARGS_EMPTY,
+					count);
 			}
 			catch (Exception e) {
-				FinderCacheUtil.removeResult(FINDER_PATH_COUNT_ALL,
+				finderCache.removeResult(FINDER_PATH_COUNT_ALL,
 					FINDER_ARGS_EMPTY);
 
 				throw processException(e);
@@ -5146,12 +5358,16 @@ public class PortletPreferencesPersistenceImpl extends BasePersistenceImpl<Portl
 	}
 
 	public void destroy() {
-		EntityCacheUtil.removeCache(PortletPreferencesImpl.class.getName());
-		FinderCacheUtil.removeCache(FINDER_CLASS_NAME_ENTITY);
-		FinderCacheUtil.removeCache(FINDER_CLASS_NAME_LIST_WITH_PAGINATION);
-		FinderCacheUtil.removeCache(FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION);
+		entityCache.removeCache(PortletPreferencesImpl.class.getName());
+		finderCache.removeCache(FINDER_CLASS_NAME_ENTITY);
+		finderCache.removeCache(FINDER_CLASS_NAME_LIST_WITH_PAGINATION);
+		finderCache.removeCache(FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION);
 	}
 
+	@BeanReference(type = CompanyProvider.class)
+	protected CompanyProvider companyProvider;
+	protected EntityCache entityCache = EntityCacheUtil.getEntityCache();
+	protected FinderCache finderCache = FinderCacheUtil.getFinderCache();
 	private static final String _SQL_SELECT_PORTLETPREFERENCES = "SELECT portletPreferences FROM PortletPreferences portletPreferences";
 	private static final String _SQL_SELECT_PORTLETPREFERENCES_WHERE_PKS_IN = "SELECT portletPreferences FROM PortletPreferences portletPreferences WHERE portletPreferencesId IN (";
 	private static final String _SQL_SELECT_PORTLETPREFERENCES_WHERE = "SELECT portletPreferences FROM PortletPreferences portletPreferences WHERE ";
