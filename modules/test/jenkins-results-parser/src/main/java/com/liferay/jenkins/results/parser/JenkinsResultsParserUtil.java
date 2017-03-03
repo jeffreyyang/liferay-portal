@@ -256,6 +256,23 @@ public class JenkinsResultsParserUtil {
 		return sb.toString();
 	}
 
+	public static List<File> findFiles(File basedir, String regex) {
+		List<File> files = new ArrayList<>();
+
+		for (File file : basedir.listFiles()) {
+			String fileName = file.getName();
+
+			if (file.isDirectory()) {
+				files.addAll(findFiles(file, regex));
+			}
+			else if (fileName.matches(regex)) {
+				files.add(file);
+			}
+		}
+
+		return files;
+	}
+
 	public static String fixFileName(String fileName) {
 		String prefix = "";
 

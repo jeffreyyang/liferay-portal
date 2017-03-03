@@ -1272,11 +1272,45 @@ public class BaseTextExportImportContentProcessor
 				url = url.substring(groupFriendlyURL.length());
 			}
 
+			while (true) {
+				pos = url.indexOf(StringPool.SLASH, 1);
+
+				if (pos == -1) {
+					break;
+				}
+
+				String groupName = url.substring(1, pos);
+
+				groupFriendlyURL = StringPool.SLASH + groupName;
+
+				Group urlGroup = GroupLocalServiceUtil.fetchFriendlyURLGroup(
+					group.getCompanyId(), groupFriendlyURL);
+
+				if (urlGroup != null) {
+					group = urlGroup;
+					groupId = urlGroup.getGroupId();
+
+					url = url.substring(groupFriendlyURL.length());
+				}
+				else {
+					throw new NoSuchLayoutException();
+				}
+			}
+
+			if (Validator.isNull(url)) {
+				continue;
+			}
+
 			Layout layout = LayoutLocalServiceUtil.fetchLayoutByFriendlyURL(
 				groupId, privateLayout, url);
 
 			if (layout == null) {
-				throw new NoSuchLayoutException();
+				group = GroupLocalServiceUtil.fetchFriendlyURLGroup(
+					group.getCompanyId(), url);
+
+				if (group == null) {
+					throw new NoSuchLayoutException();
+				}
 			}
 		}
 	}

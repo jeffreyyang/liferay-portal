@@ -14,6 +14,7 @@
 
 package com.liferay.source.formatter;
 
+import com.liferay.portal.kernel.util.CharPool;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
@@ -93,6 +94,13 @@ public class GradleSourceProcessor extends BaseSourceProcessor {
 				return StringUtil.replace(
 					content, dependencies, newDependencies);
 			}
+		}
+
+		if (dependencies.contains(StringPool.APOSTROPHE)) {
+			String newDependencies = StringUtil.replace(
+				dependencies, CharPool.APOSTROPHE, CharPool.QUOTE);
+
+			return StringUtil.replace(content, dependencies, newDependencies);
 		}
 
 		Set<String> uniqueDependencies = new TreeSet<>();

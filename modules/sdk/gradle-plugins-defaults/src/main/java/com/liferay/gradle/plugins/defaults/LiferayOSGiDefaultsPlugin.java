@@ -150,6 +150,7 @@ import org.gradle.api.internal.GradleInternal;
 import org.gradle.api.internal.artifacts.publish.ArchivePublishArtifact;
 import org.gradle.api.internal.project.ProjectInternal;
 import org.gradle.api.invocation.Gradle;
+import org.gradle.api.logging.LogLevel;
 import org.gradle.api.logging.Logger;
 import org.gradle.api.plugins.ApplicationPlugin;
 import org.gradle.api.plugins.BasePlugin;
@@ -389,7 +390,7 @@ public class LiferayOSGiDefaultsPlugin implements Plugin<Project> {
 		_configureLocalPortalTool(
 			project, portalRootDir, SourceFormatterPlugin.CONFIGURATION_NAME,
 			_SOURCE_FORMATTER_PORTAL_TOOL_NAME);
-		_configurePmd(project, portalRootDir);
+		_configurePmd(project);
 		_configureProject(project);
 		configureRepositories(project);
 		_configureSourceSetMain(project);
@@ -1604,7 +1605,6 @@ public class LiferayOSGiDefaultsPlugin implements Plugin<Project> {
 
 		Map<String, Object> bundleDefaultInstructions = new HashMap<>();
 
-		bundleDefaultInstructions.put("-check", "exports");
 		bundleDefaultInstructions.put(Constants.BUNDLE_VENDOR, "Liferay, Inc.");
 		bundleDefaultInstructions.put(
 			Constants.DONOTCOPY,
@@ -1645,26 +1645,29 @@ public class LiferayOSGiDefaultsPlugin implements Plugin<Project> {
 	private void _configureBundleInstructions(
 		Project project, GitRepo gitRepo) {
 
-		String projectPath = project.getPath();
-
-		if (!projectPath.startsWith(":apps:") &&
-			!projectPath.startsWith(":private:") && (gitRepo == null)) {
-
-			return;
-		}
-
 		Map<String, String> bundleInstructions = _getBundleInstructions(
 			project);
 
-		String exportPackage = bundleInstructions.get(Constants.EXPORT_PACKAGE);
+		String projectPath = project.getPath();
 
-		if (Validator.isNull(exportPackage)) {
-			return;
+		if (projectPath.startsWith(":apps:") ||
+			projectPath.startsWith(":private:") || (gitRepo != null)) {
+
+			String exportPackage = bundleInstructions.get(
+				Constants.EXPORT_PACKAGE);
+
+			if (Validator.isNotNull(exportPackage)) {
+				exportPackage = "!com.liferay.*.kernel.*," + exportPackage;
+
+				bundleInstructions.put(Constants.EXPORT_PACKAGE, exportPackage);
+			}
 		}
 
-		exportPackage = "!com.liferay.*.kernel.*," + exportPackage;
+		if (!bundleInstructions.containsKey(Constants.EXPORT_CONTENTS) &&
+			!bundleInstructions.containsKey("-check")) {
 
-		bundleInstructions.put(Constants.EXPORT_PACKAGE, exportPackage);
+			bundleInstructions.put("-check", "exports");
+		}
 	}
 
 	private void _configureConfiguration(Configuration configuration) {
@@ -1736,6 +1739,8 @@ public class LiferayOSGiDefaultsPlugin implements Plugin<Project> {
 		final Project project, final LiferayExtension liferayExtension) {
 
 		final Logger logger = project.getLogger();
+		final boolean compilingJSP = GradleUtil.hasStartParameterTask(
+			project, JspCPlugin.COMPILE_JSP_TASK_NAME);
 
 		GradleInternal gradleInternal = (GradleInternal)project.getGradle();
 
@@ -1769,13 +1774,18 @@ public class LiferayOSGiDefaultsPlugin implements Plugin<Project> {
 							project.getRootProject(), projectName);
 
 						if (taglibProject != null) {
-							if (logger.isLifecycleEnabled()) {
-								logger.lifecycle(
-									"Compiling JSP files of {} with {} as " +
-										"dependency in place of '{}:{}:{}'",
-									project, taglibProject, group, name,
-									externalModuleDependency.getVersion());
+							LogLevel logLevel = LogLevel.INFO;
+
+							if (compilingJSP) {
+								logLevel = LogLevel.LIFECYCLE;
 							}
+
+							logger.log(
+								logLevel,
+								"Compiling JSP files of {} with {} as " +
+									"dependency in place of '{}:{}:{}'",
+								project, taglibProject, group, name,
+								externalModuleDependency.getVersion());
 
 							projectConfigurer.configure(
 								(ProjectInternal)taglibProject);
@@ -2146,16 +2156,18 @@ public class LiferayOSGiDefaultsPlugin implements Plugin<Project> {
 		mappings.remove(configuration);
 	}
 
-	private void _configurePmd(Project project, File portalRootDir) {
+	private void _configurePmd(Project project) {
 		PmdExtension pmdExtension = GradleUtil.getExtension(
 			project, PmdExtension.class);
 
-		if (portalRootDir != null) {
-			File ruleSetFile = new File(
-				portalRootDir,
-				"tools/sdk/dependencies/net.sourceforge.pmd/rulesets/java" +
-					"/standard-rules.xml");
+		Gradle gradle = project.getGradle();
 
+		File ruleSetFile = new File(
+			gradle.getGradleUserHomeDir(),
+			"../tools/sdk/dependencies/net.sourceforge.pmd/rulesets/java" +
+				"/standard-rules.xml");
+
+		if (ruleSetFile.exists()) {
 			pmdExtension.setRuleSetFiles(project.files(ruleSetFile));
 		}
 
