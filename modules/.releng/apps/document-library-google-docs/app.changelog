@@ -1,0 +1,10 @@
+#
+# Liferay App Version 1.0.1
+#
+
+app.artifacts-1.0.1=\
+	com.liferay.document.library.google.docs-3.0.3.jar
+
+app.change.log-1.0.1=LPS-86408
+
+app.git.id-1.0.1=b0915c43a50c367577e67fd7c0d9d4d8d3affc35
